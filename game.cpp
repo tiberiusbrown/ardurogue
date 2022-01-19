@@ -6,8 +6,6 @@
 #include <Arduino.h>
 #endif
 
-#define THICK_WALLS 1
-
 static uint16_t const ENTITY_IMGS[32] PROGMEM =
 {
     0x0000,
@@ -79,31 +77,24 @@ static void draw_img(
         for(uint8_t tp = p[i], ty = y; tp; tp >>= 1, ++ty)
             if(tp & 1) set_pixel(x, ty);
     }
-#if 0
-    uint16_t i = y / 8 * 64 + x;
-    uint8_t f0 = y & 0x7;
-    uint8_t f1 = 8 - f0;
-    //uint8_t m0 = m << f0;
-    //uint8_t m1 = m >> f1;
-    if(x + w > 64)
-        w = 64 - x;
-    while(w-- > 0)
-    {
-        uint8_t ip = *p++;
-        uint8_t ip0 = ip << f0;
-        uint8_t ip1 = ip >> f1;
-        if(i >= 512) return;
-        //buf[i] = (buf[i] & ~m0) | ip0;
-        buf[i] |= ip0;
-        if(i + 64 < 512)
-            //buf[i + 64] = (buf[i + 64] & ~m1) | ip1;
-            buf[i + 64] |= ip1;
-        ++i;
-    }
-#endif
 }
 
 static void draw_tile(
+    uint8_t const* p, // PROGMEM, 5 set + 5 clear
+    uint8_t x, uint8_t y)
+{
+    for(uint8_t i = 0; i < 5; ++i, ++x)
+    {
+        uint8_t t = pgm_read_byte(&p[i]);
+        for(uint8_t ty = y; t; t >>= 1, ++ty)
+            if(t & 1) set_pixel(x, ty);
+        t = pgm_read_byte(&p[i + 5]);
+        for(uint8_t ty = y; t; t >>= 1, ++ty)
+            if(t & 1) clear_pixel(x, ty);
+    }
+}
+
+static void draw_sprite(
     uint16_t const* p, // PROGMEM
     uint8_t x, uint8_t y)
 {
@@ -121,33 +112,40 @@ static void draw_dungeon(uint8_t mx, uint8_t my)
     mx -= 6;
     my -= 6;
 
-    static uint16_t const TILES[16] PROGMEM =
+    static uint8_t const TILES[10 * 10] PROGMEM =
     {
-        0xfddf, // 0000 <none>
-        0xfccf, // 0001 N
-        0xf11f, // 0010 S
-        0xf00f, // 0011 NS
-        0xdddf, // 0100 W
-        0xcccf, // 0101 NW
-        0x111f, // 0110 SW
-        0x000f, // 0111 NSW
-        0xfddd, // 1000 E
-        0xfccc, // 1001 NE
-        0xf111, // 1010 SE
-        0xf000, // 1011 NSE
-        0xdddd, // 1100 WE
-        0xcccc, // 1101 NWE
-        0x1111, // 1110 SWE
-        0x0000, // 1111 NSWE
-    };
+        0x01, 0x04, 0x10, 0x02, 0x08, // unexplored
+        0x00, 0x00, 0x00, 0x00, 0x00,
 
-    static uint8_t const BGTILE[5] PROGMEM =
-    {
-        0x02, 0x08, 0x01, 0x04, 0x10,
+        // sides
+        0x01, 0x01, 0x01, 0x01, 0x01, // N
+        0x02, 0x02, 0x02, 0x02, 0x02,
+        0x1f, 0x00, 0x00, 0x00, 0x00, // W
+        0x00, 0x1e, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x1f, 0x00, // E
+        0x00, 0x00, 0x1e, 0x00, 0x1f,
+#if 1
+        0x0f, 0x07, 0x0d, 0x0f, 0x0b, // S
+        0x10, 0x18, 0x12, 0x10, 0x14,
+        0x0f, 0x07, 0x0d, 0x0f, 0x00, // SE
+        0x10, 0x18, 0x12, 0x10, 0x1f,
+#else
+        0x0e, 0x0e, 0x0e, 0x0e, 0x0a, // S
+        0x11, 0x11, 0x11, 0x11, 0x15,
+        0x0e, 0x0e, 0x0e, 0x0f, 0x00, // SE
+        0x11, 0x11, 0x11, 0x10, 0x1f,
+#endif
+
+        // corners
+        0x00, 0x00, 0x00, 0x1f, 0x0b, // NW
+        0x00, 0x00, 0x1f, 0x00, 0x14,
+        0x1f, 0x00, 0x00, 0x00, 0x00, // NE
+        0x00, 0x1f, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x01, 0x01, // SW
+        0x00, 0x00, 0x03, 0x02, 0x02,
+        0x01, 0x00, 0x00, 0x00, 0x00, // SE
+        0x02, 0x03, 0x00, 0x00, 0x00,
     };
-    uint8_t bgtile[5];
-    for(uint8_t i = 0; i < 5; ++i)
-        bgtile[i] = pgm_read_byte(&BGTILE[i]);
 
     for(uint8_t y = 0; y < 13; ++y)
     {
@@ -163,58 +161,47 @@ static void draw_dungeon(uint8_t mx, uint8_t my)
 
             // draw main tile
             uint8_t i = 0;
+
             i |= (uint8_t)tile_is_solid(tx + 0, ty - 1) << 0;
             i |= (uint8_t)tile_is_solid(tx + 0, ty + 1) << 1;
             i |= (uint8_t)tile_is_solid(tx - 1, ty + 0) << 2;
             i |= (uint8_t)tile_is_solid(tx + 1, ty + 0) << 3;
 
-            if(i == 0xf)
-                draw_img(bgtile, 5, px, py);
-            draw_tile(&TILES[i], x, y);
+            i |= (uint8_t)tile_is_solid(tx + 1, ty + 1) << 4;
+            i |= (uint8_t)tile_is_solid(tx - 1, ty + 1) << 5;
+            i |= (uint8_t)tile_is_solid(tx + 1, ty - 1) << 6;
+            i |= (uint8_t)tile_is_solid(tx - 1, ty - 1) << 7;
 
-            // draw inside corners and extensions
-            if(i & 0x1)
+            // base unexplored
+            draw_tile(&TILES[0], px, py);
+            
+            // sides
+            if(!(i & 0x1)) draw_tile(&TILES[10], px, py);
+            if(!(i & 0x4)) draw_tile(&TILES[20], px, py);
+            if(!(i & 0x8)) draw_tile(&TILES[30], px, py);
+            if(!(i & 0x2))
             {
-                if((i & 0x4) && !tile_is_solid(tx - 1, ty - 1))
-                    set_vline(px + 0, py - 1, py + 0);
-                if((i & 0x8) && !tile_is_solid(tx + 1, ty - 1))
-                {
-                    set_vline(px + 3, py - 1, py + 0);
-                    set_pixel(px + 4, py + 0);
-                }
-                if(!(i & 0x4)) set_pixel(px + 0, py - 1);
-                if(!(i & 0x8)) set_pixel(px + 3, py - 1);
+                if(!(i & 0x8)) draw_tile(&TILES[50], px, py);
+                else draw_tile(&TILES[40], px, py);
+                clear_pixel(px + 2, py - 1);
             }
-            if(i & 0x2)
+
+            // corners
+            if((i & 0x1a) == 0x0a) draw_tile(&TILES[60], px, py); // NW
+            if((i & 0x26) == 0x06) draw_tile(&TILES[70], px, py); // NE
+            if((i & 0x49) == 0x09) draw_tile(&TILES[80], px, py); // SW
+            if((i & 0x85) == 0x05) draw_tile(&TILES[90], px, py); // SE
+            
+            // special case corrections
+            if((i & 0x7) == 0x1) set_pixel(px, py);
+            if((i & 0x3) == 0x0) set_hline(px, px + 4, py);
+            if((i & 0x5b) == 0xb) set_hline(px + 3, px + 4, py + 1);
+            if((i & 0x0b) == 0x0) clear_pixel(px + 4, py);
+            if((i & 0x1a) == 0xa) clear_pixel(px + 2, py - 1);
+            if((i & 0x8f) == 0xd)
             {
-                if((i & 0x4) && !tile_is_solid(tx - 1, ty + 1))
-                    set_vline(px + 0, py + 2, py + 3);
-                if((i & 0x8) && !tile_is_solid(tx + 1, ty + 1))
-                {
-                    set_vline(px + 3, py + 2, py + 3);
-                    set_vline(px + 4, py + 2, py + 3);
-#if !THICK_WALLS
-                    clear_pixel(px + 4, py + 4);
-#endif
-                }
-            }
-            else
-            {
-#if THICK_WALLS
-                set_hline(px + 0, px + 3, py + 4);
-                if(i & 0x8) set_pixel(px + 4, py + 4);
-#else
-                clear_pixel(px + 4, py + 4);
-#endif
-            }
-            if(i & 0x8)
-            {
-                if(!(i & 0x1)) set_pixel(px + 4, py + 0);
-                if(!(i & 0x2)) set_vline(px + 4, py + 2, py + 3);
-            }
-            else
-            {
-                clear_pixel(px + 4, py + 4);
+                set_hline(px, px + 1, py + 1);
+                set_pixel(px + 1, py);
             }
         }
     }
@@ -226,7 +213,7 @@ static void draw_dungeon(uint8_t mx, uint8_t my)
         uint8_t ex = e.x - mx;
         uint8_t ey = e.y - my;
         if(ex >= 13 || ey >= 13) continue;
-        draw_tile(&ENTITY_IMGS[e.type], ex, ey);
+        draw_sprite(&ENTITY_IMGS[e.type], ex, ey);
     }
 }
 
@@ -247,6 +234,15 @@ static void generate_dungeon(uint8_t mapi)
             dig_tile(x, y);
     dig_tile(3, 2);
     dig_tile(5, 5);
+    dig_tile(5, 4);
+    dig_tile(4, 5);
+    dig_tile(1, 3);
+
+    for(uint8_t i = 0; i < 5; ++i)
+        dig_tile(i, 4);
+
+    dig_tile(7, 5);
+    dig_tile(7, 4);
 }
 
 static bool try_move_ent(uint8_t i, uint8_t dx, uint8_t dy)
