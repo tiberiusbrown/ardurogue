@@ -2,8 +2,21 @@
 
 #include <stdint.h>
 
+#ifdef ARDUINO
+#include <avr_stl.h>
+#else
+#define PROGMEM
+inline uint8_t pgm_read_byte(void const* p) { return *(uint8_t*)p; }
+inline uint16_t pgm_read_word(void const* p) { return *(uint16_t*)p; }
+#endif
 #include <array>
 #include <bitset>
+
+// platform functionality
+uint8_t wait_btn(); // wait for button press
+void seed();        // initialize seed0 and seed1
+void paint_left();  // draw to left half screen
+void paint_right(); // draw to right half screen
 
 static constexpr uint8_t BTN_UP    = 0x80;
 static constexpr uint8_t BTN_DOWN  = 0x10;
@@ -11,12 +24,6 @@ static constexpr uint8_t BTN_LEFT  = 0x20;
 static constexpr uint8_t BTN_RIGHT = 0x40;
 static constexpr uint8_t BTN_A     = 0x08;
 static constexpr uint8_t BTN_B     = 0x04;
-
-// platform functionality
-uint8_t wait_btn(); // wait for button press
-void seed();        // initialize seed0 and seed1
-void paint_left();  // draw to left half screen
-void paint_right(); // draw to right half screen
 
 // game logic
 void game_setup();
@@ -31,6 +38,11 @@ static constexpr uint8_t NUM_MAPS = 16;
 
 struct entity
 {
+    enum
+    {
+        NONE,
+        PLAYER,
+    };
     uint8_t type : 5;
     uint8_t confused : 1;
     uint8_t paralyzed : 1;
@@ -65,7 +77,7 @@ struct saved_data
 struct globals
 {
     std::array<uint8_t, 64 * 64 / 8> buf;
-    std::array<uint8_t, size_t(MAP_W) * MAP_H / 8> map;
+    std::array<uint8_t, size_t(MAP_W) * MAP_H / 8> tmap;
     std::array<entity, MAP_ENTITIES> ents;
     std::array<item, MAP_ITEMS> items;
     saved_data saved;
@@ -75,7 +87,7 @@ extern globals globals_;
 
 // breakout items from struct
 static constexpr auto& buf = globals_.buf;
-static constexpr auto& map = globals_.map;
+static constexpr auto& tmap = globals_.tmap;
 static constexpr auto& ents = globals_.ents;
 static constexpr auto& items = globals_.items;
 static constexpr auto& got_items = globals_.saved.got_items;

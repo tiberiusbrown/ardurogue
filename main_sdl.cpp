@@ -54,6 +54,7 @@ void paint_left()
         }
     }
     SDL_UpdateWindowSurface(window);
+    for(auto& b : buf) b = 0;
 }
 
 void paint_right()
@@ -74,6 +75,7 @@ void paint_right()
         }
     }
     SDL_UpdateWindowSurface(window);
+    for(auto& b : buf) b = 0;
 }
 
 int main(int argc, char** argv)
