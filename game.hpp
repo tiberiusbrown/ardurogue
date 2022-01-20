@@ -29,8 +29,8 @@ static constexpr uint8_t BTN_B     = 0x04;
 void game_setup();
 void game_loop();
 
-static constexpr uint8_t MAP_W = 128;
-static constexpr uint8_t MAP_H = 64;
+static constexpr uint8_t MAP_W = 64;
+static constexpr uint8_t MAP_H = 32;
 static constexpr uint8_t MAP_ITEMS = 48;
 static constexpr uint8_t MAP_ENTITIES = 32;
 static constexpr uint8_t INV_ITEMS = 32;
@@ -74,15 +74,17 @@ struct saved_data
     uint16_t seed0, seed1;
 };
 
+static constexpr uint8_t NUM_WALL_STYLES = 4;
 struct options
 {
-    uint8_t fancy_walls : 1;
+    uint8_t wall_style;
 };
 
 struct globals
 {
     std::array<uint8_t, 64 * 64 / 8> buf;
-    std::array<uint8_t, size_t(MAP_W) * MAP_H / 8> tmap;
+    std::array<uint8_t, size_t(MAP_W) * MAP_H / 8> tmap; // 1: wall/door
+    std::array<uint8_t, size_t(MAP_W) * MAP_H / 8> tfog; // 1: explored
     std::array<entity, MAP_ENTITIES> ents;
     std::array<item, MAP_ITEMS> items;
     saved_data saved;

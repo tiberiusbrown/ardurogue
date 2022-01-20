@@ -138,8 +138,8 @@ static void draw_dungeon(uint8_t mx, uint8_t my)
         0x1d, 0x1d, 0x1d, 0x1d, 0x1d,
 
         // sides
-        0x18, 0x18, 0x08, 0x18, 0x18, // N
-        0x04, 0x04, 0x14, 0x04, 0x04,
+        0x08, 0x08, 0x08, 0x08, 0x08, // N
+        0x14, 0x14, 0x14, 0x14, 0x14,
         0x01, 0x01, 0x01, 0x01, 0x01, // S
         0x02, 0x02, 0x02, 0x02, 0x02,
         0x00, 0x00, 0x00, 0x1f, 0x00, // W
@@ -148,18 +148,14 @@ static void draw_dungeon(uint8_t mx, uint8_t my)
         0x00, 0x06, 0x00, 0x00, 0x00,
 
         // corners
-        0x00, 0x00, 0x00, 0x18, 0x18, // NW
-        0x00, 0x00, 0x1c, 0x04, 0x04,
+        0x00, 0x00, 0x00, 0x18, 0x08, // NW
+        0x00, 0x00, 0x1c, 0x04, 0x14,
         0x18, 0x00, 0x00, 0x00, 0x00, // NE
         0x04, 0x1c, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x01, 0x01, // SW
         0x00, 0x00, 0x03, 0x02, 0x02,
         0x01, 0x00, 0x00, 0x00, 0x00, // SE
         0x02, 0x03, 0x00, 0x00, 0x00,
-
-        // plain wall versions
-        0x08, 0x08, 0x08, 0x08, 0x08, // N
-        0x14, 0x14, 0x14, 0x14, 0x14,
     };
 
     for(uint8_t y = 0; y < 13; ++y)
@@ -177,7 +173,18 @@ static void draw_dungeon(uint8_t mx, uint8_t my)
                 continue;
             }
             if(!tile_is_solid(tx, ty))
+            {
+                if(tile_is_solid(tx, ty - 1))
+                {
+                    uint8_t a = px - 1;
+                    uint8_t b = px + 4;
+                    if(!tile_is_solid(tx - 1, ty - 1)) ++a;
+                    if(!tile_is_solid(tx + 1, ty - 1)) --b;
+                    for(uint8_t i = 0; i < opt.wall_style; ++i)
+                        set_hline(a, b, py - 1 + i);
+                }
                 continue;
+            }
             draw_tile(&TILES[0], px, py);
 
             uint8_t i = 0;
@@ -194,16 +201,7 @@ static void draw_dungeon(uint8_t mx, uint8_t my)
 
             // sides
             if(!(i & 0x1)) draw_tile(&TILES[30], px, py);
-            if(!(i & 0x2))
-            {
-                if(opt.fancy_walls)
-                {
-                    draw_tile(&TILES[10], px, py + 5);
-                    draw_tile(&TILES[20], px, py);
-                }
-                else
-                    draw_tile(&TILES[100], px, py);
-            }
+            if(!(i & 0x2)) draw_tile(&TILES[20], px, py);
             if(!(i & 0x4)) draw_tile(&TILES[50], px, py);
             if(!(i & 0x8)) draw_tile(&TILES[40], px, py);
 
@@ -213,12 +211,9 @@ static void draw_dungeon(uint8_t mx, uint8_t my)
             if((i & 0x49) == 0x09) draw_tile(&TILES[80], px, py); // SW
             if((i & 0x85) == 0x05) draw_tile(&TILES[90], px, py); // SE
 
-            if(!opt.fancy_walls)
-            {
-                if((i & 0x6) == 0) clear_pixel(px, py + 4);
-                if((i & 0xa) == 0) clear_pixel(px + 3, py + 4);
-                if((i & 0x1a) == 0x0a) clear_pixel(px + 4, py + 4);
-            }
+            // corrections
+            if((i & 0x6) == 0) clear_pixel(px + 0, py + 4);
+            if((i & 0xa) == 0) clear_pixel(px + 3, py + 4);
         }
     }
 
@@ -302,7 +297,7 @@ void game_loop()
     case BTN_LEFT : rd = try_move_ent(0, -1, 0); break;
     case BTN_RIGHT: rd = try_move_ent(0, +1, 0); break;
     case BTN_A:
-        opt.fancy_walls = !opt.fancy_walls;
+        if(++opt.wall_style == NUM_WALL_STYLES) opt.wall_style = 0;
         rd = true;
         break;
     default: break;
