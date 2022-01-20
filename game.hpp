@@ -74,6 +74,11 @@ struct saved_data
     uint16_t seed0, seed1;
 };
 
+struct options
+{
+    uint8_t fancy_walls : 1;
+};
+
 struct globals
 {
     std::array<uint8_t, 64 * 64 / 8> buf;
@@ -81,6 +86,7 @@ struct globals
     std::array<entity, MAP_ENTITIES> ents;
     std::array<item, MAP_ITEMS> items;
     saved_data saved;
+    options opt;
 };
 
 extern globals globals_;
@@ -95,3 +101,4 @@ static constexpr auto& got_ents = globals_.saved.got_ents;
 static constexpr auto& inv = globals_.saved.inv;
 static constexpr auto& seed0 = globals_.saved.seed0;
 static constexpr auto& seed1 = globals_.saved.seed1;
+static constexpr auto& opt = globals_.opt;
