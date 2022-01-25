@@ -7,6 +7,7 @@ add_executable(
     main_sdl.cpp
     game.hpp
     game.cpp
+    generate.cpp
     )
 
 set(FORCE_STATIC_VCRT ON  CACHE BOOL "" FORCE)
