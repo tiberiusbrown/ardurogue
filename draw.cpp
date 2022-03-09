@@ -8,7 +8,7 @@ static uint16_t const ENTITY_IMGS[32] PROGMEM =
 
 static void set_pixel(uint8_t x, uint8_t y)
 {
-    if(x < 64 && y < 64)
+    if(!((x | y) & 0xc0)) // if(x < 64 && y < 64)
     {
         uint8_t& b = buf[y / 8 * 64 + x];
         b |= (1 << (y % 8));
@@ -17,7 +17,7 @@ static void set_pixel(uint8_t x, uint8_t y)
 
 static void clear_pixel(uint8_t x, uint8_t y)
 {
-    if(x < 64 && y < 64)
+    if(!((x | y) & 0xc0)) // if(x < 64 && y < 64)
     {
         uint8_t& b = buf[y / 8 * 64 + x];
         b &= ~(1 << (y % 8));
@@ -30,6 +30,12 @@ static void set_hline(uint8_t x0, uint8_t x1, uint8_t y)
         set_pixel(x0, y);
 }
 
+static void clear_hline(uint8_t x0, uint8_t x1, uint8_t y)
+{
+    for(; x0 <= x1; ++x0)
+        clear_pixel(x0, y);
+}
+
 static void set_vline(uint8_t x, uint8_t y0, uint8_t y1)
 {
     for(; y0 <= y1; ++y0)
@@ -40,6 +46,28 @@ static void set_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     for(; y0 <= y1; ++y0)
         set_hline(x0, x1, y0);
+}
+
+static void clear_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
+{
+    for(; y0 <= y1; ++y0)
+        clear_hline(x0, x1, y0);
+}
+
+static void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
+{
+    set_hline(x0, x1, y0);
+    set_hline(x0, x1, y1);
+    set_vline(x0, y0, y1);
+    set_vline(x1, y0, y1);
+}
+
+static void draw_box_pretty(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
+{
+    clear_rect(x0 - 1, x1 + 2, y0 - 1, y1 + 2);
+    set_box(x0, x1, y0, y1);
+    set_hline(x0 + 1, x1 + 1, y1 + 1);
+    set_vline(x1 + 1, y0 + 1, y1 + 1);
 }
 
 static void draw_img(
@@ -99,9 +127,9 @@ static void draw_sprite(
     draw_img(tt, 4, x, y);
 }
 
-void draw_dungeon_minimap()
+static void draw_dungeon_minimap()
 {
-    static constexpr uint8_t OX = 2, OY = 2;
+    static constexpr uint8_t OX = 3, OY = 2;
     for(uint8_t y = 0; y < MAP_H/2; ++y)
         for(uint8_t x = 0; x < MAP_W/2; ++x)
             if(2 <=
@@ -110,6 +138,16 @@ void draw_dungeon_minimap()
                 (uint8_t)(!tile_is_solid_or_unknown(x * 2 + 0, y * 2 + 1)) +
                 (uint8_t)(!tile_is_solid_or_unknown(x * 2 + 1, y * 2 + 1)))
                 set_pixel(x + OX, y + OY);
+}
+
+void draw_info()
+{
+    draw_box_pretty(1, MAP_W / 2 + 5, 0, MAP_H / 2 + 4);
+    draw_dungeon_minimap();
+    draw_text(1, 40, PSTR("THE QUICK BROWN"));
+    draw_text(1, 46, PSTR("FOX JUMPS OVER"));
+    draw_text(1, 52, PSTR("THE LAZY DOG."));
+    draw_text(1, 58, PSTR("0123456789?!"));
 }
 
 void draw_dungeon(uint8_t mx, uint8_t my)
@@ -203,8 +241,9 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             if(!(i & 0x8)) draw_tile(&TILES[40], px, py);
 
             // corners
-            if((i & 0x1a) == 0x0a) draw_tile(&TILES[60], px, py); // NW
-            if((i & 0x26) == 0x06 && !tile_is_unknown(tx, ty + 1))
+            if((i & 0x1a) == 0x0a && !tile_is_unknown(tx, ty - 1))
+                draw_tile(&TILES[60], px, py); // NW
+            if((i & 0x26) == 0x06 && !tile_is_unknown(tx, ty - 1))
                 draw_tile(&TILES[70], px, py); // NE
             if((i & 0x49) == 0x09 && !tile_is_unknown(tx + 1, ty))
                 draw_tile(&TILES[80], px, py); // SW
@@ -224,5 +263,93 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         uint8_t ey = e.y - my;
         if(ex >= 13 || ey >= 13) continue;
         draw_sprite(&ENTITY_IMGS[e.type], ex, ey);
+    }
+}
+
+static uint8_t const FONT_DATA[] PROGMEM =
+{
+    0x00, 0xff, 0xff, 0xff, /* [space] */
+
+    0x17, 0xff, 0xff, 0xff, /* ! */
+    0x03, 0x00, 0x03, 0xff, /* " */
+    0xff, 0xff, 0xff, 0xff, /* # */
+    0xff, 0xff, 0xff, 0xff, /* $ */
+    0x19, 0x04, 0x13, 0xff, /* % */
+    0xff, 0xff, 0xff, 0xff, /* & */
+    0x03, 0xff, 0xff, 0xff, /* ' */
+    0x0e, 0x11, 0xff, 0xff, /* ( */
+    0x11, 0x0e, 0xff, 0xff, /* ) */
+    0xff, 0xff, 0xff, 0xff, /* * */
+    0x04, 0x0e, 0x04, 0xff, /* + */
+    0x10, 0x08, 0xff, 0xff, /* , */
+    0x04, 0x04, 0x04, 0xff, /* - */
+    0x10, 0xff, 0xff, 0xff, /* . */
+    0x18, 0x04, 0x03, 0xff, /* / */
+
+    0x0e, 0x11, 0x0e, 0xff, /* 0 */
+    0x12, 0x1f, 0x10, 0xff, /* 1 */
+    0x19, 0x15, 0x12, 0xff, /* 2 */
+    0x11, 0x15, 0x0a, 0xff, /* 3 */
+    0x07, 0x04, 0x1f, 0xff, /* 4 */
+    0x17, 0x15, 0x09, 0xff, /* 5 */
+    0x0e, 0x15, 0x08, 0xff, /* 6 */
+    0x01, 0x19, 0x07, 0xff, /* 7 */
+    0x0a, 0x15, 0x0a, 0xff, /* 8 */
+    0x02, 0x15, 0x0e, 0xff, /* 9 */
+
+    0x0a, 0xff, 0xff, 0xff, /* : */
+    0x10, 0x08, 0xff, 0xff, /* , */
+    0xff, 0xff, 0xff, 0xff, /* < */
+    0x0a, 0x0a, 0x0a, 0xff, /* = */
+    0xff, 0xff, 0xff, 0xff, /* > */
+    0x01, 0x15, 0x02, 0xff, /* ? */
+    0xff, 0xff, 0xff, 0xff, /* @ */
+
+    0x1e, 0x05, 0x1e, 0xff, /* A */
+    0x1f, 0x15, 0x0a, 0xff, /* B */
+    0x0e, 0x11, 0x11, 0xff, /* C */
+    0x1f, 0x11, 0x0e, 0xff, /* D */
+    0x1f, 0x15, 0x11, 0xff, /* E */
+    0x1f, 0x05, 0x01, 0xff, /* F */
+    0x0e, 0x11, 0x19, 0xff, /* G */
+    0x1f, 0x04, 0x1f, 0xff, /* H */
+    0x1f, 0xff, 0xff, 0xff, /* I */
+    0x11, 0x0f, 0xff, 0xff, /* J */
+    0x1f, 0x04, 0x1b, 0xff, /* K */
+    0x1f, 0x10, 0x10, 0xff, /* L */
+    0x1f, 0x02, 0x02, 0x1f, /* M */
+    0x1f, 0x06, 0x0c, 0x1f, /* N */
+    0x0e, 0x11, 0x11, 0x0e, /* O */
+    0x1f, 0x05, 0x02, 0xff, /* P */
+    0x0e, 0x11, 0x1e, 0xff, /* Q */
+    0x1f, 0x05, 0x1a, 0xff, /* R */
+    0x12, 0x15, 0x09, 0xff, /* S */
+    0x01, 0x1f, 0x01, 0xff, /* T */
+    0x0f, 0x10, 0x10, 0x0f, /* U */
+    0x07, 0x18, 0x07, 0xff, /* V */
+    0x1f, 0x08, 0x08, 0x1f, /* W */
+    0x1b, 0x04, 0x1b, 0xff, /* X */
+    0x03, 0x14, 0x0f, 0xff, /* Y */
+    0x19, 0x15, 0x13, 0xff, /* Z */
+};
+
+void draw_text(uint8_t x, uint8_t y, char const* t, bool prog)
+{
+    for(;;)
+    {
+        char c = prog ? pgm_read_byte(t++) : *t++;
+        if(c == '\0') return;
+        uint8_t const* p = FONT_DATA + ((c - ' ') * 4);
+        for(uint8_t i = 0; i < 4; ++i)
+        {
+            uint8_t t = pgm_read_byte(p++);
+            if(!(t & 0x80))
+            {
+                for(uint8_t j = y; t; ++j, t >>= 1)
+                    if(t & 1) set_pixel(x, j);
+                ++x;
+            }
+        }
+        ++x;
     }
 }

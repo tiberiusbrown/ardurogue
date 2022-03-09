@@ -6,6 +6,7 @@
 #include <avr_stl.h>
 #include <Arduino.h>
 #else
+#define PSTR(str_) str_
 #define PROGMEM
 inline uint8_t pgm_read_byte(void const* p) { return *(uint8_t*)p; }
 inline uint16_t pgm_read_word(void const* p) { return *(uint16_t*)p; }
@@ -160,10 +161,12 @@ bool tile_is_solid(uint8_t x, uint8_t y);
 bool tile_is_explored(uint8_t x, uint8_t y);
 bool tile_is_unknown(uint8_t x, uint8_t y);
 bool tile_is_solid_or_unknown(uint8_t x, uint8_t y);
+void render();
 
 // draw.cpp
-void draw_dungeon_minimap();
+void draw_info();
 void draw_dungeon(uint8_t mx, uint8_t my);
+void draw_text(uint8_t x, uint8_t y, const char* p, bool prog = true);
 
 // generate.cpp
 void generate_dungeon(uint8_t mapi);

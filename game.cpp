@@ -67,6 +67,14 @@ bool tile_is_explored(uint8_t x, uint8_t y)
     return (t & (1 << (y % 8))) != 0;
 }
 
+void render()
+{
+    draw_dungeon(ents[0].x, ents[0].y);
+    paint_left();
+    draw_info();
+    paint_right();
+}
+
 void game_setup()
 {
     for(uint16_t i = 0; i < sizeof(globals_); ++i)
@@ -78,11 +86,7 @@ void game_setup()
 
     generate_dungeon(0);
     update_light();
-
-    draw_dungeon(ents[0].x, ents[0].y);
-    paint_left();
-    draw_dungeon_minimap();
-    paint_right();
+    render();
 }
 
 void game_loop()
@@ -102,18 +106,9 @@ void game_loop()
     case BTN_B:
         ++game_seed;
         generate_dungeon(0);
-        draw_dungeon(ents[0].x, ents[0].y);
-        paint_left();
-        draw_dungeon_minimap();
-        paint_right();
+        render();
         break;
     default: break;
     }
-    if(rd)
-    {
-        draw_dungeon(ents[0].x, ents[0].y);
-        paint_left();
-        draw_dungeon_minimap();
-        paint_right();
-    }
+    if(rd) render();
 }
