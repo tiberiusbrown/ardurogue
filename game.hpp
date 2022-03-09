@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #ifdef ARDUINO
-#include <avr_stl.h>
 #include <Arduino.h>
 #else
 #define PSTR(str_) str_
@@ -11,8 +10,38 @@
 inline uint8_t pgm_read_byte(void const* p) { return *(uint8_t*)p; }
 inline uint16_t pgm_read_word(void const* p) { return *(uint16_t*)p; }
 #endif
-#include <array>
-#include <bitset>
+
+template<class T, size_t N>
+struct array
+{
+    T d_[N];
+    T* data() { return d_; }
+    T const* data() const { return d_; }
+    T& operator[](size_t i) { return d_[i]; }
+    T const& operator[](size_t i) const { return d_[i]; }
+    size_t size() { return N; }
+    T* begin() { return d_; }
+    T const* begin() const { return d_; }
+    T* end() { return d_ + N; }
+    T const* end() const { return d_ + N; }
+};
+
+template<size_t N> struct bitset
+{
+    static constexpr size_t ND = (N + 7) / 8;
+    array<uint8_t, ND> d_;
+    bool test(size_t i) const
+    {
+        return (d_[i / 8] >> (i % 8)) & 1;
+    }
+};
+
+template<class T> void swap(T& a, T& b)
+{
+    T c = a;
+    a = b;
+    b = c;
+}
 
 // platform functionality
 uint8_t wait_btn(); // wait for button press
@@ -71,9 +100,9 @@ struct map_item
 
 struct map_info
 {
-    std::bitset<MAP_ITEMS> got_items;   // picked-up items
-    std::bitset<MAP_ENTITIES> got_ents; // defeated monsters
-    std::bitset<MAP_ROOMS> got_rooms;   // explored rooms
+    bitset<MAP_ITEMS> got_items;   // picked-up items
+    bitset<MAP_ENTITIES> got_ents; // defeated monsters
+    bitset<MAP_ROOMS> got_rooms;   // explored rooms
 };
 
 struct room
@@ -87,13 +116,13 @@ struct room
 
 struct saved_data
 {
-    std::array<map_info, NUM_MAPS> maps;
-    std::array<item, INV_ITEMS> inv;
-    std::array<entity, MAP_ENTITIES> ents;
-    std::array<item, MAP_ITEMS> items;
-    std::array<room, MAP_ROOMS> rooms;
-    uint8_t num_rooms;
     uint16_t game_seed;
+    array<map_info, NUM_MAPS> maps;
+    array<item, INV_ITEMS> inv;
+    array<entity, MAP_ENTITIES> ents;
+    array<item, MAP_ITEMS> items;
+    array<room, MAP_ROOMS> rooms;
+    uint8_t num_rooms;
 };
 
 static constexpr uint8_t NUM_WALL_STYLES = 4;
@@ -104,12 +133,12 @@ struct options
 
 struct globals
 {
-    std::array<uint8_t, 64 * 64 / 8> buf;
-    std::array<uint8_t, size_t(MAP_W) * MAP_H / 8> tmap; // 1: wall/door
-    std::array<uint8_t, size_t(MAP_W) * MAP_H / 8> tfog; // 1: explored
+    uint16_t rand_seed;
+    array<uint8_t, 64 * 64 / 8> buf;
+    array<uint8_t, size_t(MAP_W) * MAP_H / 8> tmap; // 1: wall/door
+    array<uint8_t, size_t(MAP_W) * MAP_H / 8> tfog; // 1: explored
     saved_data saved;
     options opt;
-    uint16_t rand_seed;
 };
 
 extern globals globals_;
@@ -132,12 +161,12 @@ static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);
 
 template<class T>
-inline T const& min(T const& a, T const& b)
+inline T const& tmin(T const& a, T const& b)
 {
     return a < b ? a : b;
 }
 template<class T>
-inline T const& max(T const& a, T const& b)
+inline T const& tmax(T const& a, T const& b)
 {
     return a < b ? b : a;
 }

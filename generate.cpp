@@ -88,7 +88,7 @@ static constexpr uint8_t SPLIT_TRIES = 8;
 struct bsp_data
 {
     struct bsp_node { uint8_t x, y, w, h; };
-    std::array<bsp_node, MAP_ROOMS> stack;
+    array<bsp_node, MAP_ROOMS> stack;
     uint8_t n;
     uint8_t mapi;
 };
@@ -143,13 +143,13 @@ static void join_rooms_vert(uint8_t r0, uint8_t r1, bool explored)
 static void join_rooms(uint8_t r0, uint8_t r1, bool explored)
 {
     if(rooms[r0].x > rooms[r1].x)
-        std::swap(r0, r1);
+        swap(r0, r1);
     if(rooms[r0].x + MIN_SIZE < rooms[r1].x)
         join_rooms_horz(r0, r1, explored);
     else
     {
         if(rooms[r0].y > rooms[r1].y)
-            std::swap(r0, r1);
+            swap(r0, r1);
         join_rooms_vert(r0, r1, explored);
     }
 }
