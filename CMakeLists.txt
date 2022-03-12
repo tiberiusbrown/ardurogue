@@ -5,9 +5,11 @@ project(ardurogue)
 add_executable(
     ${PROJECT_NAME}
     main_sdl.cpp
+    draw.cpp
     game.hpp
     game.cpp
     generate.cpp
+    light.cpp
     )
 
 set(FORCE_STATIC_VCRT ON  CACHE BOOL "" FORCE)
