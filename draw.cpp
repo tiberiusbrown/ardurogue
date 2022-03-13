@@ -4,6 +4,16 @@ static uint16_t const ENTITY_IMGS[32] PROGMEM =
 {
     0x0000, // none
     0x6ff6, // player
+    0x0fa4, // bat
+    0x0bd0, // snake
+    0x0f5a, // rattlesnake
+    0x9db9, // zombie
+    0x0bf0, // goblin
+    0x0f9f, // orc
+    0x0f2c, // hobgoblin
+    0x01f1, // troll
+    0x069d, // griffin
+    0xf996, // dragon
 };
 
 static void set_pixel(uint8_t x, uint8_t y)
@@ -124,6 +134,8 @@ static void draw_sprite(
     clear_img(tt, 4, x - 1, y - 1);
     clear_img(tt, 4, x + 0, y - 1);
     clear_img(tt, 4, x + 1, y - 1);
+    clear_img(tt, 4, x - 1, y);
+    clear_img(tt, 4, x + 1, y);
     draw_img(tt, 4, x, y);
 }
 
@@ -185,10 +197,6 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         0x02, 0x03, 0x00, 0x00, 0x00,
     };
 
-    uint8_t r2 = light_radius2();
-    uint8_t ex = ents[0].x;
-    uint8_t ey = ents[0].y;
-
     for(uint8_t y = 0; y < 13; ++y)
     {
         for(uint8_t x = 0; x < 13; ++x)
@@ -206,10 +214,8 @@ void draw_dungeon(uint8_t mx, uint8_t my)
 
             if(!tile_is_solid_or_unknown(tx, ty))
             {
-                uint8_t dx = u8abs(ex - tx);
-                uint8_t dy = u8abs(ey - ty);
-                if(dx * dx + dy * dy < r2 && path_clear(ex, ey, tx, ty))
-                    set_pixel(px + 2, py + 3);
+                if(player_can_see(tx, ty))
+                    set_pixel(px + 2, py + 2 + (opt.wall_style == 3));
                 if(tile_is_solid(tx, ty - 1))
                 {
                     uint8_t a = px - 1;
@@ -263,7 +269,8 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         uint8_t ex = e.x - mx;
         uint8_t ey = e.y - my;
         if(ex >= 13 || ey >= 13) continue;
-        draw_sprite(&ENTITY_IMGS[e.type], ex, ey);
+        if(player_can_see(e.x, e.y))
+            draw_sprite(&ENTITY_IMGS[e.type], ex, ey);
     }
 }
 

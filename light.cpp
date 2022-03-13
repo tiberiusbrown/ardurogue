@@ -1,5 +1,16 @@
 #include "game.hpp"
 
+bool player_can_see(uint8_t x, uint8_t y)
+{
+    uint8_t px = ents[0].x;
+    uint8_t py = ents[0].y;
+    int8_t dx = px - x;
+    int8_t dy = py - y;
+    return
+        dx * dx + dy * dy < light_radius2() &&
+        path_clear(px, py, x, y);
+}
+
 bool path_clear(
     uint8_t x0, uint8_t y0,
     uint8_t x1, uint8_t y1)

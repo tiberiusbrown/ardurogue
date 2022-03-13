@@ -68,28 +68,60 @@ static constexpr uint8_t MAP_ROOMS = 32;
 static constexpr uint8_t INV_ITEMS = 32;
 static constexpr uint8_t NUM_MAPS = 16;
 
+struct entity_info
+{
+    uint8_t strength;
+    uint8_t dexterity;
+    uint8_t speed;
+};
+
+struct monster_info
+{
+    uint8_t mean    : 1; // whether it attacks on sight
+    uint8_t regens  : 1; // regeneratess health
+    uint8_t invis   : 1; // invisible
+    uint8_t nomove  : 1; // stays put
+    uint8_t poison  : 1; // chance to drain strength on hit
+    uint8_t vampire : 1; // chance to drain max hp on hit
+    uint8_t confuse : 1; // chance to confuse on hit
+
+    entity_info i;
+};
+
+extern monster_info const MONSTER_INFO[32] PROGMEM;
+
 struct entity
 {
     enum
     {
         NONE,
         PLAYER,
+        BAT,
+        SNAKE,
+        RATTLESNAKE,
+        ZOMBIE,
+        GOBLIN,
+        ORC,
+        HOBGOBLIN,
+        TROLL,
+        GRIFFIN,
+        DRAGON,
     };
-    uint8_t type : 5;
-    uint8_t confused : 1;
+    uint8_t type      : 5;
+    uint8_t confused  : 1;
     uint8_t paralyzed : 1;
-    uint8_t weakened : 1;
+    uint8_t weakened  : 1;
     uint8_t health;
     uint8_t x, y;
 };
 
 struct item
 {
-    uint8_t type : 4;
-    uint8_t subtype : 4;
-    uint8_t identified : 1;
-    uint8_t cursed : 1;
+    uint8_t type          : 4;
+    uint8_t subtype       : 4;
     uint8_t enchant_level : 4;
+    uint8_t identified    : 1;
+    uint8_t cursed        : 1;
 };
 
 struct map_item
@@ -100,9 +132,9 @@ struct map_item
 
 struct map_info
 {
-    bitset<MAP_ITEMS> got_items;   // picked-up items
-    bitset<MAP_ENTITIES> got_ents; // defeated monsters
-    bitset<MAP_ROOMS> got_rooms;   // explored rooms
+    bitset<MAP_ITEMS>    got_items; // picked-up items
+    bitset<MAP_ENTITIES> got_ents;  // defeated monsters
+    bitset<MAP_ROOMS>    got_rooms; // explored rooms
 };
 
 struct room
@@ -116,13 +148,14 @@ struct room
 
 struct saved_data
 {
-    uint16_t game_seed;
-    array<map_info, NUM_MAPS> maps;
-    array<item, INV_ITEMS> inv;
+    uint16_t                    game_seed;
+    array<map_info, NUM_MAPS>   maps;
+    array<item, INV_ITEMS>      inv;
     array<entity, MAP_ENTITIES> ents;
-    array<item, MAP_ITEMS> items;
-    array<room, MAP_ROOMS> rooms;
-    uint8_t num_rooms;
+    array<item, MAP_ITEMS>      items;
+    array<room, MAP_ROOMS>      rooms;
+    uint8_t                     num_rooms;
+    entity_info                 pstats;
 };
 
 static constexpr uint8_t NUM_WALL_STYLES = 4;
@@ -156,9 +189,6 @@ static constexpr auto& inv = globals_.saved.inv;
 static constexpr auto& game_seed = globals_.saved.game_seed;
 static constexpr auto& rand_seed = globals_.rand_seed;
 static constexpr auto& opt = globals_.opt;
-
-static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
-static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);
 
 template<class T>
 inline T const& tmin(T const& a, T const& b)
@@ -201,7 +231,11 @@ void draw_text(uint8_t x, uint8_t y, const char* p, bool prog = true);
 void generate_dungeon(uint8_t mapi);
 
 // light.cpp
+bool player_can_see(uint8_t x, uint8_t y);
 bool path_clear(
     uint8_t x0, uint8_t y0,
     uint8_t x1, uint8_t y1);
 void update_light();
+
+static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
+static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);
