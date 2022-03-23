@@ -64,7 +64,8 @@ static constexpr uint8_t MAP_W = 48;
 static constexpr uint8_t MAP_H = 48;
 static constexpr uint8_t MAP_ITEMS = 32;
 static constexpr uint8_t MAP_ENTITIES = 32;
-static constexpr uint8_t MAP_ROOMS = 32;
+static constexpr uint8_t MAP_ROOMS = 24;
+static constexpr uint8_t MAP_DOORS = 24;
 static constexpr uint8_t INV_ITEMS = 32;
 static constexpr uint8_t NUM_MAPS = 16;
 
@@ -135,6 +136,7 @@ struct map_info
     bitset<MAP_ITEMS>    got_items; // picked-up items
     bitset<MAP_ENTITIES> got_ents;  // defeated monsters
     bitset<MAP_ROOMS>    got_rooms; // explored rooms
+    bitset<MAP_DOORS>    got_doors; // opened doors
 };
 
 struct room
@@ -146,6 +148,13 @@ struct room
     }
 };
 
+struct door
+{
+    uint8_t x;
+    uint8_t y : 7;
+    uint8_t secret : 1;
+};
+
 struct saved_data
 {
     uint16_t                    game_seed;
@@ -154,7 +163,9 @@ struct saved_data
     array<entity, MAP_ENTITIES> ents;
     array<item, MAP_ITEMS>      items;
     array<room, MAP_ROOMS>      rooms;
+    array<room, MAP_DOORS>      doors;
     uint8_t                     num_rooms;
+    uint8_t                     num_doors;
     entity_info                 pstats;
 };
 

@@ -31,13 +31,14 @@ uint8_t wait_btn()
         {
             switch(msg.wParam)
             {
-            case VK_UP   : return BTN_UP;
-            case VK_DOWN : return BTN_DOWN;
-            case VK_LEFT : return BTN_LEFT;
-            case VK_RIGHT: return BTN_RIGHT;
-            case 'A'     : return BTN_A;
-            case 'B'     : return BTN_B;
-            default      : break;
+            case VK_UP     : return BTN_UP;
+            case VK_DOWN   : return BTN_DOWN;
+            case VK_LEFT   : return BTN_LEFT;
+            case VK_RIGHT  : return BTN_RIGHT;
+            case 'A'       : return BTN_A;
+            case 'B'       : return BTN_B;
+            case VK_ESCAPE : exit(0);
+            default        : break;
             }
         }
     }
@@ -49,7 +50,7 @@ static void refresh()
     InvalidateRect(hwnd, NULL, FALSE);
 }
 
-void paint_left()
+static void paint_offset(int offset)
 {
     for(int i = 0; i < 512; ++i)
     {
@@ -59,7 +60,7 @@ void paint_left()
         for(int j = 0; j < 8; ++j, b >>= 1)
         {
             uint8_t color = (b & 1) ? 0xff : 0x00;
-            uint8_t* p = &pixels[(y * 128 + x) * 4];
+            uint8_t* p = &pixels[((y + j) * 128 + x + offset) * 4];
             *p++ = color;
             *p++ = color;
             *p++ = color;
@@ -69,24 +70,14 @@ void paint_left()
     for(auto& b : buf) b = 0;
 }
 
+void paint_left()
+{
+    paint_offset(0);
+}
+
 void paint_right()
 {
-    for(int i = 0; i < 512; ++i)
-    {
-        int x = i % 64;
-        int y = (i / 64) * 8;
-        uint8_t b = buf[i];
-        for(int j = 0; j < 8; ++j, b >>= 1)
-        {
-            uint8_t color = (b & 1) ? 0xff : 0x00;
-            uint8_t* p = &pixels[(y * 128 + x + 64) * 4];
-            *p++ = color;
-            *p++ = color;
-            *p++ = color;
-        }
-    }
-    refresh();
-    for(auto& b : buf) b = 0;
+    paint_offset(64);
 }
 
 static constexpr int RESIZE_SNAP_PIXELS = 32;
@@ -157,21 +148,25 @@ static LRESULT CALLBACK window_proc(HWND w, UINT msg, WPARAM wParam, LPARAM lPar
         {
         case WMSZ_BOTTOMLEFT:
             r->left = r->right - dw;
+            /* fallthrough */
         case WMSZ_BOTTOM:
             r->bottom = r->top + dh;
             break;
         case WMSZ_TOPLEFT:
             r->top = r->bottom - dh;
+            /* fallthrough */
         case WMSZ_LEFT:
             r->left = r->right - dw;
             break;
         case WMSZ_TOPRIGHT:
             r->right = r->left + dw;
+            /* fallthrough */
         case WMSZ_TOP:
             r->top = r->bottom - dh;
             break;
         case WMSZ_BOTTOMRIGHT:
             r->bottom = r->top + dh;
+            /* fallthrough */
         case WMSZ_RIGHT:
             r->right = r->left + dw;
             break;
@@ -237,6 +232,7 @@ int WINAPI WinMain(
     wc.lpfnWndProc = window_proc;
     wc.hInstance = hInstance;
     wc.lpszClassName = CLASS_NAME;
+    wc.hCursor = LoadCursorA(NULL, IDC_ARROW);
     RegisterClass(&wc);
 
     ww = ZOOM * FBW;

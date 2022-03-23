@@ -2,6 +2,12 @@
 
 static constexpr uint8_t ROOM_TRIES = 64;
 
+// chances are out of 256
+// chance to place a door
+static constexpr uint8_t DOOR_CHANCE = 128;
+// chance for door to be secret
+static constexpr uint8_t DOOR_SECRET_CHANCE = 32;
+
 struct room_info
 {
     uint8_t w;
@@ -124,7 +130,7 @@ static void join_rooms_vert(uint8_t r0, uint8_t r1, bool explored)
     uint8_t y0 = rooms[r0].y + rooms[r0].h;
     while(tile_is_solid(x0, y0 - 1)) --y0;
     uint8_t x1 = rooms[r1].x + rooms[r1].w / 2;
-    uint8_t y1 = rooms[r1].y - 1;
+    uint8_t y1 = rooms[r1].y == 0 ? 0 : rooms[r1].y - 1;
     while(tile_is_solid(x1, y1 + 1)) ++y1;
 
     uint8_t y2 = (y0 + y1 + 1) / 2;
@@ -273,14 +279,18 @@ void generate_dungeon(uint8_t mapi)
         for(uint8_t j = 0; j < 217; ++j)
             u8rand();
 
-    for(auto& t : tmap) t = 0xff;
-    for(auto& t : tfog) t = 0;
+    //for(;;)
+    //{
+        for(auto& t : tmap) t = 0xff;
+        for(auto& t : tfog) t = 0;
 
-    auto& data = *(bsp_data*)&buf;
-    data.mapi = mapi;
-    data.stack[0] = { 0, 0, MAP_W, MAP_H };
-    num_rooms = 0;
-    generate_recurse();
+        auto& data = *(bsp_data*)&buf;
+        data.mapi = mapi;
+        data.stack[0] = { 0, 0, MAP_W, MAP_H };
+        num_rooms = 0;
+        generate_recurse();
+        num_rooms;
+    //}
 
     // clear buf
     for(auto& b : buf) b = 0;
