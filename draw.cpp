@@ -15,6 +15,7 @@ static uint16_t const ENTITY_IMGS[32] PROGMEM =
     0x069d, // griffin
     0xf996, // dragon
 };
+static uint16_t const DOOR_IMGS[2] PROGMEM = { 0xefbe, 0xe11e };
 
 static void set_pixel(uint8_t x, uint8_t y)
 {
@@ -119,7 +120,7 @@ static void draw_tile(
     }
 }
 
-static void draw_sprite(
+static void draw_sprite_precise(
     uint16_t const* p, // PROGMEM
     uint8_t x, uint8_t y)
 {
@@ -129,8 +130,6 @@ static void draw_sprite(
     tt[1] = (tp >> 8) & 0xf;
     tt[2] = (tp >> 4) & 0xf;
     tt[3] = (tp >> 0) & 0xf;
-    x *= 5;
-    y *= 5;
     clear_img(tt, 4, x - 1, y - 1);
     clear_img(tt, 4, x + 0, y - 1);
     clear_img(tt, 4, x + 1, y - 1);
@@ -139,9 +138,22 @@ static void draw_sprite(
     draw_img(tt, 4, x, y);
 }
 
+static void draw_sprite(
+    uint16_t const* p, // PROGMEM
+    uint8_t x, uint8_t y)
+{
+    draw_sprite_precise(p, x * 5, y * 5);
+}
+
 static void draw_dungeon_minimap()
 {
     static constexpr uint8_t OX = 3, OY = 2;
+#if 1
+    for(uint8_t y = 0; y < MAP_H; ++y)
+        for(uint8_t x = 0; x < MAP_W; ++x)
+            if(!tile_is_solid_or_unknown(x, y))
+                set_pixel(x + OX, y + OY);
+#else
     for(uint8_t y = 0; y < MAP_H/2; ++y)
         for(uint8_t x = 0; x < MAP_W/2; ++x)
             if(2 <=
@@ -150,17 +162,19 @@ static void draw_dungeon_minimap()
                 (uint8_t)(!tile_is_solid_or_unknown(x * 2 + 0, y * 2 + 1)) +
                 (uint8_t)(!tile_is_solid_or_unknown(x * 2 + 1, y * 2 + 1)))
                 set_pixel(x + OX, y + OY);
+#endif
 }
 
 void draw_info()
 {
-    draw_box_pretty(1, MAP_W / 2 + 5, 0, MAP_H / 2 + 4);
+    //draw_box_pretty(1, MAP_W / 2 + 5, 0, MAP_H / 2 + 4);
+    draw_box_pretty(1, MAP_W + 5, 0, MAP_H + 4);
     draw_dungeon_minimap();
-    draw_text(1, 34, PSTR("the lazy dog."));
-    draw_text(1, 40, PSTR("THE QUICK BROWN"));
-    draw_text(1, 46, PSTR("FOX JUMPS OVER"));
-    draw_text(1, 52, PSTR("THE LAZY DOG."));
-    draw_text(1, 58, PSTR("0123456789!?%"));
+    //draw_text(1, 34, PSTR("the lazy dog."));
+    //draw_text(1, 40, PSTR("THE QUICK BROWN"));
+    //draw_text(1, 46, PSTR("FOX JUMPS OVER"));
+    //draw_text(1, 52, PSTR("THE LAZY DOG."));
+    //draw_text(1, 58, PSTR("0123456789!?%"));
 }
 
 void draw_dungeon(uint8_t mx, uint8_t my)
@@ -197,6 +211,8 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         0x02, 0x03, 0x00, 0x00, 0x00,
     };
 
+    dig_nonsecret_door_tiles();
+
     for(uint8_t y = 0; y < 13; ++y)
     {
         for(uint8_t x = 0; x < 13; ++x)
@@ -211,11 +227,8 @@ void draw_dungeon(uint8_t mx, uint8_t my)
                 draw_tile(&TILES[0], px, py);
                 continue;
             }
-
             if(!tile_is_solid_or_unknown(tx, ty))
             {
-                if(player_can_see(tx, ty))
-                    set_pixel(px + 2, py + 2 + (opt.wall_style == 3));
                 if(tile_is_solid(tx, ty - 1))
                 {
                     uint8_t a = px - 1;
@@ -227,6 +240,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
                 }
                 continue;
             }
+
             draw_tile(&TILES[0], px, py);
 
             uint8_t i = 0;
@@ -242,25 +256,64 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             i |= (uint8_t)tile_is_solid_or_unknown(tx - 1, ty - 1) << 7;
 
             // sides
-            if(!(i & 0x1)) draw_tile(&TILES[30], px, py);
-            if(!(i & 0x2)) draw_tile(&TILES[20], px, py);
-            if(!(i & 0x4)) draw_tile(&TILES[50], px, py);
-            if(!(i & 0x8)) draw_tile(&TILES[40], px, py);
+            if(!(i & 0x1)) draw_tile(&TILES[30], px, py); // N
+            if(!(i & 0x2)) draw_tile(&TILES[20], px, py); // S
+            if(!(i & 0x4)) draw_tile(&TILES[50], px, py); // W
+            if(!(i & 0x8)) draw_tile(&TILES[40], px, py); // E
 
             // corners
-            if((i & 0x1a) == 0x0a && !tile_is_unknown(tx, ty - 1))
+            if((i & 0x1a) == 0x0a && tile_is_solid(tx, ty + 1))
                 draw_tile(&TILES[60], px, py); // NW
-            if((i & 0x26) == 0x06 && !tile_is_unknown(tx, ty - 1))
+            if((i & 0x26) == 0x06 && tile_is_solid(tx, ty + 1))
                 draw_tile(&TILES[70], px, py); // NE
-            if((i & 0x49) == 0x09 && !tile_is_unknown(tx + 1, ty))
+            if((i & 0x49) == 0x09 && tile_is_solid(tx + 1, ty))
                 draw_tile(&TILES[80], px, py); // SW
-            if((i & 0x85) == 0x05) draw_tile(&TILES[90], px, py); // SE
+            if((i & 0x85) == 0x05)
+                draw_tile(&TILES[90], px, py); // SE
 
             // corrections
             if(!(i & 0x6)) clear_pixel(px + 0, py + 4);
             if(!(i & 0xa)) clear_pixel(px + 3, py + 4);
         }
     }
+
+    update_doors();
+
+    // draw lit tiles
+    for(uint8_t y = 0; y < 13; ++y)
+    {
+        for(uint8_t x = 0; x < 13; ++x)
+        {
+            uint8_t tx = x + mx;
+            uint8_t ty = y + my;
+            if(!tile_is_solid_or_unknown(tx, ty))
+            {
+                if(player_can_see(tx, ty))
+                    set_pixel(x * 5 + 2, y * 5 + 2 + (opt.wall_style == 3));
+            }
+        }
+    }
+
+    // draw doors
+    for(uint8_t i = 0; i < num_doors; ++i)
+    {
+        auto const& d = doors[i];
+        uint8_t dx = d.x - mx;
+        uint8_t dy = d.y - my;
+        if(dx >= 13 || dy >= 13) continue;
+        if(tile_is_explored(d.x, d.y))
+        {
+            uint8_t oy = 0;
+            uint8_t px = dx * 5;
+            uint8_t py = dy * 5;
+            bool ns = !tile_is_solid_or_unknown(d.x, d.y + 1);
+            if(ns) oy = opt.wall_style;
+            clear_rect(px - 1, px + 4, py, py + 4 + oy);
+            draw_sprite_precise(&DOOR_IMGS[d.open], px, py);
+        }
+    }
+
+    // draw items
 
     // draw entities
     for(auto const& e : ents)

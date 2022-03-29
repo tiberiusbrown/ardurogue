@@ -1,4 +1,4 @@
-#ifndef ARDUINO
+#if defined(_WIN32)
 
 #include <windows.h>
 #include <stdlib.h>
@@ -37,12 +37,12 @@ uint8_t wait_btn()
             case VK_RIGHT  : return BTN_RIGHT;
             case 'A'       : return BTN_A;
             case 'B'       : return BTN_B;
-            case VK_ESCAPE : exit(0);
+            case VK_ESCAPE : ExitProcess(0);
             default        : break;
             }
         }
     }
-    exit(0);
+    ExitProcess(0);
 }
 
 static void refresh()
@@ -207,28 +207,31 @@ static LRESULT CALLBACK window_proc(HWND w, UINT msg, WPARAM wParam, LPARAM lPar
     return 0;
 }
 
+#ifdef NDEBUG
+void main(void)
+#else
 int WINAPI WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
     LPSTR     lpCmdLine,
     int       nShowCmd
 )
-{
-#if 0
-    SDL_Init(SDL_INIT_VIDEO);
-
-    window = SDL_CreateWindow(
-        "ardurogue",
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
-        ZOOM * 128,
-        ZOOM * 64,
-        0
-    );
 #endif
+{
+#ifndef NDEBUG
+    (void)hPrevInstance;
+    (void)lpCmdLine;
+    (void)nShowCmd;
+#else
+    HINSTANCE hInstance = GetModuleHandleA(NULL);
+#endif{
 
     WNDCLASS wc{};
+    BITMAPINFO bmi{};
+    RECT wr;
+    HBITMAP hbitmap;
     static char const* const CLASS_NAME = "ardurogue";
+
     wc.lpfnWndProc = window_proc;
     wc.hInstance = hInstance;
     wc.lpszClassName = CLASS_NAME;
@@ -239,7 +242,6 @@ int WINAPI WinMain(
     wh = ZOOM * FBH;
     update_im();
 
-    RECT wr;
     wr.left = wr.top = 0;
     wr.right = ww;
     wr.bottom = wh;
@@ -255,12 +257,11 @@ int WINAPI WinMain(
         NULL, NULL, hInstance, NULL);
 
     if(hwnd == NULL)
-        return 0;
+        goto byebye;
 
     hdc = GetDC(hwnd);
     hdc_mem = CreateCompatibleDC(hdc);
 
-    BITMAPINFO bmi{};
     bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
     bmi.bmiHeader.biWidth = FBW;
     bmi.bmiHeader.biHeight = -FBH;
@@ -268,9 +269,9 @@ int WINAPI WinMain(
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biCompression = BI_RGB;
 
-    HBITMAP hbitmap = CreateDIBSection(0, &bmi, DIB_RGB_COLORS, (void**)&pixels, NULL, 0);
+    hbitmap = CreateDIBSection(0, &bmi, DIB_RGB_COLORS, (void**)&pixels, NULL, 0);
     if(hbitmap == 0)
-        return 0;
+        goto byebye;
     SelectObject(hdc_mem, hbitmap);
 
     brush_black = CreateSolidBrush(RGB(0, 0, 0));
@@ -282,7 +283,21 @@ int WINAPI WinMain(
     for(;;)
         game_loop();
 
+byebye:
+    (void)0;
+#ifndef NDEBUG
     return 0;
+#endif
 }
+
+#ifdef NDEBUG
+#pragma function(memset)
+void* __cdecl memset(void* dest, int c, size_t count)
+{
+    char* bytes = (char*)dest;
+    while(count--) *bytes++ = (char)c;
+    return dest;
+}
+#endif
 
 #endif

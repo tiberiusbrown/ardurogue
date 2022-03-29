@@ -43,8 +43,16 @@ static bool try_move_ent(uint8_t i, uint8_t dx, uint8_t dy)
     uint8_t ny = ents[i].y + dy;
     if(tile_is_solid(nx, ny))
     {
+        door* d = get_door(nx, ny);
+        if(d && !d->secret)
+        {
+            d->open = 1;
+            maps[map_index].got_doors.set(index_of_door(*d));
+            update_doors();
+            update_light();
+            return true;
+        }
         // TODO: check for other entities to attack
-        // TODO: check for doors to open
         return false;
     }
     ents[i].x = nx;
@@ -67,6 +75,19 @@ bool tile_is_explored(uint8_t x, uint8_t y)
     return (t & (1 << (y % 8))) != 0;
 }
 
+door* get_door(uint8_t x, uint8_t y)
+{
+    for(uint8_t i = 0; i < num_doors; ++i)
+        if(doors[i].x == x && doors[i].y == y)
+            return &doors[i];
+    return nullptr;
+}
+
+uint8_t index_of_door(door const& d)
+{
+    return uint8_t(ptrdiff_t(&d - &doors.d_[0]));
+}
+
 void render()
 {
     draw_dungeon(ents[0].x, ents[0].y);
@@ -81,8 +102,10 @@ void game_setup()
         ((uint8_t*)&globals_)[i] = 0;
 
     ents[0].type = entity::PLAYER;
+    ents[0].x = 4;
+    ents[0].y = 4;
 
-    game_seed = 0x4327;
+    game_seed = 0xbabe;
 
     generate_dungeon(0);
     update_light();
@@ -104,7 +127,7 @@ void game_loop()
         rd = true;
         break;
     case BTN_B:
-        ++game_seed;
+        //++game_seed;
         generate_dungeon(0);
         render();
         break;

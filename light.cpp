@@ -41,8 +41,9 @@ bool path_clear(
     return true;
 }
 
-static void set_tile_explored(uint8_t x, uint8_t y)
+void set_tile_explored(uint8_t x, uint8_t y)
 {
+    if(x >= MAP_W || y >= MAP_H) return;
     uint16_t const i = y / 8 * MAP_W + x;
     uint8_t const m = 1 << (y % 8);
     tfog[i] |= m;
@@ -67,19 +68,5 @@ void update_light()
             uint8_t dy = u8abs(y - py);
             if(dx * dx + dy * dy < r2 && path_clear(px, py, x, y))
                 set_tile_explored(x, y);
-        }
-
-    // post process
-    for(uint8_t y = ay; y <= by; ++y)
-        for(uint8_t x = ax; x <= bx; ++x)
-        {
-            if(tile_is_solid(x, y) && (
-                tile_is_explored(x - 1, y) ||
-                tile_is_explored(x + 1, y) ||
-                tile_is_explored(x, y - 1) ||
-                tile_is_explored(x, y + 1)))
-            {
-                set_tile_explored(x, y);
-            }
         }
 }

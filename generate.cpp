@@ -1,18 +1,27 @@
 #include "game.hpp"
 
-static constexpr uint8_t ROOM_TRIES = 64;
+static constexpr uint8_t ROOM_BIG_CHANCE = 64;
 
 // chances are out of 256
 // chance to place a door
-static constexpr uint8_t DOOR_CHANCE = 128;
+static constexpr uint8_t DOOR_CHANCE = 196;
 // chance for door to be secret
-static constexpr uint8_t DOOR_SECRET_CHANCE = 32;
+static constexpr uint8_t DOOR_SECRET_CHANCE = 0;
+
+static constexpr uint8_t RANDOM_DOOR_SPACE = 4;
 
 struct room_info
 {
     uint8_t w;
     uint8_t h;
     uint8_t mask[8];
+};
+
+struct big_room_info
+{
+    uint8_t w;
+    uint8_t h;
+    uint8_t mask[32];
 };
 
 static constexpr uint8_t cbm(uint32_t x)
@@ -28,8 +37,123 @@ static constexpr uint8_t cbm(uint32_t x)
         (((x & 0x10000000) ? 1 : 0) << 0);
 }
 
+static constexpr big_room_info const BIG_ROOM_TYPES[] PROGMEM =
+{
+{
+    16, 16, {
+    cbm(0x11111000), cbm(0x00011111),
+    cbm(0x11100000), cbm(0x00000111),
+    cbm(0x11000000), cbm(0x00000011),
+    cbm(0x10000000), cbm(0x00000001),
+    cbm(0x10000000), cbm(0x00000001),
+    cbm(0x00000111), cbm(0x11100000),
+    cbm(0x00000100), cbm(0x00100000),
+    cbm(0x00000100), cbm(0x00100000),
+    cbm(0x00000100), cbm(0x00100000),
+    cbm(0x00000100), cbm(0x00100000),
+    cbm(0x00000110), cbm(0x01100000),
+    cbm(0x10000000), cbm(0x00000001),
+    cbm(0x10000000), cbm(0x00000001),
+    cbm(0x11000000), cbm(0x00000011),
+    cbm(0x11100000), cbm(0x00000111),
+    cbm(0x11111000), cbm(0x00011111), }
+},
+{
+    16, 16, {
+    cbm(0x11111000), cbm(0x00011111),
+    cbm(0x11100000), cbm(0x00000111),
+    cbm(0x11000000), cbm(0x00000011),
+    cbm(0x10000000), cbm(0x00000001),
+    cbm(0x10001100), cbm(0x00110001),
+    cbm(0x00001100), cbm(0x00110000),
+    cbm(0x00000000), cbm(0x00000000),
+    cbm(0x00000000), cbm(0x00000000),
+    cbm(0x00000000), cbm(0x00000000),
+    cbm(0x00000000), cbm(0x00000000),
+    cbm(0x00001100), cbm(0x00110000),
+    cbm(0x10001100), cbm(0x00110001),
+    cbm(0x10000000), cbm(0x00000001),
+    cbm(0x11000000), cbm(0x00000011),
+    cbm(0x11100000), cbm(0x00000111),
+    cbm(0x11111000), cbm(0x00011111), }
+},
+{
+    13, 13, {
+    cbm(0x11111101), cbm(0x11111111),
+    cbm(0x11111000), cbm(0x11111111),
+    cbm(0x11110000), cbm(0x01111111),
+    cbm(0x11100000), cbm(0x00111111),
+    cbm(0x11000000), cbm(0x00011111),
+    cbm(0x10000000), cbm(0x00001111),
+    cbm(0x00000000), cbm(0x00000111),
+    cbm(0x10000000), cbm(0x00001111),
+    cbm(0x11000000), cbm(0x00011111),
+    cbm(0x11100000), cbm(0x00111111),
+    cbm(0x11110000), cbm(0x01111111),
+    cbm(0x11111000), cbm(0x11111111),
+    cbm(0x11111101), cbm(0x11111111),
+    cbm(0x11111111), cbm(0x11111111),
+    cbm(0x11111111), cbm(0x11111111),
+    cbm(0x11111111), cbm(0x11111111), }
+},
+{
+    12, 12, {
+    cbm(0x11000000), cbm(0x00111111),
+    cbm(0x10000000), cbm(0x00011111),
+    cbm(0x00000000), cbm(0x00001111),
+    cbm(0x00000000), cbm(0x00001111),
+    cbm(0x00000000), cbm(0x00001111),
+    cbm(0x00000000), cbm(0x00001111),
+    cbm(0x00000000), cbm(0x00001111),
+    cbm(0x00000000), cbm(0x00001111),
+    cbm(0x00000000), cbm(0x00001111),
+    cbm(0x00000000), cbm(0x00001111),
+    cbm(0x10000000), cbm(0x00011111),
+    cbm(0x11000000), cbm(0x00111111),
+    cbm(0x11111111), cbm(0x11111111),
+    cbm(0x11111111), cbm(0x11111111),
+    cbm(0x11111111), cbm(0x11111111),
+    cbm(0x11111111), cbm(0x11111111), }
+},
+};
+static constexpr uint8_t NUM_BIG_ROOM_TYPES =
+sizeof(BIG_ROOM_TYPES) / sizeof(BIG_ROOM_TYPES[0]);
+
 static constexpr room_info const ROOM_TYPES[] PROGMEM =
 {
+{
+    4, 4, {
+    cbm(0x00001111),
+    cbm(0x00001111),
+    cbm(0x00001111),
+    cbm(0x00001111),
+    cbm(0x11111111),
+    cbm(0x11111111),
+    cbm(0x11111111),
+    cbm(0x11111111), },
+},
+{
+    5, 5, {
+    cbm(0x00000111),
+    cbm(0x00000111),
+    cbm(0x00000111),
+    cbm(0x00000111),
+    cbm(0x00000111),
+    cbm(0x11111111),
+    cbm(0x11111111),
+    cbm(0x11111111), },
+},
+{
+    6, 6, {
+    cbm(0x00000011),
+    cbm(0x00000011),
+    cbm(0x00000011),
+    cbm(0x00000011),
+    cbm(0x00000011),
+    cbm(0x00000011),
+    cbm(0x11111111),
+    cbm(0x11111111), },
+},
 {
     6, 6, {
     cbm(0x10000111),
@@ -39,6 +163,61 @@ static constexpr room_info const ROOM_TYPES[] PROGMEM =
     cbm(0x00000011),
     cbm(0x10000111),
     cbm(0x11111111),
+    cbm(0x11111111), },
+},
+{
+    6, 6, {
+    cbm(0x10000111),
+    cbm(0x00000011),
+    cbm(0x00000011),
+    cbm(0x00000011),
+    cbm(0x00000011),
+    cbm(0x10000111),
+    cbm(0x11111111),
+    cbm(0x11111111), },
+},
+{
+    7, 7, {
+    cbm(0x00000001),
+    cbm(0x00000001),
+    cbm(0x00000001),
+    cbm(0x00000001),
+    cbm(0x00000001),
+    cbm(0x00000001),
+    cbm(0x00000001),
+    cbm(0x11111111), },
+},
+{
+    7, 7, {
+    cbm(0x11101111),
+    cbm(0x11000111),
+    cbm(0x10000011),
+    cbm(0x00000001),
+    cbm(0x10000011),
+    cbm(0x11000111),
+    cbm(0x11101111),
+    cbm(0x11111111), },
+},
+{
+    7, 7, {
+    cbm(0x11000111),
+    cbm(0x11000111),
+    cbm(0x00000001),
+    cbm(0x00000001),
+    cbm(0x00000001),
+    cbm(0x11000111),
+    cbm(0x11000111),
+    cbm(0x11111111), },
+},
+{
+    7, 7, {
+    cbm(0x11000111),
+    cbm(0x11000111),
+    cbm(0x00010001),
+    cbm(0x00111001),
+    cbm(0x00010001),
+    cbm(0x11000111),
+    cbm(0x11000111),
     cbm(0x11111111), },
 },
 {
@@ -78,198 +257,266 @@ static constexpr room_info const ROOM_TYPES[] PROGMEM =
 static constexpr uint8_t NUM_ROOM_TYPES =
 sizeof(ROOM_TYPES) / sizeof(ROOM_TYPES[0]);
 
-static void dig_tile(uint8_t x, uint8_t y, bool explored)
+static uint8_t random_room_type()
+{
+    if(u8rand() < ROOM_BIG_CHANCE)
+        return 0x80 + u8rand(NUM_BIG_ROOM_TYPES);
+    return u8rand(NUM_ROOM_TYPES);
+}
+
+uint8_t room::w() const
+{
+    if(type & 0x80) return pgm_read_byte(&BIG_ROOM_TYPES[type & 0x7f].w);
+    return pgm_read_byte(&ROOM_TYPES[type].w);
+}
+
+uint8_t room::h() const
+{
+    if(type & 0x80) return pgm_read_byte(&BIG_ROOM_TYPES[type & 0x7f].h);
+    return pgm_read_byte(&ROOM_TYPES[type].h);
+}
+
+bool room::solid(uint8_t rx, uint8_t ry) const
+{
+    if(type & 0x80)
+    {
+        uint8_t i = ry * 2 + rx / 8;
+        uint8_t m = pgm_read_byte(&BIG_ROOM_TYPES[type & 0x7f].mask[i]);
+        return (m & (1 << (rx & 7))) != 0;
+    }
+    uint8_t m = pgm_read_byte(&ROOM_TYPES[type].mask[ry]);
+    return (m & (1 << rx)) != 0;
+}
+
+bool room::inside(uint8_t tx, uint8_t ty) const
+{
+    uint8_t rx = uint8_t(tx - x);
+    uint8_t ry = uint8_t(ty - y);
+    if(!(rx < w() && ry < h()))
+        return false;
+    return !solid(rx, ry);
+}
+
+bool room::inside_bb(uint8_t tx, uint8_t ty) const
+{
+    uint8_t rx = uint8_t(tx - x);
+    uint8_t ry = uint8_t(ty - y);
+    return (rx < w() && ry < h());
+}
+
+static void dig_tile(uint8_t x, uint8_t y)
 {
     uint16_t const i = y / 8 * MAP_W + x;
     uint8_t const m = 1 << (y % 8);
     tmap[i] &= ~m;
-    if(explored)
-        tfog[i] |= m;
 }
 
-static constexpr uint8_t MIN_SIZE = 8;
-static constexpr uint8_t MIN_SPLIT_SIZE = MIN_SIZE * 2 + 1;
-static constexpr uint8_t SPLIT_TRIES = 8;
-
-struct bsp_data
+static void fill_tile(uint8_t x, uint8_t y)
 {
-    struct bsp_node { uint8_t x, y, w, h; };
-    array<bsp_node, MAP_ROOMS> stack;
-    uint8_t n;
-    uint8_t mapi;
-};
-static_assert(sizeof(bsp_data) <= sizeof(buf), "");
-
-// r0.x < r1.x
-static void join_rooms_horz(uint8_t r0, uint8_t r1, bool explored)
-{
-    uint8_t x0 = rooms[r0].x + rooms[r0].w;
-    uint8_t y0 = rooms[r0].y + rooms[r0].h / 2;
-    while(tile_is_solid(x0 - 1, y0)) --x0;
-    uint8_t x1 = rooms[r1].x - 1;
-    uint8_t y1 = rooms[r1].y + rooms[r1].h / 2;
-    while(tile_is_solid(x1 + 1, y1)) ++x1;
-
-    uint8_t x2 = (x0 + x1 + 1) / 2;
-    for(uint8_t i = x0; i <= x2; ++i)
-        dig_tile(i, y0, explored);
-    if(y0 < y1)
-        for(uint8_t i = y0; i <= y1; ++i)
-            dig_tile(x2, i, explored);
-    else
-        for(uint8_t i = y1; i <= y0; ++i)
-            dig_tile(x2, i, explored);
-    for(uint8_t i = x2; i <= x1; ++i)
-        dig_tile(i, y1, explored);
+    uint16_t const i = y / 8 * MAP_W + x;
+    uint8_t const m = 1 << (y % 8);
+    tmap[i] |= m;
 }
 
-// r0.y < r1.y
-static void join_rooms_vert(uint8_t r0, uint8_t r1, bool explored)
+void dig_nonsecret_door_tiles()
 {
-    uint8_t x0 = rooms[r0].x + rooms[r0].w / 2;
-    uint8_t y0 = rooms[r0].y + rooms[r0].h;
-    while(tile_is_solid(x0, y0 - 1)) --y0;
-    uint8_t x1 = rooms[r1].x + rooms[r1].w / 2;
-    uint8_t y1 = rooms[r1].y == 0 ? 0 : rooms[r1].y - 1;
-    while(tile_is_solid(x1, y1 + 1)) ++y1;
-
-    uint8_t y2 = (y0 + y1 + 1) / 2;
-    for(uint8_t i = y0; i <= y2; ++i)
-        dig_tile(x0, i, explored);
-    if(x0 < x1)
-        for(uint8_t i = x0; i <= x1; ++i)
-            dig_tile(i, y2, explored);
-    else
-        for(uint8_t i = x1; i <= x0; ++i)
-            dig_tile(i, y2, explored);
-    for(uint8_t i = y2; i <= y1; ++i)
-        dig_tile(x1, i, explored);
-}
-
-static void join_rooms(uint8_t r0, uint8_t r1, bool explored)
-{
-    if(rooms[r0].x > rooms[r1].x)
-        swap(r0, r1);
-    if(rooms[r0].x + MIN_SIZE < rooms[r1].x)
-        join_rooms_horz(r0, r1, explored);
-    else
+    for(int i = 0; i < num_doors; ++i)
     {
-        if(rooms[r0].y > rooms[r1].y)
-            swap(r0, r1);
-        join_rooms_vert(r0, r1, explored);
+        auto const& d = doors[i];
+        if(!d.secret)
+            dig_tile(d.x, d.y);
     }
 }
 
-static bool room_is_explored(uint8_t mapi, uint8_t r)
+void update_doors()
 {
-    return r < MAP_ROOMS && maps[mapi].got_rooms.test(r);
-}
-
-static uint8_t generate_recurse()
-{
-    auto& data = *(bsp_data*)&buf;
-    auto& stack = data.stack;
-    auto& n = data.n;
-
-    if(num_rooms >= MAP_ROOMS)
-        return -1;
-
-    // check stop condition
-    if(stack[n].w <= MIN_SPLIT_SIZE && stack[n].h <= MIN_SPLIT_SIZE)
+    for(int i = 0; i < num_doors; ++i)
     {
-        //rooms[nr].secret = ...;
-
-        uint8_t x, y, w, h;
-        bool const explored = maps[data.mapi].got_rooms.test(num_rooms);
-
-        if(u8rand() < 64)
-        {
-            // special room
-            uint8_t t = u8rand(NUM_ROOM_TYPES);
-            w = pgm_read_byte(&ROOM_TYPES[t].w);
-            h = pgm_read_byte(&ROOM_TYPES[t].h);
-            x = stack[n].x;
-            y = stack[n].y;
-            if(stack[n].w > w) x = stack[n].x + u8rand(stack[n].w - w);
-            if(stack[n].h > h) y = stack[n].y + u8rand(stack[n].h - h);
-            for(uint8_t iy = 0; iy < h; ++iy)
-            {
-                uint8_t m = pgm_read_byte(&ROOM_TYPES[t].mask[iy]);
-                for(uint8_t ix = 0; ix < w; ++ix, m >>= 1)
-                    if(!(m & 1)) dig_tile(x + ix, y + iy, explored);
-            }
-        }
+        auto const& d = doors[i];
+        if(d.open)
+            dig_tile(d.x, d.y);
         else
-        {
-            w = stack[n].w - u8rand(4) - 1;
-            h = stack[n].h - u8rand(4) - 1;
-            x = stack[n].x + u8rand(stack[n].w - w);
-            y = stack[n].y + u8rand(stack[n].h - h);
-            for(uint8_t iy = 0; iy < h; ++iy)
-                for(uint8_t ix = 0; ix < w; ++ix)
-                    dig_tile(x + ix, y + iy, explored);
-        }
-
-        rooms[num_rooms] = { x, y, w, h };
-
-        return num_rooms++;
+            fill_tile(d.x, d.y);
     }
+}
 
-    uint8_t r = -1;
-    
-    for(uint8_t i = 0; i < SPLIT_TRIES; ++i)
+static bool verify_room(
+    uint8_t x, uint8_t y, uint8_t type, bool& explored)
+{
+    auto& r = rooms[num_rooms];
+    r.x = x;
+    r.y = y;
+    r.type = type;
+    if(x >= MAP_W) return false;
+    if(y >= MAP_H) return false;
+    uint8_t bx = x + r.w();
+    uint8_t by = y + r.h();
+    if(bx >= MAP_W) return false;
+    if(by >= MAP_H) return false;
+    for(uint8_t ty = y; ty < by; ++ty)
+        for(uint8_t tx = x; tx < bx; ++tx)
+        {
+            if(!r.inside(tx, ty))
+                continue;
+            for(int8_t dy = -1; dy <= 1; ++dy)
+                for(int8_t dx = -1; dx <= 1; ++dx)
+                    if(!tile_is_solid(tx + dx, ty + dy))
+                        return false;
+        }
+    explored = maps[map_index].got_rooms.test(num_rooms);
+    return true;
+}
+
+static void finish_latest_room()
+{
+    bool explored = maps[map_index].got_rooms.test(num_rooms);
+    if(explored)
     {
-        if((u8rand() & 1) && stack[n].h > MIN_SPLIT_SIZE)
-        {
-            // split north-south
-            uint8_t y = stack[n].y + u8rand(stack[n].h - MIN_SPLIT_SIZE) + MIN_SIZE;
-            ++n;
-            stack[n] = stack[n - 1];
-            stack[n].h = y - stack[n].y;
-            uint8_t r0 = generate_recurse();
-            stack[n].y = y + 1;
-            stack[n].h = stack[n - 1].h - stack[n].h - 1;
-            uint8_t r1 = generate_recurse();
-            --n;
-
-            bool explored =
-                room_is_explored(data.mapi, r0) ||
-                room_is_explored(data.mapi, r1);
-
-            // join with vertical corridor
-            if(r0 < MAP_ROOMS && r1 < MAP_ROOMS)
-                join_rooms(r0, r1, explored);
-
-            r = (u8rand() & 1) ? r0 : r1;
-            break;
-        }
-        else if(stack[n].w > MIN_SPLIT_SIZE)
-        {
-            // split west-east
-            uint8_t x = stack[n].x + u8rand(stack[n].w - MIN_SPLIT_SIZE) + MIN_SIZE;
-            ++n;
-            stack[n] = stack[n - 1];
-            stack[n].w = x - stack[n].x;
-            uint8_t r0 = generate_recurse();
-            stack[n].x = x + 1;
-            stack[n].w = stack[n - 1].w - stack[n].w - 1;
-            uint8_t r1 = generate_recurse();
-            --n;
-
-            bool explored =
-                room_is_explored(data.mapi, r0) ||
-                room_is_explored(data.mapi, r1);
-
-            // join with horizontal corridor
-            if(r0 < MAP_ROOMS && r1 < MAP_ROOMS)
-                join_rooms(r0, r1, explored);
-
-            r = (u8rand() & 1) ? r0 : r1;
-            break;
-        }
+        auto& r = rooms[num_rooms];
+        for(uint8_t y = 0; y <= r.h(); ++y)
+            for(uint8_t x = 0; x <= r.w(); ++x)
+            {
+                if(r.inside(x, y))
+                {
+                    uint8_t tx = r.x + x;
+                    uint8_t ty = r.y + y;
+                    set_tile_explored(tx, ty);
+                    set_tile_explored(tx - 1, ty);
+                    set_tile_explored(tx + 1, ty);
+                    set_tile_explored(tx, ty - 1);
+                    set_tile_explored(tx, ty + 1);
+                }
+            }
     }
+    ++num_rooms;
+}
 
-    return r;
+static bool dig_room(
+    uint8_t type, uint8_t x, uint8_t y)
+{
+    bool explored;
+    if(!verify_room(x, y, type, explored))
+        return false;
+    auto const& r = rooms[num_rooms];
+    for(uint8_t iy = 0; iy < r.h(); ++iy)
+    {
+        for(uint8_t ix = 0; ix < r.w(); ++ix)
+            if(r.inside(x + ix, y + iy))
+                dig_tile(x + ix, y + iy);
+    }
+    finish_latest_room();
+    return true;
+}
+
+static void dig_initial_room()
+{
+    dig_room(random_room_type(), MAP_W / 2 - 3, MAP_H / 2 - 3);
+}
+
+static void add_door(uint8_t x, uint8_t y)
+{
+    dig_tile(x, y);
+    if(u8rand() >= DOOR_CHANCE) return;
+    if(num_doors >= MAP_DOORS) return;
+    if(get_door(x, y) != nullptr) return;
+    auto& d = doors[num_doors];
+    uint8_t t = u8rand();
+    if(maps[map_index].got_doors.test(num_doors))
+        d.open = 1;
+    else
+        d.secret = (t < DOOR_SECRET_CHANCE);
+    d.x = x;
+    d.y = y;
+    ++num_doors;
+}
+
+static void random_room_edge(uint8_t d, uint8_t t, uint8_t& rx, uint8_t& ry)
+{
+    room r = { 0, 0, t };
+    for(;;)
+    {
+        switch(d)
+        {
+        case 0: r.x = u8rand(r.w()), r.y = 0; break;
+        case 1: r.x = u8rand(r.w()), r.y = r.h() - 1; break;
+        case 2: r.x = 0, r.y = u8rand(r.h()); break;
+        case 3: r.x = r.w() - 1, r.y = u8rand(r.h()); break;
+        default: break;
+        }
+        if(!r.solid(r.x, r.y)) break;
+    }
+    rx = r.x, ry = r.y;
+}
+
+int8_t const DIRX[4] PROGMEM = { 0, 0, -1, 1 };
+int8_t const DIRY[4] PROGMEM = { -1, 1, 0, 0 };
+
+static bool try_generate_room()
+{
+    if(num_rooms >= MAP_ROOMS) return false;
+    room const& pr = rooms[u8rand(num_rooms)];
+    uint8_t d = u8rand() % 4; // direction to place new room
+    uint8_t t = random_room_type(); // new room type
+    uint8_t x0, y0; // current room edge (rel)
+    uint8_t x1, y1; // new room edge (rel)
+    uint8_t xd, yd; // door pos
+    uint8_t xr, yr; // new room
+    random_room_edge(d, pr.type, x0, y0);
+    random_room_edge(d ^ 1, t, x1, y1);
+    xd = pr.x + x0 + (int8_t)pgm_read_byte(&DIRX[d]);
+    yd = pr.y + y0 + (int8_t)pgm_read_byte(&DIRY[d]);
+    xr = xd - x1 + (int8_t)pgm_read_byte(&DIRX[d]);
+    yr = yd - y1 + (int8_t)pgm_read_byte(&DIRY[d]);
+    if(!dig_room(t, xr, yr))
+        return false;
+    add_door(xd, yd);
+    return true;
+}
+
+static void try_add_random_door()
+{
+    auto const& r = rooms[u8rand(num_rooms)];
+    uint8_t d = u8rand() % 4;
+    uint8_t x, y;
+    random_room_edge(d, r.type, x, y);
+    x += r.x + (int8_t)pgm_read_byte(&DIRX[d]);
+    y += r.y + (int8_t)pgm_read_byte(&DIRY[d]);
+    if(!tile_is_solid(x, y)) return;
+    for(uint8_t i = 0; i < num_rooms; ++i)
+        if(rooms[i].inside_bb(x, y)) return;
+    //{
+    //    uint8_t t = 0;
+    //    t |= (uint8_t)tile_is_solid(x - 1, y) << 0;
+    //    t |= (uint8_t)tile_is_solid(x + 1, y) << 1;
+    //    t |= (uint8_t)tile_is_solid(x, y - 1) << 2;
+    //    t |= (uint8_t)tile_is_solid(x, y + 1) << 3;
+    //    if(t != 0x3 && t != 0xc) return;
+    //}
+    if(d < 2) // north/south
+    {
+        if(tile_is_solid(x, y - 1) || tile_is_solid(x, y + 1))
+            return;
+        for(uint8_t i = 0; i < RANDOM_DOOR_SPACE; ++i)
+            if(!tile_is_solid(x - i, y) || !tile_is_solid(x + i, y))
+                return;
+    }
+    else // west/east
+    {
+        if(tile_is_solid(x - 1, y) || tile_is_solid(x + 1, y))
+            return;
+        for(uint8_t i = 0; i < RANDOM_DOOR_SPACE; ++i)
+            if(!tile_is_solid(x, y - i) || !tile_is_solid(x, y + i))
+                return;
+    }
+    //for(uint8_t i = 0; i < num_doors; ++i)
+    //{
+    //    uint8_t dx = doors[i].x;
+    //    uint8_t dy = doors[i].y;
+    //    if((u8abs(dx - x) <= RANDOM_DOOR_SPACE &&
+    //        u8abs(dy - y) <= RANDOM_DOOR_SPACE))
+    //        return;
+    //}
+    add_door(x, y);
 }
 
 void generate_dungeon(uint8_t mapi)
@@ -279,18 +526,25 @@ void generate_dungeon(uint8_t mapi)
         for(uint8_t j = 0; j < 217; ++j)
             u8rand();
 
-    //for(;;)
-    //{
-        for(auto& t : tmap) t = 0xff;
-        for(auto& t : tfog) t = 0;
+    for(auto& t : tmap) t = 0xff;
+    memzero(&tfog, sizeof(tfog));
+    memzero(&ents[1], sizeof(ents) - sizeof(ents[0]));
+    memzero(&items, sizeof(items));
+    memzero(&rooms, sizeof(rooms));
+    memzero(&doors, sizeof(doors));
+    num_rooms = 0;
+    num_doors = 0;
+    dig_initial_room();
+    for(uint16_t i = 0; i < 4096; ++i)
+        try_generate_room();
+    for(uint16_t i = 0; i < 1024; ++i)
+        try_add_random_door();
 
-        auto& data = *(bsp_data*)&buf;
-        data.mapi = mapi;
-        data.stack[0] = { 0, 0, MAP_W, MAP_H };
-        num_rooms = 0;
-        generate_recurse();
-        num_rooms;
-    //}
+    for(uint16_t i = 0; i < tfog.size(); ++i)
+        tfog[i] = tmap[i];
+    update_doors();
+
+    //for(auto& t : tfog) t = 0xff;
 
     // clear buf
     for(auto& b : buf) b = 0;

@@ -34,6 +34,14 @@ template<size_t N> struct bitset
     {
         return (d_[i / 8] >> (i % 8)) & 1;
     }
+    void set(size_t i)
+    {
+        d_[i / 8] |= (1 << (i % 8));
+    }
+    void clear(size_t i)
+    {
+        d_[i / 8] &= ~(1 << (i % 8));
+    }
 };
 
 template<class T> void swap(T& a, T& b)
@@ -41,6 +49,21 @@ template<class T> void swap(T& a, T& b)
     T c = a;
     a = b;
     b = c;
+}
+
+static void pgm_memcpy(void* dst, void const* src, uint8_t n)
+{
+    uint8_t* d = (uint8_t*)dst;
+    uint8_t const* s = (uint8_t const*)src;
+    for(uint8_t i = 0; i < n; ++i)
+        d[i] = pgm_read_byte(&s[i]);
+}
+
+static void memzero(void* dst, uint8_t n)
+{
+    uint8_t* d = (uint8_t*)dst;
+    for(uint8_t i = 0; i < n; ++i)
+        d[i] = 0;
 }
 
 // platform functionality
@@ -64,8 +87,8 @@ static constexpr uint8_t MAP_W = 48;
 static constexpr uint8_t MAP_H = 48;
 static constexpr uint8_t MAP_ITEMS = 32;
 static constexpr uint8_t MAP_ENTITIES = 32;
-static constexpr uint8_t MAP_ROOMS = 24;
-static constexpr uint8_t MAP_DOORS = 24;
+static constexpr uint8_t MAP_ROOMS = 32;
+static constexpr uint8_t MAP_DOORS = 32;
 static constexpr uint8_t INV_ITEMS = 32;
 static constexpr uint8_t NUM_MAPS = 16;
 
@@ -141,18 +164,21 @@ struct map_info
 
 struct room
 {
-    uint8_t x, y, w, h;
-    bool inside(uint8_t tx, uint8_t ty) const
-    {
-        return uint8_t(tx - x) < w && uint8_t(ty - y) < h;
-    }
+    uint8_t x, y;
+    uint8_t type; // bit 7 set if big
+    uint8_t w() const;
+    uint8_t h() const;
+    bool solid(uint8_t rx, uint8_t ry) const;
+    bool inside(uint8_t tx, uint8_t ty) const;
+    bool inside_bb(uint8_t tx, uint8_t ty) const;
 };
 
 struct door
 {
-    uint8_t x;
+    uint8_t x : 7;
+    uint8_t open : 1;
     uint8_t y : 7;
-    uint8_t secret : 1;
+    uint8_t secret : 1; // must be zero if open
 };
 
 struct saved_data
@@ -163,9 +189,10 @@ struct saved_data
     array<entity, MAP_ENTITIES> ents;
     array<item, MAP_ITEMS>      items;
     array<room, MAP_ROOMS>      rooms;
-    array<room, MAP_DOORS>      doors;
+    array<door, MAP_DOORS>      doors;
     uint8_t                     num_rooms;
     uint8_t                     num_doors;
+    uint8_t                     map_index;
     entity_info                 pstats;
 };
 
@@ -188,18 +215,21 @@ struct globals
 extern globals globals_;
 
 // breakout items from struct
-static constexpr auto& buf = globals_.buf;
-static constexpr auto& tmap = globals_.tmap;
-static constexpr auto& tfog = globals_.tfog;
-static constexpr auto& ents = globals_.saved.ents;
-static constexpr auto& items = globals_.saved.items;
-static constexpr auto& maps = globals_.saved.maps;
-static constexpr auto& rooms = globals_.saved.rooms;
-static constexpr auto& num_rooms = globals_.saved.num_rooms;
-static constexpr auto& inv = globals_.saved.inv;
-static constexpr auto& game_seed = globals_.saved.game_seed;
-static constexpr auto& rand_seed = globals_.rand_seed;
-static constexpr auto& opt = globals_.opt;
+inline constexpr auto& buf = globals_.buf;
+inline constexpr auto& tmap = globals_.tmap;
+inline constexpr auto& tfog = globals_.tfog;
+inline constexpr auto& ents = globals_.saved.ents;
+inline constexpr auto& items = globals_.saved.items;
+inline constexpr auto& maps = globals_.saved.maps;
+inline constexpr auto& rooms = globals_.saved.rooms;
+inline constexpr auto& doors = globals_.saved.doors;
+inline constexpr auto& num_rooms = globals_.saved.num_rooms;
+inline constexpr auto& num_doors = globals_.saved.num_doors;
+inline constexpr auto& map_index = globals_.saved.map_index;
+inline constexpr auto& inv = globals_.saved.inv;
+inline constexpr auto& game_seed = globals_.saved.game_seed;
+inline constexpr auto& rand_seed = globals_.rand_seed;
+inline constexpr auto& opt = globals_.opt;
 
 template<class T>
 inline T const& tmin(T const& a, T const& b)
@@ -231,6 +261,8 @@ bool tile_is_solid(uint8_t x, uint8_t y);
 bool tile_is_explored(uint8_t x, uint8_t y);
 bool tile_is_unknown(uint8_t x, uint8_t y);
 bool tile_is_solid_or_unknown(uint8_t x, uint8_t y);
+door* get_door(uint8_t x, uint8_t y);
+uint8_t index_of_door(door const& d);
 void render();
 
 // draw.cpp
@@ -239,13 +271,18 @@ void draw_dungeon(uint8_t mx, uint8_t my);
 void draw_text(uint8_t x, uint8_t y, const char* p, bool prog = true);
 
 // generate.cpp
+void dig_nonsecret_door_tiles();
+void update_doors();   // set tile to solid for closed doors
 void generate_dungeon(uint8_t mapi);
+extern int8_t const DIRX[4] PROGMEM;
+extern int8_t const DIRY[4] PROGMEM;
 
 // light.cpp
 bool player_can_see(uint8_t x, uint8_t y);
 bool path_clear(
     uint8_t x0, uint8_t y0,
     uint8_t x1, uint8_t y1);
+void set_tile_explored(uint8_t x, uint8_t y);
 void update_light();
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
