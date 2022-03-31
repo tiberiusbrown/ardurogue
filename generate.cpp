@@ -367,30 +367,6 @@ static bool verify_room(
     return true;
 }
 
-static void finish_latest_room()
-{
-    bool explored = maps[map_index].got_rooms.test(num_rooms);
-    if(explored)
-    {
-        auto& r = rooms[num_rooms];
-        for(uint8_t y = 0; y <= r.h(); ++y)
-            for(uint8_t x = 0; x <= r.w(); ++x)
-            {
-                if(r.inside(x, y))
-                {
-                    uint8_t tx = r.x + x;
-                    uint8_t ty = r.y + y;
-                    set_tile_explored(tx, ty);
-                    set_tile_explored(tx - 1, ty);
-                    set_tile_explored(tx + 1, ty);
-                    set_tile_explored(tx, ty - 1);
-                    set_tile_explored(tx, ty + 1);
-                }
-            }
-    }
-    ++num_rooms;
-}
-
 static bool dig_room(
     uint8_t type, uint8_t x, uint8_t y)
 {
@@ -398,13 +374,23 @@ static bool dig_room(
     if(!verify_room(x, y, type, explored))
         return false;
     auto const& r = rooms[num_rooms];
-    for(uint8_t iy = 0; iy < r.h(); ++iy)
-    {
-        for(uint8_t ix = 0; ix < r.w(); ++ix)
-            if(r.inside(x + ix, y + iy))
-                dig_tile(x + ix, y + iy);
-    }
-    finish_latest_room();
+    uint8_t bx = r.x + r.w();
+    uint8_t by = r.y + r.h();
+    for(uint8_t iy = r.y; iy < by; ++iy)
+        for(uint8_t ix = r.x; ix < bx; ++ix)
+            if(r.inside(ix, iy))
+            {
+                dig_tile(ix, iy);
+                if(explored)
+                {
+                    set_tile_explored(ix, iy);
+                    set_tile_explored(ix - 1, iy);
+                    set_tile_explored(ix + 1, iy);
+                    set_tile_explored(ix, iy - 1);
+                    set_tile_explored(ix, iy + 1);
+                }
+            }
+    ++num_rooms;
     return true;
 }
 
@@ -422,7 +408,10 @@ static void add_door(uint8_t x, uint8_t y)
     auto& d = doors[num_doors];
     uint8_t t = u8rand();
     if(maps[map_index].got_doors.test(num_doors))
+    {
+        set_tile_explored(x, y);
         d.open = 1;
+    }
     else
         d.secret = (t < DOOR_SECRET_CHANCE);
     d.x = x;
@@ -541,7 +530,7 @@ void generate_dungeon(uint8_t mapi)
         try_add_random_door();
 
     for(uint16_t i = 0; i < tfog.size(); ++i)
-        tfog[i] = tmap[i];
+        tfog[i] |= tmap[i];
     update_doors();
 
     //for(auto& t : tfog) t = 0xff;

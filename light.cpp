@@ -69,4 +69,17 @@ void update_light()
             if(dx * dx + dy * dy < r2 && path_clear(px, py, x, y))
                 set_tile_explored(x, y);
         }
+
+    // set rooms explored
+    for(uint8_t i = 0; i < num_rooms; ++i)
+    {
+        if(maps[map_index].got_rooms.test(i)) continue;
+        room const& r = rooms[i];
+        uint8_t bx = r.x + r.w();
+        uint8_t by = r.y + r.h();
+        for(uint8_t y = r.y; y < by; ++y)
+            for(uint8_t x = r.x; x < bx; ++x)
+                if(tile_is_explored(x, y) && r.inside(x, y))
+                    maps[map_index].got_rooms.set(i);
+    }
 }
