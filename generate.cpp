@@ -5,8 +5,10 @@ static constexpr uint8_t ROOM_BIG_CHANCE = 64;
 // chances are out of 256
 // chance to place a door
 static constexpr uint8_t DOOR_CHANCE = 196;
-// chance for door to be secret
+// chance for any door to be secret
 static constexpr uint8_t DOOR_SECRET_CHANCE = 0;
+// chance for isolated door (only door leading to a room) to be secret
+static constexpr uint8_t DOOR_ISOLATED_SECRET_CHANCE = 0;
 
 static constexpr uint8_t RANDOM_DOOR_SPACE = 4;
 
@@ -473,14 +475,6 @@ static void try_add_random_door()
     if(!tile_is_solid(x, y)) return;
     for(uint8_t i = 0; i < num_rooms; ++i)
         if(rooms[i].inside_bb(x, y)) return;
-    //{
-    //    uint8_t t = 0;
-    //    t |= (uint8_t)tile_is_solid(x - 1, y) << 0;
-    //    t |= (uint8_t)tile_is_solid(x + 1, y) << 1;
-    //    t |= (uint8_t)tile_is_solid(x, y - 1) << 2;
-    //    t |= (uint8_t)tile_is_solid(x, y + 1) << 3;
-    //    if(t != 0x3 && t != 0xc) return;
-    //}
     if(d < 2) // north/south
     {
         if(tile_is_solid(x, y - 1) || tile_is_solid(x, y + 1))
@@ -497,21 +491,51 @@ static void try_add_random_door()
             if(!tile_is_solid(x, y - i) || !tile_is_solid(x, y + i))
                 return;
     }
-    //for(uint8_t i = 0; i < num_doors; ++i)
-    //{
-    //    uint8_t dx = doors[i].x;
-    //    uint8_t dy = doors[i].y;
-    //    if((u8abs(dx - x) <= RANDOM_DOOR_SPACE &&
-    //        u8abs(dy - y) <= RANDOM_DOOR_SPACE))
-    //        return;
-    //}
     add_door(x, y);
 }
 
-void generate_dungeon(uint8_t mapi)
+bool occupied(uint8_t x, uint8_t y)
+{
+    if(tile_is_solid(x, y)) return true;
+    if(x == xdn && y == ydn) return true;
+    if(x == xup && y == yup) return true;
+    for(auto const& e : ents)
+        if(e.type != entity::NONE && e.x == x && e.y == y)
+            return true; 
+    for(auto const& i : items)
+        if(i.it.type != item::NONE && i.x == x && i.y == y)
+            return true;
+    for(uint8_t i = 0; i < num_doors; ++i)
+        if(doors[i].x == x && doors[i].y == y)
+            return true;
+    return false;
+}
+
+static coord find_unoccupied()
+{
+    for(uint16_t tries = 0; tries < 1024; ++tries)
+    {
+        uint8_t x = u8rand(MAP_W);
+        uint8_t y = u8rand(MAP_H);
+        if(!occupied(x, y))
+            return { x, y };
+    }
+    for(uint8_t y = 0; y < MAP_H; ++y)
+        for(uint8_t x = 0; x < MAP_W; ++x)
+            if(!occupied(x, y))
+                return { x, y };
+}
+
+static void find_unoccupied(uint8_t& x, uint8_t& y)
+{
+    coord c = find_unoccupied();
+    x = c.x, y = c.y;
+}
+
+void generate_dungeon()
 {
     rand_seed = game_seed;
-    for(uint8_t i = 0; i < mapi; ++i)
+    for(uint8_t i = 0; i < map_index; ++i)
         for(uint8_t j = 0; j < 217; ++j)
             u8rand();
 
@@ -521,17 +545,23 @@ void generate_dungeon(uint8_t mapi)
     memzero(&items, sizeof(items));
     memzero(&rooms, sizeof(rooms));
     memzero(&doors, sizeof(doors));
+    num_ents = 1;
     num_rooms = 0;
     num_doors = 0;
+    xdn = ydn = xup = yup = 255;
     dig_initial_room();
     for(uint16_t i = 0; i < 4096; ++i)
         try_generate_room();
     for(uint16_t i = 0; i < 1024; ++i)
         try_add_random_door();
 
+    // set all solid tiles to explored (makes walls fill out better)
     for(uint16_t i = 0; i < tfog.size(); ++i)
         tfog[i] |= tmap[i];
     update_doors();
+
+    find_unoccupied(xdn, ydn);
+    find_unoccupied(xup, yup);
 
     //for(auto& t : tfog) t = 0xff;
 

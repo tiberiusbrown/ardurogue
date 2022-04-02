@@ -92,6 +92,8 @@ static constexpr uint8_t MAP_DOORS = 32;
 static constexpr uint8_t INV_ITEMS = 32;
 static constexpr uint8_t NUM_MAPS = 16;
 
+struct coord { uint8_t x, y; };
+
 struct entity_info
 {
     uint8_t strength;
@@ -139,13 +141,40 @@ struct entity
     uint8_t x, y;
 };
 
+// potion types
+enum
+{
+    POT_HEALING,
+};
+
+// scroll types
+enum
+{
+    SCR_TELEPORT,
+};
+
 struct item
 {
-    uint8_t type          : 4;
-    uint8_t subtype       : 4;
-    uint8_t enchant_level : 4;
-    uint8_t identified    : 1;
-    uint8_t cursed        : 1;
+    enum
+    {
+        NONE,
+        FOOD,   // quantity
+        POTION, // quantity
+        SCROLL, // quantity
+        ARROW,  // quantity
+        BOW,    // level
+        SWORD,  // level
+        RING,   // level
+        AMULET, // level
+        ARMOR,  // level
+        HELM,   // level
+        BOOTS,  // level
+    };
+    uint8_t type           : 4;
+    uint8_t subtype        : 4;
+    uint8_t identified     : 1;
+    uint8_t cursed         : 1;
+    uint8_t quant_or_level : 6;
 };
 
 struct map_item
@@ -187,9 +216,11 @@ struct saved_data
     array<map_info, NUM_MAPS>   maps;
     array<item, INV_ITEMS>      inv;
     array<entity, MAP_ENTITIES> ents;
-    array<item, MAP_ITEMS>      items;
+    array<map_item, MAP_ITEMS>  items;
     array<room, MAP_ROOMS>      rooms;
     array<door, MAP_DOORS>      doors;
+    uint8_t                     num_ents;  // only used for generation
+    uint8_t                     num_items; // only used for generation
     uint8_t                     num_rooms;
     uint8_t                     num_doors;
     uint8_t                     map_index;
@@ -208,6 +239,8 @@ struct globals
     array<uint8_t, 64 * 64 / 8> buf;
     array<uint8_t, size_t(MAP_W) * MAP_H / 8> tmap; // 1: wall/door
     array<uint8_t, size_t(MAP_W) * MAP_H / 8> tfog; // 1: explored
+    uint8_t xdn, ydn; // coords of down stairs
+    uint8_t xup, yup; // coords of up stairs
     saved_data saved;
     options opt;
 };
@@ -218,13 +251,19 @@ extern globals globals_;
 inline constexpr auto& buf = globals_.buf;
 inline constexpr auto& tmap = globals_.tmap;
 inline constexpr auto& tfog = globals_.tfog;
+inline constexpr auto& xdn = globals_.xdn;
+inline constexpr auto& ydn = globals_.ydn;
+inline constexpr auto& xup = globals_.xup;
+inline constexpr auto& yup = globals_.yup;
+inline constexpr auto& num_ents  = globals_.saved.num_ents;
+inline constexpr auto& num_items = globals_.saved.num_items;
+inline constexpr auto& num_rooms = globals_.saved.num_rooms;
+inline constexpr auto& num_doors = globals_.saved.num_doors;
 inline constexpr auto& ents = globals_.saved.ents;
 inline constexpr auto& items = globals_.saved.items;
 inline constexpr auto& maps = globals_.saved.maps;
 inline constexpr auto& rooms = globals_.saved.rooms;
 inline constexpr auto& doors = globals_.saved.doors;
-inline constexpr auto& num_rooms = globals_.saved.num_rooms;
-inline constexpr auto& num_doors = globals_.saved.num_doors;
 inline constexpr auto& map_index = globals_.saved.map_index;
 inline constexpr auto& inv = globals_.saved.inv;
 inline constexpr auto& game_seed = globals_.saved.game_seed;
@@ -273,7 +312,8 @@ void draw_text(uint8_t x, uint8_t y, const char* p, bool prog = true);
 // generate.cpp
 void dig_nonsecret_door_tiles();
 void update_doors();   // set tile to solid for closed doors
-void generate_dungeon(uint8_t mapi);
+void generate_dungeon();
+bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
 extern int8_t const DIRX[4] PROGMEM;
 extern int8_t const DIRY[4] PROGMEM;
 

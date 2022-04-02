@@ -148,25 +148,25 @@ static LRESULT CALLBACK window_proc(HWND w, UINT msg, WPARAM wParam, LPARAM lPar
         {
         case WMSZ_BOTTOMLEFT:
             r->left = r->right - dw;
-            /* fallthrough */
+            [[fallthrough]];
         case WMSZ_BOTTOM:
             r->bottom = r->top + dh;
             break;
         case WMSZ_TOPLEFT:
             r->top = r->bottom - dh;
-            /* fallthrough */
+            [[fallthrough]];
         case WMSZ_LEFT:
             r->left = r->right - dw;
             break;
         case WMSZ_TOPRIGHT:
             r->right = r->left + dw;
-            /* fallthrough */
+            [[fallthrough]];
         case WMSZ_TOP:
             r->top = r->bottom - dh;
             break;
         case WMSZ_BOTTOMRIGHT:
             r->bottom = r->top + dh;
-            /* fallthrough */
+            [[fallthrough]];
         case WMSZ_RIGHT:
             r->right = r->left + dw;
             break;

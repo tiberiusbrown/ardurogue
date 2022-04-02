@@ -106,8 +106,9 @@ void game_setup()
     ents[0].y = 4;
 
     game_seed = 0xbabe;
+    map_index = 0;
 
-    generate_dungeon(0);
+    generate_dungeon();
     update_light();
     render();
 }
@@ -128,7 +129,7 @@ void game_loop()
         break;
     case BTN_B:
         //++game_seed;
-        generate_dungeon(0);
+        generate_dungeon();
         render();
         break;
     default: break;

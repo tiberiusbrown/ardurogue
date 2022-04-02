@@ -120,11 +120,10 @@ static void draw_tile(
     }
 }
 
-static void draw_sprite_precise(
-    uint16_t const* p, // PROGMEM
+static void draw_sprite_precise_nonprog(
+    uint16_t tp,
     uint8_t x, uint8_t y)
 {
-    uint16_t tp = pgm_read_word(p);
     uint8_t tt[4];
     tt[0] = (tp >> 12) & 0xf;
     tt[1] = (tp >> 8) & 0xf;
@@ -136,6 +135,21 @@ static void draw_sprite_precise(
     clear_img(tt, 4, x - 1, y);
     clear_img(tt, 4, x + 1, y);
     draw_img(tt, 4, x, y);
+}
+
+static void draw_sprite_precise(
+    uint16_t const* p, // PROGMEM
+    uint8_t x, uint8_t y)
+{
+    uint16_t tp = pgm_read_word(p);
+    draw_sprite_precise_nonprog(tp, x, y);
+}
+
+static void draw_sprite_nonprog(
+    uint16_t tp,
+    uint8_t x, uint8_t y)
+{
+    draw_sprite_precise_nonprog(tp, x * 5, y * 5);
 }
 
 static void draw_sprite(
@@ -311,6 +325,19 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             clear_rect(px - 1, px + 4, py, py + 4 + oy);
             draw_sprite_precise(&DOOR_IMGS[d.open], px, py);
         }
+    }
+
+    // draw stairs
+    {
+        uint8_t dx, dy;
+        dx = xdn - mx;
+        dy = ydn - my;
+        if(dx <= 13 && dy < 13 && tile_is_explored(xdn, ydn))
+            draw_sprite_nonprog(0xfec8, dx, dy);
+        dx = xup - mx;
+        dy = yup - my;
+        if(dx <= 13 && dy < 13 && tile_is_explored(xdn, ydn))
+            draw_sprite_nonprog(0x8cef, dx, dy);
     }
 
     // draw items
