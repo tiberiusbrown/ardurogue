@@ -29,6 +29,8 @@ uint8_t wait_btn()
         DispatchMessage(&msg);
         if(msg.hwnd == hwnd && msg.message == WM_KEYDOWN)
         {
+            // note: is repeat if
+            //       (HIWORD(msg.lParam) & KF_REPEAT) != 0
             switch(msg.wParam)
             {
             case VK_UP     : return BTN_UP;
@@ -50,7 +52,7 @@ static void refresh()
     InvalidateRect(hwnd, NULL, FALSE);
 }
 
-static void paint_offset(int offset)
+static void paint_offset(int offset, bool clear)
 {
     for(int i = 0; i < 512; ++i)
     {
@@ -67,17 +69,18 @@ static void paint_offset(int offset)
         }
     }
     refresh();
-    for(auto& b : buf) b = 0;
+    if(clear)
+        for(auto& b : buf) b = 0;
 }
 
-void paint_left()
+void paint_left(bool clear)
 {
-    paint_offset(0);
+    paint_offset(0, clear);
 }
 
-void paint_right()
+void paint_right(bool clear)
 {
-    paint_offset(64);
+    paint_offset(64, clear);
 }
 
 static constexpr int RESIZE_SNAP_PIXELS = 32;

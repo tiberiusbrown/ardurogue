@@ -37,30 +37,6 @@ bool tile_is_solid_or_unknown(uint8_t x, uint8_t y)
     return ((tmap[i] | ~tfog[i]) & m) != 0;
 }
 
-static bool try_move_ent(uint8_t i, uint8_t dx, uint8_t dy)
-{
-    uint8_t nx = ents[i].x + dx;
-    uint8_t ny = ents[i].y + dy;
-    if(tile_is_solid(nx, ny))
-    {
-        door* d = get_door(nx, ny);
-        if(d && !d->secret)
-        {
-            d->open = 1;
-            maps[map_index].got_doors.set(index_of_door(*d));
-            update_doors();
-            update_light();
-            return true;
-        }
-        // TODO: check for other entities to attack
-        return false;
-    }
-    ents[i].x = nx;
-    ents[i].y = ny;
-    update_light();
-    return true;
-}
-
 bool tile_is_solid(uint8_t x, uint8_t y)
 {
     if(x >= MAP_W || y >= MAP_H) return true;
@@ -83,6 +59,14 @@ door* get_door(uint8_t x, uint8_t y)
     return nullptr;
 }
 
+entity* get_entity(uint8_t x, uint8_t y)
+{
+    for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
+        if(ents[i].type != entity::NONE && ents[i].x == x && ents[i].y == y)
+            return &ents[i];
+    return nullptr;
+}
+
 uint8_t index_of_door(door const& d)
 {
     return uint8_t(ptrdiff_t(&d - &doors.d_[0]));
@@ -101,38 +85,73 @@ void game_setup()
     for(uint16_t i = 0; i < sizeof(globals_); ++i)
         ((uint8_t*)&globals_)[i] = 0;
 
-    ents[0].type = entity::PLAYER;
-    ents[0].x = 4;
-    ents[0].y = 4;
-
     game_seed = 0xbabe;
     map_index = 0;
-
     generate_dungeon();
+
+    pinfo = {};
+    pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
+    new_entity(0, entity::PLAYER, xup, yup);
+
+    for(uint8_t i = 1; i < 24; ++i)
+    {
+        auto c = find_unoccupied();
+        new_entity(i, entity::BAT, c.x, c.y);
+    }
+
+    statusn = 0;
+    statusx = 1;
+    statusy = STATUS_START_Y;
+    status(PSTR("Welcome to ArduRogue."));
+
     update_light();
     render();
+}
+
+// advance all entities and effects
+static void advance()
+{
+    uint8_t pspeed = entity_speed(0);
+    for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
+    {
+        uint8_t espeed = entity_speed(i);
+        while(espeed >= pspeed)
+        {
+            advance_entity(i);
+            espeed -= pspeed;
+        }
+        if(u8rand(pspeed) < espeed)
+            advance_entity(i);
+    }
 }
 
 void game_loop()
 {
     uint8_t b = wait_btn();
-    bool rd = false;
+    statusn = 0;
+    statusx = 1;
+    statusy = STATUS_START_Y;
+    action a{};
     switch(b)
     {
-    case BTN_UP   : rd = try_move_ent(0, 0, -1); break;
-    case BTN_DOWN : rd = try_move_ent(0, 0, +1); break;
-    case BTN_LEFT : rd = try_move_ent(0, -1, 0); break;
-    case BTN_RIGHT: rd = try_move_ent(0, +1, 0); break;
+    case BTN_UP   : a.type = action::MOVE; a.dir = 0; break;
+    case BTN_DOWN : a.type = action::MOVE; a.dir = 1; break;
+    case BTN_LEFT : a.type = action::MOVE; a.dir = 2; break;
+    case BTN_RIGHT: a.type = action::MOVE; a.dir = 3; break;
     case BTN_A:
         if(++opt.wall_style == NUM_WALL_STYLES) opt.wall_style = 0;
-        rd = true;
         break;
     case BTN_B:
         //++game_seed;
         generate_dungeon();
-        render();
         break;
     default: break;
     }
-    if(rd) render();
+    if(entity_perform_action(0, a))
+    {
+        update_doors();
+        update_light();
+        render();
+        advance();
+    }
 }

@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-static uint16_t const ENTITY_IMGS[32] PROGMEM =
+static uint16_t const ENTITY_IMGS[] PROGMEM =
 {
     0x0000, // none
     0x6ff6, // player
@@ -15,9 +15,26 @@ static uint16_t const ENTITY_IMGS[32] PROGMEM =
     0x069d, // griffin
     0xf996, // dragon
 };
+
+static uint16_t const ITEM_IMGS[] PROGMEM =
+{
+    0x0000, // none
+    0x9429, // food
+    0x00b0, // potion
+    0x01b3, // scroll
+    0x8421, // arrow
+    0x0960, // bow
+    0x04f4, // sword
+    0x0aaa, // ring
+    0x0606, // amulet
+    0x0f90, // armor
+    0x0f90, // helm
+    0x0f90, // boots
+};
+
 static uint16_t const DOOR_IMGS[2] PROGMEM = { 0xefbe, 0xe11e };
 
-static void set_pixel(uint8_t x, uint8_t y)
+void set_pixel(uint8_t x, uint8_t y)
 {
     if(!((x | y) & 0xc0)) // if(x < 64 && y < 64)
     {
@@ -26,7 +43,7 @@ static void set_pixel(uint8_t x, uint8_t y)
     }
 }
 
-static void clear_pixel(uint8_t x, uint8_t y)
+void clear_pixel(uint8_t x, uint8_t y)
 {
     if(!((x | y) & 0xc0)) // if(x < 64 && y < 64)
     {
@@ -35,37 +52,37 @@ static void clear_pixel(uint8_t x, uint8_t y)
     }
 }
 
-static void set_hline(uint8_t x0, uint8_t x1, uint8_t y)
+void set_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
     for(; x0 <= x1; ++x0)
         set_pixel(x0, y);
 }
 
-static void clear_hline(uint8_t x0, uint8_t x1, uint8_t y)
+void clear_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
     for(; x0 <= x1; ++x0)
         clear_pixel(x0, y);
 }
 
-static void set_vline(uint8_t x, uint8_t y0, uint8_t y1)
+void set_vline(uint8_t x, uint8_t y0, uint8_t y1)
 {
     for(; y0 <= y1; ++y0)
         set_pixel(x, y0);
 }
 
-static void set_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
+void set_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     for(; y0 <= y1; ++y0)
         set_hline(x0, x1, y0);
 }
 
-static void clear_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
+void clear_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     for(; y0 <= y1; ++y0)
         clear_hline(x0, x1, y0);
 }
 
-static void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
+void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     set_hline(x0, x1, y0);
     set_hline(x0, x1, y1);
@@ -73,7 +90,7 @@ static void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
     set_vline(x1, y0, y1);
 }
 
-static void draw_box_pretty(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
+void draw_box_pretty(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     clear_rect(x0 - 1, x1 + 2, y0 - 1, y1 + 2);
     set_box(x0, x1, y0, y1);
@@ -179,16 +196,32 @@ static void draw_dungeon_minimap()
 #endif
 }
 
+static void draw_progress_bar(
+    uint8_t x, uint8_t y,
+    uint8_t a, uint8_t b)
+{
+    constexpr uint8_t W = 32;
+    set_box(x, x + W + 1, y, y + 2);
+    uint8_t f = b == 0 ? 0 : uint8_t(uint16_t(a * W + W / 2) / b);
+    set_hline(x + 1, y + 1, y + f);
+}
+
 void draw_info()
 {
+    auto const& e = ents[0];
+    draw_textf(1, 0, PSTR("Health: %u/%u"), e.health, entity_max_health(0));
+    draw_textf(1, 6, PSTR("Pos: [%u, %u]"), e.x, e.y);
+
     //draw_box_pretty(1, MAP_W / 2 + 5, 0, MAP_H / 2 + 4);
-    draw_box_pretty(1, MAP_W + 5, 0, MAP_H + 4);
-    draw_dungeon_minimap();
+    //draw_box_pretty(1, MAP_W + 5, 0, MAP_H + 4);
+    //draw_dungeon_minimap();
     //draw_text(1, 34, PSTR("the lazy dog."));
     //draw_text(1, 40, PSTR("THE QUICK BROWN"));
     //draw_text(1, 46, PSTR("FOX JUMPS OVER"));
     //draw_text(1, 52, PSTR("THE LAZY DOG."));
     //draw_text(1, 58, PSTR("0123456789!?%"));
+
+    draw_status();
 }
 
 void draw_dungeon(uint8_t mx, uint8_t my)
@@ -341,6 +374,15 @@ void draw_dungeon(uint8_t mx, uint8_t my)
     }
 
     // draw items
+    for(auto const& i : items)
+    {
+        if(i.it.type == entity::NONE) continue;
+        uint8_t ix = i.x - mx;
+        uint8_t iy = i.y - my;
+        if(ix >= 13 || iy >= 13) continue;
+        if(player_can_see(i.x, i.y))
+            draw_sprite(&ITEM_IMGS[i.it.type], ix, iy);
+    }
 
     // draw entities
     for(auto const& e : ents)
@@ -472,7 +514,7 @@ void draw_text(uint8_t x, uint8_t y, char const* t, bool prog)
         if(c < 32) return;
         if(c == ' ')
         {
-            x += 2;
+            x += SPACE_WIDTH + 1;
             continue;
         }
         uint16_t p = pgm_read_word(FONT_DATA + c - 33);
@@ -489,4 +531,39 @@ void draw_text(uint8_t x, uint8_t y, char const* t, bool prog)
         }
         ++x;
     }
+}
+
+void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...)
+{
+    char buf[32];
+    va_list ap;
+    va_start(ap, fmt);
+    tvsprintf(buf, fmt, ap);
+    va_end(ap);
+    draw_text(x, y, buf, false);
+}
+
+uint8_t char_width(char c)
+{
+    if(c == ' ') return SPACE_WIDTH;
+    uint16_t p = pgm_read_word(FONT_DATA + c - 33);
+    uint8_t a, b, n = 3;
+    a = uint8_t(p >> 5) & 0x1f;
+    b = uint8_t(p >> 10) & 0x1f;
+    if(b == 0) n = (a == 0 ? 1 : 2);
+    return n;
+}
+
+uint8_t text_width(char const* s, bool prog)
+{
+    uint8_t r = 1;
+    for(;;)
+    {
+        char c = prog ? pgm_read_byte(s) : *s;
+        ++r;
+        if(c == '\0') break;
+        ++s;
+        r += char_width(c);
+    }
+    return r - 1;
 }

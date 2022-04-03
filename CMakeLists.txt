@@ -12,12 +12,18 @@ endif()
 
 add_executable(
     ${PROJECT_NAME} ${WINFLAG}
+    .editorconfig
     main_win32.cpp
     draw.cpp
+    entity.cpp
     game.hpp
     game.cpp
     generate.cpp
     light.cpp
+    monsters.cpp
+    sprintf.cpp
+    status.cpp
+    strings.cpp
     )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

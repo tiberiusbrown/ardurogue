@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdarg.h>
 
 #ifdef ARDUINO
 #include <Arduino.h>
@@ -9,6 +10,7 @@
 #define PROGMEM
 inline uint8_t pgm_read_byte(void const* p) { return *(uint8_t*)p; }
 inline uint16_t pgm_read_word(void const* p) { return *(uint16_t*)p; }
+inline void const* pgm_read_ptr(void const* p) { return *(void const**)p; }
 #endif
 
 template<class T, size_t N>
@@ -69,8 +71,8 @@ static void memzero(void* dst, uint8_t n)
 // platform functionality
 uint8_t wait_btn(); // wait for button press
 void seed();        // initialize seed0 and seed1
-void paint_left();  // draw to left half screen
-void paint_right(); // draw to right half screen
+void paint_left(bool clear = true);  // draw to left half screen
+void paint_right(bool clear = true); // draw to right half screen
 
 static constexpr uint8_t BTN_UP    = 0x80;
 static constexpr uint8_t BTN_DOWN  = 0x10;
@@ -96,25 +98,30 @@ struct coord { uint8_t x, y; };
 
 struct entity_info
 {
-    uint8_t strength;
-    uint8_t dexterity;
-    uint8_t speed;
+    uint8_t mean     : 1; // whether it can attack
+    uint8_t nomove   : 1; // stays put (mon only)
+    uint8_t regens   : 1; // regenerates health
+    uint8_t invis    : 1; // invisible
+    uint8_t poison   : 1; // chance to drain strength (weaken) on hit
+    uint8_t vampire  : 1; // chance to drain max hp on hit
+    uint8_t confuse  : 1; // chance to confuse on hit
+    uint8_t paralyze : 1; // chance to paralyze on hit
+    uint8_t opener   : 1; // whether it can open doors
+
+    uint8_t strength;    // higher is better
+    uint8_t dexterity;   // higher is better
+    uint8_t speed;       // lower is faster
+    uint8_t max_health;
 };
 
-struct monster_info
+// info specific to player
+struct player_info
 {
-    uint8_t mean    : 1; // whether it attacks on sight
-    uint8_t regens  : 1; // regeneratess health
-    uint8_t invis   : 1; // invisible
-    uint8_t nomove  : 1; // stays put
-    uint8_t poison  : 1; // chance to drain strength on hit
-    uint8_t vampire : 1; // chance to drain max hp on hit
-    uint8_t confuse : 1; // chance to confuse on hit
-
-    entity_info i;
+    uint8_t invis_rem;    // invis cycles remaining
+    uint8_t confuse_rem;  // confuse cycles remaining
+    uint8_t paralyze_rem; // paralysis cycles remaining
+    uint8_t vamp_drain;   // amount of max health drained by vampire
 };
-
-extern monster_info const MONSTER_INFO[32] PROGMEM;
 
 struct entity
 {
@@ -141,15 +148,40 @@ struct entity
     uint8_t x, y;
 };
 
+struct action
+{
+    enum
+    {
+        WAIT,  // <nothing>
+        USE,   // index0 [index1, in case of identify/enchant]
+        SHOOT, // dir
+        DROP,  // index0
+        THROW, // dir index0
+        CLOSE, // dir
+        MOVE,  // dir
+    };
+    uint8_t type;
+    uint8_t dir;
+    uint8_t index0; // e.g. scroll of enchant
+    uint8_t index1; // e.g. item to enchant
+};
+
 // potion types
 enum
 {
     POT_HEALING,
+    POT_CONFUSION,
+    POT_FLAME,
+    POT_STRENGTH,
+    POT_INVIS,
 };
 
 // scroll types
 enum
 {
+    SCR_IDENTIFY,
+    SCR_ENCHANT,
+    SCR_REMOVE_CURSE,
     SCR_TELEPORT,
 };
 
@@ -172,9 +204,9 @@ struct item
     };
     uint8_t type           : 4;
     uint8_t subtype        : 4;
+    uint8_t quant_or_level : 6;
     uint8_t identified     : 1;
     uint8_t cursed         : 1;
-    uint8_t quant_or_level : 6;
 };
 
 struct map_item
@@ -215,6 +247,7 @@ struct saved_data
     uint16_t                    game_seed;
     array<map_info, NUM_MAPS>   maps;
     array<item, INV_ITEMS>      inv;
+    bitset<INV_ITEMS>           equipped;
     array<entity, MAP_ENTITIES> ents;
     array<map_item, MAP_ITEMS>  items;
     array<room, MAP_ROOMS>      rooms;
@@ -225,6 +258,7 @@ struct saved_data
     uint8_t                     num_doors;
     uint8_t                     map_index;
     entity_info                 pstats;
+    player_info                 pinfo;
 };
 
 static constexpr uint8_t NUM_WALL_STYLES = 4;
@@ -243,11 +277,13 @@ struct globals
     uint8_t xup, yup; // coords of up stairs
     saved_data saved;
     options opt;
+    char statusbuf[128];
+    uint8_t statusn, statusx, statusy;
 };
 
 extern globals globals_;
 
-// breakout items from struct
+// breakout stuff from struct for ease of coding
 inline constexpr auto& buf = globals_.buf;
 inline constexpr auto& tmap = globals_.tmap;
 inline constexpr auto& tfog = globals_.tfog;
@@ -266,9 +302,16 @@ inline constexpr auto& rooms = globals_.saved.rooms;
 inline constexpr auto& doors = globals_.saved.doors;
 inline constexpr auto& map_index = globals_.saved.map_index;
 inline constexpr auto& inv = globals_.saved.inv;
+inline constexpr auto& equipped = globals_.saved.equipped;
 inline constexpr auto& game_seed = globals_.saved.game_seed;
+inline constexpr auto& pstats = globals_.saved.pstats;
+inline constexpr auto& pinfo = globals_.saved.pinfo;
 inline constexpr auto& rand_seed = globals_.rand_seed;
 inline constexpr auto& opt = globals_.opt;
+inline constexpr auto& statusbuf = globals_.statusbuf;
+inline constexpr auto& statusn = globals_.statusn;
+inline constexpr auto& statusx = globals_.statusx;
+inline constexpr auto& statusy = globals_.statusy;
 
 template<class T>
 inline T const& tmin(T const& a, T const& b)
@@ -285,6 +328,10 @@ inline uint8_t u8abs(uint8_t x)
 {
     return (x & 0x80) ? -x : x;
 }
+inline uint8_t u8max(uint8_t a, uint8_t b)
+{
+    return a < b ? b : a;
+}
 
 inline uint8_t light_radius() { return 5; }
 inline uint8_t light_radius2()
@@ -293,6 +340,9 @@ inline uint8_t light_radius2()
     return r * r + r / 2;
 }
 
+// strings.cpp
+extern char const* const MONSTER_NAMES[] PROGMEM;
+
 // game.cpp
 uint8_t u8rand();
 uint8_t u8rand(uint8_t m);
@@ -300,20 +350,37 @@ bool tile_is_solid(uint8_t x, uint8_t y);
 bool tile_is_explored(uint8_t x, uint8_t y);
 bool tile_is_unknown(uint8_t x, uint8_t y);
 bool tile_is_solid_or_unknown(uint8_t x, uint8_t y);
-door* get_door(uint8_t x, uint8_t y);
+door* get_door(uint8_t x, uint8_t y); 
+entity* get_entity(uint8_t x, uint8_t y);
 uint8_t index_of_door(door const& d);
 void render();
 
 // draw.cpp
+static constexpr uint8_t SPACE_WIDTH = 1;
+void set_pixel(uint8_t x, uint8_t y);
+void clear_pixel(uint8_t x, uint8_t y);
+void set_hline(uint8_t x0, uint8_t x1, uint8_t y);
+void clear_hline(uint8_t x0, uint8_t x1, uint8_t y);
+void set_vline(uint8_t x, uint8_t y0, uint8_t y1);
+void set_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
+void clear_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
+void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
+void draw_box_pretty(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
 void draw_info();
 void draw_dungeon(uint8_t mx, uint8_t my);
 void draw_text(uint8_t x, uint8_t y, const char* p, bool prog = true);
+// fmt is PROGMEM
+void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...); // max 32
+uint8_t char_width(char c);
+uint8_t text_width(char const* s, bool prog = true);
 
 // generate.cpp
+void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y);
 void dig_nonsecret_door_tiles();
 void update_doors();   // set tile to solid for closed doors
 void generate_dungeon();
 bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
+coord find_unoccupied();
 extern int8_t const DIRX[4] PROGMEM;
 extern int8_t const DIRY[4] PROGMEM;
 
@@ -324,6 +391,28 @@ bool path_clear(
     uint8_t x1, uint8_t y1);
 void set_tile_explored(uint8_t x, uint8_t y);
 void update_light();
+
+// sprintf.cpp: expects fmt to be PROGMEM
+void tsprintf(char* b, char const* fmt, ...);
+void tvsprintf(char* b, char const* fmt, va_list ap);
+uint8_t tstrlen(char const* s); // s not progmem
+
+// status.cpp: fmt is PROGMEM
+static constexpr uint8_t NUM_STATUS_ROWS = 6;
+static constexpr uint8_t STATUS_START_Y = 65 - 6 * NUM_STATUS_ROWS;
+void draw_status();
+void status(char const* fmt, ...);
+
+// entity.cpp
+uint8_t entity_speed(uint8_t i);
+uint8_t entity_max_health(uint8_t i);
+void advance_entity(uint8_t i);
+bool entity_perform_action(uint8_t i, action const& a);
+
+// monsters.cpp
+extern entity_info const MONSTER_INFO[] PROGMEM;
+entity_info entity_get_info(uint8_t i);
+void monster_ai(uint8_t i, action& a);
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);

@@ -511,7 +511,7 @@ bool occupied(uint8_t x, uint8_t y)
     return false;
 }
 
-static coord find_unoccupied()
+coord find_unoccupied()
 {
     for(uint16_t tries = 0; tries < 1024; ++tries)
     {
@@ -524,6 +524,7 @@ static coord find_unoccupied()
         for(uint8_t x = 0; x < MAP_W; ++x)
             if(!occupied(x, y))
                 return { x, y };
+    return { 255, 255 };
 }
 
 static void find_unoccupied(uint8_t& x, uint8_t& y)
@@ -560,11 +561,22 @@ void generate_dungeon()
         tfog[i] |= tmap[i];
     update_doors();
 
-    find_unoccupied(xdn, ydn);
+    if(map_index < NUM_MAPS - 1)
+        find_unoccupied(xdn, ydn);
     find_unoccupied(xup, yup);
 
     //for(auto& t : tfog) t = 0xff;
 
     // clear buf
     for(auto& b : buf) b = 0;
+}
+
+void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y)
+{
+    auto& e = ents[i];
+    e = {};
+    e.type = type;
+    e.health = entity_max_health(i);
+    e.x = x;
+    e.y = y;
 }
