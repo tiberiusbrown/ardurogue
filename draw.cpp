@@ -257,6 +257,99 @@ void draw_info_without_status()
     draw_progress_bar(41, 7, pstats.xp, xp_for_level());
 }
 
+static int8_t const DDIRX[8] PROGMEM =
+{
+    -1, +1, -1, +1, +1, -1, 0, 0,
+};
+static int8_t const DDIRY[8] PROGMEM =
+{
+    -1, -1, +1, +1, 0, 0, +1, -1,
+};
+
+static uint8_t ddir_mask(uint8_t tx, uint8_t ty)
+{
+    uint8_t i = 0;
+    for(uint8_t j = 0; j < 8; ++j)
+    {
+        i <<= 1;
+        int8_t dx = (int8_t)pgm_read_byte(&DDIRX[j]);
+        int8_t dy = (int8_t)pgm_read_byte(&DDIRY[j]);
+        i |= (uint8_t)tile_is_solid_or_unknown(tx + dx, ty + dy);
+    }
+    return i;
+}
+
+void draw_map_offset(uint8_t ox)
+{
+    for(uint8_t y = 0; y < 64; y += 2)
+        for(uint8_t x = 0; x < 64; x += 2)
+        {
+            set_pixel(x + ((y >> 1) & 1), y);
+        }
+
+    //dig_nonsecret_door_tiles();
+
+    for(uint8_t y = 0; y < MAP_H; ++y)
+    {
+        bool prior = false;
+        for(uint8_t tx = 0; tx < 32; ++tx)
+        {
+            uint8_t x = tx + ox;
+            uint8_t px = tx * 2, py = y * 2;
+            if(tile_is_solid_or_unknown(x, y))
+            {
+                uint8_t m = ddir_mask(x, y);
+                if(tile_is_solid(x, y) && m != 0xff)
+                {
+                    clear_rect(px, px + 2, py, py + 2);
+                    set_rect(px, px + 1, py, py + 1);
+
+                    // thinner walls
+                    if(!(m & 0x1)) clear_hline(px, px + 1, py);
+                    if(!(m & 0x4)) clear_vline(px, py, py + 1);
+                    if((m & 0x85) == 0x05) clear_pixel(px, py);
+
+                    if(prior) clear_vline(px - 1, py, py + 2);
+                    prior = false;
+                }
+                else
+                    prior = true;
+            }
+            else
+            {
+                clear_pixel(px + (y & 1), py);
+            }
+        }
+    }
+
+    // draw doors
+    for(uint8_t i = 0; i < num_doors; ++i)
+    {
+        auto const& d = doors[i];
+        if(d.secret || d.open) continue;
+        if(!tile_is_explored(d.x, d.y)) continue;
+        uint8_t px = (d.x - ox) * 2, py = d.y * 2;
+        clear_rect(px, px + 2, py, py + 2);
+        set_pixel(px + 1, py + 1);
+    }
+
+    //update_doors();
+    
+    // draw stairs
+    if(tile_is_explored(xdn, ydn))
+    {
+        uint8_t tx = (xdn - ox) * 2, ty = ydn * 2;
+        set_hline(tx, tx + 1, ty + 1);
+        set_pixel(tx, ty);
+    }
+    if(tile_is_explored(xup, yup))
+    {
+        uint8_t tx = (xup - ox) * 2, ty = yup * 2;
+        set_hline(tx, tx + 1, ty + 1);
+        set_pixel(tx + 1, ty);
+    }
+}
+
 void draw_dungeon(uint8_t mx, uint8_t my)
 {
     mx -= 6;
@@ -322,18 +415,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             }
 
             draw_tile(&TILES[0], px, py);
-
-            uint8_t i = 0;
-
-            i |= (uint8_t)tile_is_solid_or_unknown(tx + 0, ty - 1) << 0;
-            i |= (uint8_t)tile_is_solid_or_unknown(tx + 0, ty + 1) << 1;
-            i |= (uint8_t)tile_is_solid_or_unknown(tx - 1, ty + 0) << 2;
-            i |= (uint8_t)tile_is_solid_or_unknown(tx + 1, ty + 0) << 3;
-
-            i |= (uint8_t)tile_is_solid_or_unknown(tx + 1, ty + 1) << 4;
-            i |= (uint8_t)tile_is_solid_or_unknown(tx - 1, ty + 1) << 5;
-            i |= (uint8_t)tile_is_solid_or_unknown(tx + 1, ty - 1) << 6;
-            i |= (uint8_t)tile_is_solid_or_unknown(tx - 1, ty - 1) << 7;
+            uint8_t i = ddir_mask(tx, ty);
 
             // sides
             if(!(i & 0x1)) draw_tile(&TILES[30], px, py); // N

@@ -45,13 +45,14 @@ void monster_ai(uint8_t i, action& a)
     if(info.nomove || player_is_dead())
         return;
     uint8_t dp = dist_to_player(e.x, e.y);
-    if(!info.mean || pstats.invis || dp >= 10)
+    bool mean = info.mean || e.aggro;
+    if(!mean || pstats.invis || dp >= 10)
     {
         a.dir = u8rand() & 3;
         uint8_t nx = e.x + (int8_t)pgm_read_byte(&DIRX[a.dir]);
         uint8_t ny = e.y + (int8_t)pgm_read_byte(&DIRY[a.dir]);
         entity* e = get_entity(nx, ny);
-        if(e && (!info.mean || e->type != entity::PLAYER))
+        if(e && (!mean || e->type != entity::PLAYER))
             return;
         a.type = action::MOVE;
         return;

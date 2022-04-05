@@ -19,8 +19,9 @@ uint8_t entity_max_health(uint8_t i)
     uint8_t r;
     if(i == 0)
     {
-        // TODO: factor in item modifiers
         r = pstats.max_health;
+        if(pinfo.vamp_drain >= r)
+            return 0;
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].max_health);
@@ -140,9 +141,15 @@ uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi) // 0 for block
     return ta - td;
 }
 
+void entity_heal(uint8_t i, uint8_t amount, bool cansee)
+{
+
+}
+
 void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam, bool cansee)
 {
     auto const& e = ents[atti];
+    auto info = entity_get_info(atti);
     auto& te = ents[defi];
     if(dam > te.health)
     {
@@ -157,7 +164,37 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam, bool cansee)
             player_gain_xp(pgm_read_byte(&MONSTER_INFO[tt].xp));
     }
     else
+    {
+        if(defi == 0 && info.vampire && u8rand() < 40)
+        {
+            status(PSTR("@S drains your health!"), e.type);
+            pinfo.vamp_drain += 3;
+            ents[0].health = tmin(ents[0].health, entity_max_health(0));
+            if(ents[0].health == 0)
+            {
+                status(PSTR("@S @V!"), te.type, te.type, PSTR("die"));
+                return;
+            }
+        }
+
+        if(info.confuse && u8rand() < 40)
+        {
+            if(cansee)
+                status(PSTR("@S @V confused!"), te.type, te.type, PSTR("become"));
+            if(defi == 0)
+                pinfo.confuse_rem = u8rand() % 4 + 4;
+            te.confused = 1;
+        }
+
+        if(info.poison && !te.weakened && u8rand() < 20)
+        {
+            if(cansee)
+                status(PSTR("@S @A weakened!"), te.type, te.type);
+            te.weakened = 1;
+        }
+
         te.health -= dam;
+    }
 }
 
 static void entity_attack_entity(uint8_t atti, uint8_t defi, bool cansee)
@@ -166,7 +203,9 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi, bool cansee)
     auto const& e = ents[atti];
     auto& te = ents[defi];
     if(!hit && cansee)
-        status(PSTR("@S @V @O."), e.type, e.type, PSTR("miss"), te.type);
+        status(PSTR("@S @v @O."), e.type, e.type, PSTR("miss"), te.type);
+    if(atti == 0)
+        te.aggro = 1;
     if(hit)
     {
         uint8_t dam = calculate_hit_damage(atti, defi);

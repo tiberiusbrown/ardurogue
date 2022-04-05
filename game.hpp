@@ -169,10 +169,11 @@ struct entity
         GRIFFIN,
         DRAGON,
     };
-    uint8_t type      : 5;
+    uint8_t type;
     uint8_t confused  : 1;
     uint8_t paralyzed : 1;
     uint8_t weakened  : 1;
+    uint8_t aggro     : 1; // when a non-mean monster is attacked by player
     uint8_t health;
     uint8_t x, y;
 };
@@ -473,6 +474,7 @@ void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
 void draw_box_pretty(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
 void draw_info();
 void draw_info_without_status();
+void draw_map_offset(uint8_t ox);
 void draw_dungeon(uint8_t mx, uint8_t my);
 
 // generate.cpp
@@ -515,6 +517,7 @@ uint8_t entity_attack(uint8_t i);
 uint8_t entity_defense(uint8_t i);
 bool test_attack_hit(uint8_t atti, uint8_t defi); // 0 for miss
 uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi); // 0 for block
+void entity_heal(uint8_t i, uint8_t amount, bool cansee);
 void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam, bool cansee);
 void advance_entity(uint8_t i);
 bool entity_perform_action(uint8_t i, action const& a);

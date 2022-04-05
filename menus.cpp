@@ -166,62 +166,6 @@ static act_method const ACT_METHODS[] PROGMEM =
     act_close,
 };
 
-static void draw_map_offset(uint8_t ox)
-{
-    for(uint8_t y = 0; y < 64; y += 2)
-        for(uint8_t x = 0; x < 64; x += 2)
-        {
-            set_pixel(x + ((y >> 1) & 1), y);
-        }
-    for(uint8_t y = 0; y < MAP_H; ++y)
-    {
-        bool prior = false;
-        for(uint8_t tx = 0; tx < 32; ++tx)
-        {
-            uint8_t x = tx + ox;
-            uint8_t px = tx * 2, py = y * 2;
-            if(tile_is_solid_or_unknown(x, y))
-            {
-                uint8_t m =
-                    (uint8_t)tile_is_solid_or_unknown(x - 1, y) +
-                    (uint8_t)tile_is_solid_or_unknown(x + 1, y) +
-                    (uint8_t)tile_is_solid_or_unknown(x, y - 1) +
-                    (uint8_t)tile_is_solid_or_unknown(x, y + 1) +
-                    (uint8_t)tile_is_solid_or_unknown(x - 1, y - 1) +
-                    (uint8_t)tile_is_solid_or_unknown(x - 1, y + 1) +
-                    (uint8_t)tile_is_solid_or_unknown(x + 1, y - 1) +
-                    (uint8_t)tile_is_solid_or_unknown(x + 1, y + 1);
-                if(tile_is_solid(x, y) && m < 8)
-                {
-                    clear_rect(px, px + 2, py, py + 2);
-                    set_rect(px, px + 1, py, py + 1);
-                    if(prior) clear_vline(px - 1, py, py + 2);
-                    prior = false;
-                }
-                else
-                    prior = true;
-            }
-            else
-            {
-                clear_pixel(px + (y & 1), py);
-            }
-        }
-    }
-
-    if(tile_is_explored(xdn, ydn))
-    {
-        uint8_t tx = (xdn - ox) * 2, ty = ydn * 2;
-        set_hline(tx, tx + 1, ty + 1);
-        set_pixel(tx, ty);
-    }
-    if(tile_is_explored(xup, yup))
-    {
-        uint8_t tx = (xup - ox) * 2, ty = yup * 2;
-        set_hline(tx, tx + 1, ty + 1);
-        set_pixel(tx + 1, ty);
-    }
-}
-
 static void men_map()
 {
     draw_map_offset(0);
