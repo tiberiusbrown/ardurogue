@@ -16,10 +16,12 @@ add_executable(
     main_win32.cpp
     draw.cpp
     entity.cpp
+    font.cpp
     game.hpp
     game.cpp
     generate.cpp
     light.cpp
+    menus.cpp
     monsters.cpp
     sprintf.cpp
     status.cpp

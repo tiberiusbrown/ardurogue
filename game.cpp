@@ -69,7 +69,45 @@ entity* get_entity(uint8_t x, uint8_t y)
 
 uint8_t index_of_door(door const& d)
 {
-    return uint8_t(ptrdiff_t(&d - &doors.d_[0]));
+    return uint8_t(ptrdiff_t(&d - &doors[0]));
+}
+
+uint8_t index_of_entity(entity const& e)
+{
+    return uint8_t(ptrdiff_t(&e - &ents[0]));
+}
+
+uint8_t xp_for_level()
+{
+    return tmin<uint8_t>(plevel, 15) * 16 + 10;
+}
+
+void player_gain_xp(uint8_t xp)
+{
+    uint8_t txp = xp_for_level();
+    if(txp - xp < pstats.xp)
+    {
+        ++plevel;
+        status(PSTR("You advance to level @u!"), plevel + 1);
+        pstats.max_health += 4;
+        if(plevel <= 19)
+        {
+            if(plevel % 4 == 2)
+            {
+                status(PSTR("You feel stronger."));
+                pstats.strength += 1;
+            }
+            if(plevel % 4 == 0)
+            {
+                status(PSTR("You feel quicker."));
+                pstats.dexterity += 1;
+            }
+        }
+        ents[0].health = entity_max_health(0);
+        pstats.xp += (xp - txp);
+    }
+    else
+        pstats.xp += xp;
 }
 
 void render()
@@ -80,24 +118,33 @@ void render()
     paint_right();
 }
 
+static void init_perm(uint8_t* p, uint8_t n)
+{
+    for(uint8_t i = 0; i < n; ++i)
+        p[i] = i;
+    for(uint8_t i = 0; i < n - 1; ++i)
+        swap(p[i], p[u8rand(n - i)]);
+}
+
 void game_setup()
 {
-    for(uint16_t i = 0; i < sizeof(globals_); ++i)
-        ((uint8_t*)&globals_)[i] = 0;
+    memzero(&globals_, sizeof(globals_));
 
     game_seed = 0xbabe;
+    opt.wall_style = 2;
+
+    rand_seed = game_seed;
+    init_perm(perm_pot.data(), perm_pot.size());
+    init_perm(perm_scr.data(), perm_scr.size());
+    init_perm(perm_rng.data(), perm_rng.size());
+    init_perm(perm_amu.data(), perm_amu.size());
+
     map_index = 0;
     generate_dungeon();
 
     pinfo = {};
     pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
     new_entity(0, entity::PLAYER, xup, yup);
-
-    for(uint8_t i = 1; i < 24; ++i)
-    {
-        auto c = find_unoccupied();
-        new_entity(i, entity::BAT, c.x, c.y);
-    }
 
     statusn = 0;
     statusx = 1;
@@ -127,11 +174,11 @@ static void advance()
 
 void game_loop()
 {
-    uint8_t b = wait_btn();
     statusn = 0;
     statusx = 1;
     statusy = STATUS_START_Y;
     action a{};
+    uint8_t b = wait_btn();
     switch(b)
     {
     case BTN_UP   : a.type = action::MOVE; a.dir = 0; break;
@@ -139,19 +186,48 @@ void game_loop()
     case BTN_LEFT : a.type = action::MOVE; a.dir = 2; break;
     case BTN_RIGHT: a.type = action::MOVE; a.dir = 3; break;
     case BTN_A:
-        if(++opt.wall_style == NUM_WALL_STYLES) opt.wall_style = 0;
+        //if(++opt.wall_style == NUM_WALL_STYLES) opt.wall_style = 0;
+        repeat_action(a);
         break;
     case BTN_B:
-        //++game_seed;
-        generate_dungeon();
+        if(!action_menu(a))
+        {
+            render();
+            return;
+        }
         break;
     default: break;
     }
+    uint8_t px = ents[0].x, py = ents[0].y;
     if(entity_perform_action(0, a))
     {
         update_doors();
         update_light();
-        render();
         advance();
+    }
+    render();
+    
+    // checks after the player moved
+    if(px != ents[0].x || py != ents[0].y)
+    {
+        if(ents[0].x == xdn && ents[0].y == ydn &&
+            yesno_menu(PSTR("Go down to the next dungeon?")))
+        {
+            ++map_index;
+            generate_dungeon();
+            ents[0].x = xup, ents[0].y = yup;
+            update_light();
+            render();
+        }
+        else if(ents[0].x == xup && ents[0].y == yup &&
+            yesno_menu(PSTR("Go back up the stairs?")))
+        {
+            --map_index;
+            // TODO: test for returning to surface
+            generate_dungeon();
+            ents[0].x = xdn, ents[0].y = ydn;
+            update_light();
+            render();
+        }
     }
 }

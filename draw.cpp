@@ -52,6 +52,15 @@ void clear_pixel(uint8_t x, uint8_t y)
     }
 }
 
+void inv_pixel(uint8_t x, uint8_t y)
+{
+    if(!((x | y) & 0xc0)) // if(x < 64 && y < 64)
+    {
+        uint8_t& b = buf[y / 8 * 64 + x];
+        b ^= (1 << (y % 8));
+    }
+}
+
 void set_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
     for(; x0 <= x1; ++x0)
@@ -64,10 +73,22 @@ void clear_hline(uint8_t x0, uint8_t x1, uint8_t y)
         clear_pixel(x0, y);
 }
 
+void inv_hline(uint8_t x0, uint8_t x1, uint8_t y)
+{
+    for(; x0 <= x1; ++x0)
+        inv_pixel(x0, y);
+}
+
 void set_vline(uint8_t x, uint8_t y0, uint8_t y1)
 {
     for(; y0 <= y1; ++y0)
         set_pixel(x, y0);
+}
+
+void clear_vline(uint8_t x, uint8_t y0, uint8_t y1)
+{
+    for(; y0 <= y1; ++y0)
+        clear_pixel(x, y0);
 }
 
 void set_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
@@ -80,6 +101,12 @@ void clear_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     for(; y0 <= y1; ++y0)
         clear_hline(x0, x1, y0);
+}
+
+void inv_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
+{
+    for(; y0 <= y1; ++y0)
+        inv_hline(x0, x1, y0);
 }
 
 void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
@@ -98,7 +125,7 @@ void draw_box_pretty(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
     set_vline(x1 + 1, y0 + 1, y1 + 1);
 }
 
-static void draw_img(
+static void set_img(
     uint8_t const* p, // NOT PROGMEM
     uint8_t w,
     uint8_t x, uint8_t y)
@@ -108,6 +135,14 @@ static void draw_img(
         for(uint8_t tp = p[i], ty = y; tp; tp >>= 1, ++ty)
             if(tp & 1) set_pixel(x, ty);
     }
+}
+
+void set_img_prog(uint8_t const* p, uint8_t w, uint8_t x, uint8_t y)
+{
+    uint8_t tp[8];
+    for(uint8_t i = 0; i < w; ++i)
+        tp[i] = pgm_read_byte(&p[i]);
+    set_img(tp, w, x, y);
 }
 
 static void clear_img(
@@ -151,7 +186,7 @@ static void draw_sprite_precise_nonprog(
     clear_img(tt, 4, x + 1, y - 1);
     clear_img(tt, 4, x - 1, y);
     clear_img(tt, 4, x + 1, y);
-    draw_img(tt, 4, x, y);
+    set_img(tt, 4, x, y);
 }
 
 static void draw_sprite_precise(
@@ -200,28 +235,26 @@ static void draw_progress_bar(
     uint8_t x, uint8_t y,
     uint8_t a, uint8_t b)
 {
-    constexpr uint8_t W = 32;
+    constexpr uint8_t W = 16;
     set_box(x, x + W + 1, y, y + 2);
     uint8_t f = b == 0 ? 0 : uint8_t(uint16_t(a * W + W / 2) / b);
-    set_hline(x + 1, y + 1, y + f);
+    set_hline(x + 1, x + f, y + 1);
 }
 
 void draw_info()
 {
-    auto const& e = ents[0];
-    draw_textf(1, 0, PSTR("Health: %u/%u"), e.health, entity_max_health(0));
-    draw_textf(1, 6, PSTR("Pos: [%u, %u]"), e.x, e.y);
-
-    //draw_box_pretty(1, MAP_W / 2 + 5, 0, MAP_H / 2 + 4);
-    //draw_box_pretty(1, MAP_W + 5, 0, MAP_H + 4);
-    //draw_dungeon_minimap();
-    //draw_text(1, 34, PSTR("the lazy dog."));
-    //draw_text(1, 40, PSTR("THE QUICK BROWN"));
-    //draw_text(1, 46, PSTR("FOX JUMPS OVER"));
-    //draw_text(1, 52, PSTR("THE LAZY DOG."));
-    //draw_text(1, 58, PSTR("0123456789!?%"));
-
+    draw_info_without_status();
     draw_status();
+}
+
+void draw_info_without_status()
+{
+    auto const& e = ents[0];
+    draw_textf(1, 0, PSTR("Dungeon Level @u"), map_index + 1);
+    draw_textf(1, 6, PSTR("HP"));
+    draw_textf(33, 6, PSTR("XP"));
+    draw_progress_bar(9, 7, ents[0].health, entity_max_health(0));
+    draw_progress_bar(41, 7, pstats.xp, xp_for_level());
 }
 
 void draw_dungeon(uint8_t mx, uint8_t my)
@@ -345,6 +378,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
     for(uint8_t i = 0; i < num_doors; ++i)
     {
         auto const& d = doors[i];
+        if(d.secret) continue;
         uint8_t dx = d.x - mx;
         uint8_t dy = d.y - my;
         if(dx >= 13 || dy >= 13) continue;
@@ -369,7 +403,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             draw_sprite_nonprog(0xfec8, dx, dy);
         dx = xup - mx;
         dy = yup - my;
-        if(dx <= 13 && dy < 13 && tile_is_explored(xdn, ydn))
+        if(dx <= 13 && dy < 13 && tile_is_explored(xup, yup))
             draw_sprite_nonprog(0x8cef, dx, dy);
     }
 
@@ -394,176 +428,11 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         if(player_can_see(e.x, e.y))
             draw_sprite(&ENTITY_IMGS[e.type], ex, ey);
     }
-}
 
-static constexpr uint16_t fd(
-    uint8_t a = 0, uint8_t b = 0, uint8_t c = 0)
-{
-    return
-        (uint16_t(a & 0x1f) <<  0) |
-        (uint16_t(b & 0x1f) <<  5) |
-        (uint16_t(c & 0x1f) << 10);
-}
-
-static uint16_t const FONT_DATA[] PROGMEM =
-{
-
-    fd(0x17            ), /* ! */
-    fd(0x03, 0x00, 0x03), /* " */
-    fd(                ), /* # */
-    fd(                ), /* $ */
-    fd(0x19, 0x04, 0x13), /* % */
-    fd(                ), /* & */
-    fd(0x03            ), /* ' */
-    fd(0x0e, 0x11      ), /* ( */
-    fd(0x11, 0x03      ), /* ) */
-    fd(                ), /* * */
-    fd(0x04, 0x0e, 0x04), /* + */
-    fd(0x10, 0x08      ), /* , */
-    fd(0x04, 0x04, 0x04), /* - */
-    fd(0x10            ), /* . */
-    fd(0x18, 0x04, 0x03), /* / */
-
-    fd(0x0e, 0x11, 0x0e), /* 0 */
-    fd(0x12, 0x1f, 0x10), /* 1 */
-    fd(0x19, 0x15, 0x12), /* 2 */
-    fd(0x11, 0x15, 0x0a), /* 3 */
-    fd(0x07, 0x04, 0x1f), /* 4 */
-    fd(0x17, 0x15, 0x09), /* 5 */
-    fd(0x0e, 0x15, 0x08), /* 6 */
-    fd(0x01, 0x19, 0x07), /* 7 */
-    fd(0x0a, 0x15, 0x0a), /* 8 */
-    fd(0x02, 0x15, 0x0e), /* 9 */
-
-    fd(0x0a            ), /* : */
-    fd(0x10, 0x0a      ), /* ; */
-    fd(0x04, 0x04, 0x0a), /* < */
-    fd(0x0a, 0x0a, 0x0a), /* = */
-    fd(0x0a, 0x04, 0x04), /* > */
-    fd(0x01, 0x15, 0x02), /* ? */
-    fd(                ), /* @ */
-
-    fd(0x1e, 0x05, 0x1e), /* A */
-    fd(0x1f, 0x15, 0x0a), /* B */
-    fd(0x0e, 0x11, 0x11), /* C */
-    fd(0x1f, 0x11, 0x0e), /* D */
-    fd(0x1f, 0x15, 0x11), /* E */
-    fd(0x1f, 0x05, 0x01), /* F */
-    fd(0x0e, 0x11, 0x19), /* G */
-    fd(0x1f, 0x04, 0x1f), /* H */
-    fd(0x11, 0x1f, 0x11), /* I */
-    fd(0x11, 0x0f      ), /* J */
-    fd(0x1f, 0x04, 0x1b), /* K */
-    fd(0x1f, 0x10, 0x10), /* L */
-    fd(0x1f, 0x02, 0x1f), /* M */
-    fd(0x1f, 0x01, 0x1e), /* N */
-    fd(0x1f, 0x11, 0x1f), /* O */
-    fd(0x1f, 0x05, 0x02), /* P */
-    fd(0x0e, 0x11, 0x1e), /* Q */
-    fd(0x1f, 0x05, 0x1a), /* R */
-    fd(0x12, 0x15, 0x09), /* S */
-    fd(0x01, 0x1f, 0x01), /* T */
-    fd(0x1f, 0x10, 0x1f), /* U */
-    fd(0x07, 0x18, 0x07), /* V */
-    fd(0x1f, 0x08, 0x1f), /* W */
-    fd(0x1b, 0x04, 0x1b), /* X */
-    fd(0x03, 0x14, 0x0f), /* Y */
-    fd(0x19, 0x15, 0x13), /* Z */
-
-    fd(0x1f, 0x11      ), /* [ */
-    fd(0x03, 0x04, 0x18), /* \ */
-    fd(0x11, 0x1f      ), /* ] */
-    fd(0x02, 0x01, 0x02), /* ^ */
-    fd(0x10, 0x10, 0x10), /* _ */
-    fd(0x01, 0x02      ), /* ` */
-
-    fd(0x0c, 0x12, 0x1e), /* a */
-    fd(0x1f, 0x12, 0x0c), /* b */
-    fd(0x0c, 0x12, 0x12), /* c */
-    fd(0x0c, 0x12, 0x1f), /* d */
-    fd(0x0c, 0x1a, 0x14), /* e */
-    fd(0x1e, 0x05      ), /* f */
-    fd(0x16, 0x1e      ), /* g */
-    fd(0x1f, 0x02, 0x1c), /* h */
-    fd(0x1d            ), /* i */
-    fd(0x10, 0x0d      ), /* j */
-    fd(0x1f, 0x04, 0x1a), /* k */
-    fd(0x1f            ), /* l */
-    fd(0x1e, 0x04, 0x1e), /* m */
-    fd(0x1e, 0x02, 0x1c), /* n */
-    fd(0x0c, 0x12, 0x0c), /* o */
-    fd(0x1e, 0x0a, 0x04), /* p */
-    fd(0x04, 0x0a, 0x1e), /* q */
-    fd(0x1e, 0x04, 0x02), /* r */
-    fd(0x16, 0x1a      ), /* s */
-    fd(0x0f, 0x12      ), /* t */
-    fd(0x0e, 0x10, 0x1e), /* u */
-    fd(0x06, 0x18, 0x06), /* v */
-    fd(0x1e, 0x08, 0x1e), /* w */
-    fd(0x12, 0x0c, 0x12), /* x */
-    fd(0x02, 0x14, 0x0e), /* y */
-    fd(0x1a, 0x16      ), /* z */
-
-};
-
-void draw_text(uint8_t x, uint8_t y, char const* t, bool prog)
-{
-    for(;;)
+    // draw generate message
+    if(xup == 255)
     {
-        char c = prog ? pgm_read_byte(t++) : *t++;
-        if(c < 32) return;
-        if(c == ' ')
-        {
-            x += SPACE_WIDTH + 1;
-            continue;
-        }
-        uint16_t p = pgm_read_word(FONT_DATA + c - 33);
-        uint8_t d[3], n = 3;
-        d[0] = uint8_t(p) & 0x1f;
-        d[1] = uint8_t(p >> 5) & 0x1f;
-        d[2] = uint8_t(p >> 10) & 0x1f;
-        if(d[2] == 0) n = (d[1] == 0 ? 1 : 2);
-        for(uint8_t i = 0; i < n; ++i, ++x)
-        {
-            uint8_t t = d[i];
-            for(uint8_t j = y; t; ++j, t >>= 1)
-                if(t & 1) set_pixel(x, j);
-        }
-        ++x;
+        draw_box_pretty(10, 52, 24, 40);
+        draw_text(17, 30, PSTR("Loading..."));
     }
-}
-
-void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...)
-{
-    char buf[32];
-    va_list ap;
-    va_start(ap, fmt);
-    tvsprintf(buf, fmt, ap);
-    va_end(ap);
-    draw_text(x, y, buf, false);
-}
-
-uint8_t char_width(char c)
-{
-    if(c == ' ') return SPACE_WIDTH;
-    uint16_t p = pgm_read_word(FONT_DATA + c - 33);
-    uint8_t a, b, n = 3;
-    a = uint8_t(p >> 5) & 0x1f;
-    b = uint8_t(p >> 10) & 0x1f;
-    if(b == 0) n = (a == 0 ? 1 : 2);
-    return n;
-}
-
-uint8_t text_width(char const* s, bool prog)
-{
-    uint8_t r = 1;
-    for(;;)
-    {
-        char c = prog ? pgm_read_byte(s) : *s;
-        ++r;
-        if(c == '\0') break;
-        ++s;
-        r += char_width(c);
-    }
-    return r - 1;
 }

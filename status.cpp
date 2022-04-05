@@ -8,7 +8,7 @@ static inline bool is_white(char c)
 	return c <= ' ';
 }
 
-static uint8_t advance_white(char* b, uint8_t i)
+uint8_t advance_white(char* b, uint8_t i)
 {
 	while(!is_white(b[i])) ++i;
 	b[i] = '\0';
@@ -37,8 +37,10 @@ void draw_status()
     }
 }
 
-static void more_status()
+void status_more()
 {
+    draw_dungeon(ents[0].x, ents[0].y);
+    paint_left();
     draw_info();
     draw_text(65 - MORE_WIDTH, 59, PSTR("[more]"));
     paint_right();
@@ -61,13 +63,13 @@ void status(char const* fmt, ...)
 	for(;;)
 	{
         if(uint8_t(statusn + b - a) > sizeof(statusbuf))
-            more_status();
+            status_more();
         for(uint8_t i = a; i < b; ++i)
             statusbuf[statusn++] = buf[i];
 		uint8_t n = text_width(&buf[a], false);
 		if(statusy >= 59 && statusx + n > 64 - MORE_WIDTH)
 		{
-            more_status();
+            status_more();
 			continue;
 		}
 		if(statusx + n > 64)

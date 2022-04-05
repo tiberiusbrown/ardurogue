@@ -6,11 +6,68 @@ static constexpr uint8_t ROOM_BIG_CHANCE = 64;
 // chance to place a door
 static constexpr uint8_t DOOR_CHANCE = 196;
 // chance for any door to be secret
-static constexpr uint8_t DOOR_SECRET_CHANCE = 0;
+static constexpr uint8_t DOOR_SECRET_CHANCE = 32;
 // chance for isolated door (only door leading to a room) to be secret
 static constexpr uint8_t DOOR_ISOLATED_SECRET_CHANCE = 0;
 
 static constexpr uint8_t RANDOM_DOOR_SPACE = 4;
+
+struct map_gen_info
+{
+    uint8_t monster_types[8];
+};
+
+static map_gen_info const MAP_GEN_INFOS[NUM_MAPS] =
+{
+{ // level 1
+    { entity::BAT, entity::SNAKE, entity::SNAKE, },
+},
+{ // level 2
+    { entity::SNAKE, entity::RATTLESNAKE, },
+},
+{ // level 3
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 4
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 5
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 6
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 7
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 8
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 9
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 10
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 11
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 12
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 13
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 14
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 15
+    { entity::BAT, entity::SNAKE, },
+},
+{ // level 16
+    { entity::BAT, entity::SNAKE, },
+},
+};
 
 struct room_info
 {
@@ -535,6 +592,8 @@ static void find_unoccupied(uint8_t& x, uint8_t& y)
 
 void generate_dungeon()
 {
+    if(map_index & 0x80) return;
+
     rand_seed = game_seed;
     for(uint8_t i = 0; i < map_index; ++i)
         for(uint8_t j = 0; j < 217; ++j)
@@ -542,7 +601,6 @@ void generate_dungeon()
 
     for(auto& t : tmap) t = 0xff;
     memzero(&tfog, sizeof(tfog));
-    memzero(&ents[1], sizeof(ents) - sizeof(ents[0]));
     memzero(&items, sizeof(items));
     memzero(&rooms, sizeof(rooms));
     memzero(&doors, sizeof(doors));
@@ -550,6 +608,10 @@ void generate_dungeon()
     num_rooms = 0;
     num_doors = 0;
     xdn = ydn = xup = yup = 255;
+
+    render();
+    //wait_btn();
+
     dig_initial_room();
     for(uint16_t i = 0; i < 4096; ++i)
         try_generate_room();
@@ -564,6 +626,25 @@ void generate_dungeon()
     if(map_index < NUM_MAPS - 1)
         find_unoccupied(xdn, ydn);
     find_unoccupied(xup, yup);
+
+    // add monsters
+    for(uint8_t i = 1; i < MAP_ENTITIES; ++i)
+    {
+        auto& e = ents[i];
+        e = {};
+        find_unoccupied(e.x, e.y);
+        for(;;)
+        {
+            uint8_t j = u8rand() % 8;
+            j = pgm_read_byte(&MAP_GEN_INFOS[map_index].monster_types[j]);
+            if(j != 0)
+            {
+                e.type = j;
+                e.health = entity_max_health(i);
+                break;
+            }
+        }
+    }
 
     //for(auto& t : tfog) t = 0xff;
 

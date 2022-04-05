@@ -3,23 +3,23 @@
 entity_info const MONSTER_INFO[] PROGMEM =
 {
     /*
-    * mean        poison      opener           max_health
-    *    nomove      vampire     strength
-    *       regens      confuse       dexterity
+    * mean        poison      opener            defense
+    *    nomove      vampire     strength           max_health
+    *       regens      confuse       dexterity          xp
     *          invis       paralyze        speed
     */
-    { },                                         // none
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  16,  16,  16,  10 }, // player
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0,   4,  24,  32,   1 }, // bat
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0,   6,  12,  12,   2 }, // snake
-    { 1, 0, 0, 0, 1, 0, 0, 0, 0,   6,  12,  12,   3 }, // rattlesnake
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  12,   8,   8,   6 }, // zombie
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  16,  16,  16,  10 }, // goblin
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  20,  16,  16,  16 }, // orc
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  24,  16,  16,  20 }, // hobgoblin
-    { 1, 0, 1, 0, 0, 0, 0, 0, 1,  32,  12,  12,  32 }, // troll
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  24,  24,  24,  24 }, // griffin
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  48,  16,  16,  48 }, // dragon
+    { },                                                        // none
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   4,   4,  16,  0,  10,   0 }, // player
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0,   1,   6,  32,  0,   1,   1 }, // bat
+    { 1, 0, 0, 0, 0, 0, 0, 0, 0,   2,   3,  12,  0,   2,   2 }, // snake
+    { 1, 0, 0, 0, 1, 0, 0, 0, 0,   3,   3,  12,  0,   3,   3 }, // rattlesnake
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   4,   2,   8,  0,   6,   5 }, // zombie
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   5,   4,  16,  1,  10,   6 }, // goblin
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   7,   4,  16,  2,  16,   7 }, // orc
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   8,   4,  16,  3,  20,   8 }, // hobgoblin
+    { 1, 0, 1, 0, 0, 0, 0, 0, 1,  12,   3,  12,  5,  32,  11 }, // troll
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   7,   6,  24,  1,  24,  12 }, // griffin
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  20,   4,  16,  8,  48,  20 }, // dragon
 };
 
 entity_info entity_get_info(uint8_t i)
@@ -41,14 +41,14 @@ void monster_ai(uint8_t i, action& a)
 {
     auto& e = ents[i];
     auto info = entity_get_info(i);
-    if(info.nomove)
+    if(info.nomove || player_is_dead())
     {
         a.type = action::WAIT;
         return;
     }
     a.type = action::MOVE;
     uint8_t dp = dist_to_player(e.x, e.y);
-    if(!info.mean || dp >= 10)
+    if(!info.mean || pstats.invis || dp >= 10)
     {
         a.dir = u8rand() & 3;
         return;

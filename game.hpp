@@ -5,6 +5,24 @@
 
 #ifdef ARDUINO
 #include <Arduino.h>
+
+// http://michael-buschbeck.github.io/arduino/2013/10/20/string-merging-pstr/
+#undef PSTR
+#define PSTR(str) \
+  (__extension__({ \
+    PGM_P ptr;  \
+    asm volatile \
+    ( \
+      ".pushsection .progmem.data, \"SM\", @progbits, 1" "\n\t" \
+      "PSTR%=: .string " #str                            "\n\t" \
+      ".popsection"                                      "\n\t" \
+      "ldi %A0, lo8(PSTR%=)"                             "\n\t" \
+      "ldi %B0, hi8(PSTR%=)"                             "\n\t" \
+      : "=d" (ptr) \
+    ); \
+    ptr; \
+  }))
+
 #else
 #define PSTR(str_) str_
 #define PROGMEM
@@ -12,6 +30,10 @@ inline uint8_t pgm_read_byte(void const* p) { return *(uint8_t*)p; }
 inline uint16_t pgm_read_word(void const* p) { return *(uint16_t*)p; }
 inline void const* pgm_read_ptr(void const* p) { return *(void const**)p; }
 #endif
+
+// useful when T is a pointer type, like function pointer or char const*
+template<class T>
+inline T pgmptr(T const* p) { return (T)pgm_read_ptr(p); }
 
 template<class T, size_t N>
 struct array
@@ -32,18 +54,9 @@ template<size_t N> struct bitset
 {
     static constexpr size_t ND = (N + 7) / 8;
     array<uint8_t, ND> d_;
-    bool test(size_t i) const
-    {
-        return (d_[i / 8] >> (i % 8)) & 1;
-    }
-    void set(size_t i)
-    {
-        d_[i / 8] |= (1 << (i % 8));
-    }
-    void clear(size_t i)
-    {
-        d_[i / 8] &= ~(1 << (i % 8));
-    }
+    bool test(size_t i) const { return (d_[i / 8] >> (i % 8)) & 1; }
+    void set(size_t i) { d_[i / 8] |= (1 << (i % 8)); }
+    void clear(size_t i) { d_[i / 8] &= ~(1 << (i % 8)); }
 };
 
 template<class T> void swap(T& a, T& b)
@@ -61,10 +74,10 @@ static void pgm_memcpy(void* dst, void const* src, uint8_t n)
         d[i] = pgm_read_byte(&s[i]);
 }
 
-static void memzero(void* dst, uint8_t n)
+static void memzero(void* dst, uint16_t n)
 {
     uint8_t* d = (uint8_t*)dst;
-    for(uint8_t i = 0; i < n; ++i)
+    for(uint16_t i = 0; i < n; ++i)
         d[i] = 0;
 }
 
@@ -85,8 +98,8 @@ static constexpr uint8_t BTN_B     = 0x04;
 void game_setup();
 void game_loop();
 
-static constexpr uint8_t MAP_W = 48;
-static constexpr uint8_t MAP_H = 48;
+static constexpr uint8_t MAP_W = 64;
+static constexpr uint8_t MAP_H = 32;
 static constexpr uint8_t MAP_ITEMS = 32;
 static constexpr uint8_t MAP_ENTITIES = 32;
 static constexpr uint8_t MAP_ROOMS = 32;
@@ -111,7 +124,22 @@ struct entity_info
     uint8_t strength;    // higher is better
     uint8_t dexterity;   // higher is better
     uint8_t speed;       // lower is faster
+    uint8_t defense;     // higher is better
     uint8_t max_health;
+
+    uint8_t xp;          // xp granted for killing / current xp (player)
+};
+
+// item slots
+enum
+{
+    SLOT_WEAPON,
+    SLOT_HELM,
+    SLOT_ARMOR,
+    SLOT_BOOTS,
+    SLOT_RING,
+    SLOT_AMULET,
+    NUM_SLOTS
 };
 
 // info specific to player
@@ -121,6 +149,7 @@ struct player_info
     uint8_t confuse_rem;  // confuse cycles remaining
     uint8_t paralyze_rem; // paralysis cycles remaining
     uint8_t vamp_drain;   // amount of max health drained by vampire
+    array<uint8_t, NUM_SLOTS> equipped;
 };
 
 struct entity
@@ -174,6 +203,7 @@ enum
     POT_FLAME,
     POT_STRENGTH,
     POT_INVIS,
+    NUM_POT,
 };
 
 // scroll types
@@ -183,7 +213,25 @@ enum
     SCR_ENCHANT,
     SCR_REMOVE_CURSE,
     SCR_TELEPORT,
+    NUM_SCR,
 };
+
+// ring types
+enum
+{
+    RNG_SEE_INVIS,
+    NUM_RNG,
+};
+
+// amulet types
+enum
+{
+    AMU_SPEED,
+    NUM_AMU,
+};
+
+static constexpr uint8_t NUM_IDENT =
+    NUM_POT + NUM_SCR + NUM_RNG + NUM_AMU;
 
 struct item
 {
@@ -259,6 +307,9 @@ struct saved_data
     uint8_t                     map_index;
     entity_info                 pstats;
     player_info                 pinfo;
+    bitset<NUM_IDENT>           identified;
+    uint8_t                     prev_action;
+    uint8_t                     plevel;
 };
 
 static constexpr uint8_t NUM_WALL_STYLES = 4;
@@ -279,6 +330,10 @@ struct globals
     options opt;
     char statusbuf[128];
     uint8_t statusn, statusx, statusy;
+    array<uint8_t, NUM_POT> perm_pot;
+    array<uint8_t, NUM_SCR> perm_scr;
+    array<uint8_t, NUM_RNG> perm_rng;
+    array<uint8_t, NUM_AMU> perm_amu;
 };
 
 extern globals globals_;
@@ -312,6 +367,30 @@ inline constexpr auto& statusbuf = globals_.statusbuf;
 inline constexpr auto& statusn = globals_.statusn;
 inline constexpr auto& statusx = globals_.statusx;
 inline constexpr auto& statusy = globals_.statusy;
+inline constexpr auto& perm_pot = globals_.perm_pot;
+inline constexpr auto& perm_scr = globals_.perm_scr;
+inline constexpr auto& perm_rng = globals_.perm_rng;
+inline constexpr auto& perm_amu = globals_.perm_amu;
+inline constexpr auto& identified = globals_.saved.identified;
+inline constexpr auto& prev_action = globals_.saved.prev_action;
+inline constexpr auto& plevel = globals_.saved.plevel;
+
+inline bool potion_is_identified(uint8_t subtype)
+{
+    return identified.test(subtype);
+}
+inline bool scroll_is_identified(uint8_t subtype)
+{
+    return identified.test(NUM_POT + subtype);
+}
+inline bool ring_is_identified(uint8_t subtype)
+{
+    return identified.test(NUM_POT + NUM_SCR + subtype);
+}
+inline bool amulet_is_identified(uint8_t subtype)
+{
+    return identified.test(NUM_POT + NUM_SCR + NUM_RNG + subtype);
+}
 
 template<class T>
 inline T const& tmin(T const& a, T const& b)
@@ -340,8 +419,18 @@ inline uint8_t light_radius2()
     return r * r + r / 2;
 }
 
+inline bool player_is_dead() { return ents[0].type == entity::NONE; }
+
 // strings.cpp
 extern char const* const MONSTER_NAMES[] PROGMEM;
+//extern char const* const ITEM_NAMES[] PROGMEM;
+extern char const* const POT_NAMES[] PROGMEM;
+extern char const* const SCR_NAMES[] PROGMEM;
+extern char const* const RNG_NAMES[] PROGMEM;
+extern char const* const AMU_NAMES[] PROGMEM;
+extern char const* const UNID_POT_NAMES[] PROGMEM;
+extern char const* const UNID_SCR_NAMES[] PROGMEM;
+extern char const* const UNID_RNG_AMU_NAMES[] PROGMEM;
 
 // game.cpp
 uint8_t u8rand();
@@ -353,26 +442,38 @@ bool tile_is_solid_or_unknown(uint8_t x, uint8_t y);
 door* get_door(uint8_t x, uint8_t y); 
 entity* get_entity(uint8_t x, uint8_t y);
 uint8_t index_of_door(door const& d);
+uint8_t index_of_entity(entity const& e);
+uint8_t xp_for_level();
+void player_gain_xp(uint8_t xp);
 void render();
+
+// font.cpp
+uint8_t draw_char(uint8_t x, uint8_t y, char c); // returns width of char
+void draw_text(uint8_t x, uint8_t y, const char* p, bool prog = true);
+// fmt is PROGMEM
+void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...); // max 64
+uint8_t char_width(char c);
+uint8_t text_width(char const* s, bool prog = true);
 
 // draw.cpp
 static constexpr uint8_t SPACE_WIDTH = 1;
+void set_img_prog(uint8_t const* p, uint8_t w, uint8_t x, uint8_t y);
 void set_pixel(uint8_t x, uint8_t y);
 void clear_pixel(uint8_t x, uint8_t y);
+void inv_pixel(uint8_t x, uint8_t y);
 void set_hline(uint8_t x0, uint8_t x1, uint8_t y);
 void clear_hline(uint8_t x0, uint8_t x1, uint8_t y);
+void inv_hline(uint8_t x0, uint8_t x1, uint8_t y);
 void set_vline(uint8_t x, uint8_t y0, uint8_t y1);
+void clear_vline(uint8_t x, uint8_t y0, uint8_t y1);
 void set_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
 void clear_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
+void inv_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
 void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
 void draw_box_pretty(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1);
 void draw_info();
+void draw_info_without_status();
 void draw_dungeon(uint8_t mx, uint8_t my);
-void draw_text(uint8_t x, uint8_t y, const char* p, bool prog = true);
-// fmt is PROGMEM
-void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...); // max 32
-uint8_t char_width(char c);
-uint8_t text_width(char const* s, bool prog = true);
 
 // generate.cpp
 void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y);
@@ -400,12 +501,21 @@ uint8_t tstrlen(char const* s); // s not progmem
 // status.cpp: fmt is PROGMEM
 static constexpr uint8_t NUM_STATUS_ROWS = 6;
 static constexpr uint8_t STATUS_START_Y = 65 - 6 * NUM_STATUS_ROWS;
+uint8_t advance_white(char* b, uint8_t i);
 void draw_status();
 void status(char const* fmt, ...);
+void status_more();
 
 // entity.cpp
 uint8_t entity_speed(uint8_t i);
 uint8_t entity_max_health(uint8_t i);
+uint8_t entity_strength(uint8_t i);
+uint8_t entity_dexterity(uint8_t i);
+uint8_t entity_attack(uint8_t i);
+uint8_t entity_defense(uint8_t i);
+bool test_attack_hit(uint8_t atti, uint8_t defi); // 0 for miss
+uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi); // 0 for block
+void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam, bool cansee);
 void advance_entity(uint8_t i);
 bool entity_perform_action(uint8_t i, action const& a);
 
@@ -413,6 +523,12 @@ bool entity_perform_action(uint8_t i, action const& a);
 extern entity_info const MONSTER_INFO[] PROGMEM;
 entity_info entity_get_info(uint8_t i);
 void monster_ai(uint8_t i, action& a);
+
+// menus.cpp
+bool yesno_menu(char const* fmt, ...);
+bool direction_menu(uint8_t& d, char const* s = nullptr);
+bool repeat_action(action& a);
+bool action_menu(action& a);
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);
