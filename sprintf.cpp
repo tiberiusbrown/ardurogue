@@ -125,6 +125,8 @@ static char* item_name(char* dst, item it)
     return dst;
 }
 
+static char const HEX_CHARS[] PROGMEM = "0123456789ABCDEF";
+
 void tvsprintf(char* b, char const* fmt, va_list ap)
 {
     char c, ct;
@@ -144,7 +146,12 @@ void tvsprintf(char* b, char const* fmt, va_list ap)
         switch(c)
         {
         case 'c': // char
-            *b++ = va_arg(ap, char);
+            *b++ = (char)va_arg(ap, int);
+            break;
+        case 'x': // hex byte
+            u = (uint8_t)va_arg(ap, int);
+            *b++ = pgm_read_byte(&HEX_CHARS[u >> 4]);
+            *b++ = pgm_read_byte(&HEX_CHARS[u & 15]);
             break;
         case 's': // ram string
             s = va_arg(ap, char const*);

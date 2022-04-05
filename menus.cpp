@@ -187,6 +187,10 @@ static void men_debug()
     static char const VERSION_STR[] PROGMEM = "Version: " VERSION;
     draw_text(1, 1, VERSION_STR);
     draw_textf(1, 7, PSTR("Stack: @u"), unused_stack());
+    draw_textf(1, 13, PSTR("Seed: @x@x"),
+        game_seed >> 8, game_seed & 0xff);
+    draw_textf(1, 19, PSTR("Rand: @x@x"),
+        rand_seed >> 8, rand_seed & 0xff);
     paint_left();
     paint_right();
     while(wait_btn() != BTN_B)

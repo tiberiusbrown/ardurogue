@@ -639,8 +639,11 @@ void generate_dungeon()
             j = pgm_read_byte(&MAP_GEN_INFOS[map_index].monster_types[j]);
             if(j != 0)
             {
-                e.type = j;
-                e.health = entity_max_health(i);
+                if(!maps[map_index].got_ents.test(i))
+                {
+                    e.type = j;
+                    e.health = entity_max_health(i);
+                }
                 break;
             }
         }
