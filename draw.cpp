@@ -11,6 +11,7 @@ static uint16_t const ENTITY_IMGS[] PROGMEM =
     0x0bf0, // goblin
     0x0f9f, // orc
     0x0f2c, // hobgoblin
+    0xefbe, // mimic (looks like a closed door)
     0x01f1, // troll
     0x069d, // griffin
     0xf996, // dragon

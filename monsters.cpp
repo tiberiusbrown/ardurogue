@@ -3,23 +3,24 @@
 entity_info const MONSTER_INFO[] PROGMEM =
 {
     /*
-    * mean        poison      opener            defense
-    *    nomove      vampire     strength           max_health
-    *       regens      confuse       dexterity          xp
-    *          invis       paralyze        speed
+    * mean        poison      opener         defense
+    *    nomove      vampire     strength        max_health
+    *       regens      confuse      dexterity        xp
+    *          invis       paralyze      speed
     */
     { },                                                        // none
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   4,   4,  16,  0,  10,   0 }, // player
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0,   1,   6,  32,  0,   1,   1 }, // bat
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0,   2,   3,  12,  0,   2,   2 }, // snake
-    { 1, 0, 0, 0, 1, 0, 0, 0, 0,   3,   3,  12,  0,   3,   3 }, // rattlesnake
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   4,   2,   8,  0,   6,   5 }, // zombie
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   5,   4,  16,  1,  10,   6 }, // goblin
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   7,   4,  16,  2,  16,   7 }, // orc
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   8,   4,  16,  3,  20,   8 }, // hobgoblin
-    { 1, 0, 1, 0, 0, 0, 0, 0, 1,  12,   3,  12,  5,  32,  11 }, // troll
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,   7,   6,  24,  1,  24,  12 }, // griffin
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  20,   4,  16,  8,  48,  20 }, // dragon
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  4,  4,  4,  0,  10,  0 }, // player
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0,  1,  6,  8,  0,   1,  1 }, // bat
+    { 1, 0, 0, 0, 0, 0, 0, 0, 0,  2,  3,  3,  0,   2,  2 }, // snake
+    { 1, 0, 0, 0, 1, 0, 0, 0, 0,  3,  3,  3,  0,   3,  3 }, // rattlesnake
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  4,  2,  2,  0,   6,  5 }, // zombie
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  5,  4,  4,  1,  10,  6 }, // goblin
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  7,  4,  4,  2,  16,  7 }, // orc
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  8,  4,  4,  3,  20,  8 }, // hobgoblin
+    { 1, 1, 0, 0, 0, 0, 0, 0, 1,  8,  4,  4,  3,  20,  8 }, // mimic
+    { 1, 0, 1, 0, 0, 0, 0, 0, 1, 12,  3,  3,  5,  32, 11 }, // troll
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1,  7,  6,  6,  1,  24, 12 }, // griffin
+    { 1, 0, 0, 0, 0, 0, 0, 0, 1, 20,  4,  4,  8,  48, 20 }, // dragon
 };
 
 entity_info entity_get_info(uint8_t i)
@@ -42,7 +43,7 @@ void monster_ai(uint8_t i, action& a)
     auto& e = ents[i];
     auto info = entity_get_info(i);
     a.type = action::WAIT;
-    if(info.nomove || player_is_dead())
+    if((info.nomove && !e.aggro) || player_is_dead())
         return;
     uint8_t dp = dist_to_player(e.x, e.y);
     bool mean = info.mean || e.aggro;

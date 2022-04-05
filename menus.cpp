@@ -114,6 +114,7 @@ static char const MEN_MAP[] PROGMEM = "Dungeon Map";
 static char const MEN_STATS[] PROGMEM = "Player Info";
 static char const MEN_SETTINGS[] PROGMEM = "Settings";
 static char const MEN_SAVE[] PROGMEM = "Save Progress";
+static char const MEN_DEBUG[] PROGMEM = "Debug Info";
 
 static char const* const MEN_ITEMS[] PROGMEM =
 {
@@ -121,6 +122,7 @@ static char const* const MEN_ITEMS[] PROGMEM =
     MEN_STATS,
     MEN_SETTINGS,
     MEN_SAVE,
+    MEN_DEBUG,
 };
 
 static bool act_wait(action& a)
@@ -173,12 +175,23 @@ static void men_map()
     draw_map_offset(32);
     paint_right();
     while(wait_btn() != BTN_B)
-        ;
+        (void)0;
 }
 
 static void men_info() {}
 static void men_settings() {}
 static void men_save() {}
+
+static void men_debug()
+{
+    static char const VERSION_STR[] PROGMEM = "Version: " VERSION;
+    draw_text(1, 1, VERSION_STR);
+    draw_textf(1, 7, PSTR("Stack: @u"), unused_stack());
+    paint_left();
+    paint_right();
+    while(wait_btn() != BTN_B)
+        (void)0;
+}
 
 using men_method = void(*)(void);
 static men_method const MEN_METHODS[] PROGMEM =
@@ -187,6 +200,7 @@ static men_method const MEN_METHODS[] PROGMEM =
     men_info,
     men_settings,
     men_save,
+    men_debug,
 };
 
 bool repeat_action(action& a)
@@ -216,7 +230,7 @@ bool action_menu(action& a)
             if(act)
             {
                 text = MEN_ITEMS;
-                n = 3;
+                n = 4;
                 i = 0;
             }
             else

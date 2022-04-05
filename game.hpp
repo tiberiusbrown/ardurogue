@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+#include "version.hpp"
+
 #ifdef ARDUINO
 #include <Arduino.h>
 
@@ -165,6 +167,7 @@ struct entity
         GOBLIN,
         ORC,
         HOBGOBLIN,
+        MIMIC,
         TROLL,
         GRIFFIN,
         DRAGON,
@@ -532,6 +535,10 @@ bool yesno_menu(char const* fmt, ...);
 bool direction_menu(uint8_t& d, char const* s = nullptr);
 bool repeat_action(action& a);
 bool action_menu(action& a);
+
+// stack.cpp
+void stack_canary_init();
+uint8_t unused_stack();
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);

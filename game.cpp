@@ -128,6 +128,7 @@ static void init_perm(uint8_t* p, uint8_t n)
 
 void game_setup()
 {
+    stack_canary_init();
     memzero(&globals_, sizeof(globals_));
 
     game_seed = 0xbabe;

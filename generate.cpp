@@ -17,7 +17,7 @@ struct map_gen_info
     uint8_t monster_types[8];
 };
 
-static map_gen_info const MAP_GEN_INFOS[NUM_MAPS] =
+static map_gen_info const MAP_GEN_INFOS[NUM_MAPS] PROGMEM =
 {
 { // level 1
     { entity::BAT, entity::SNAKE, entity::SNAKE, },
