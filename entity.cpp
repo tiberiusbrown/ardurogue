@@ -134,7 +134,7 @@ uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi) // 0 for block
 {
     uint8_t ta = entity_attack(atti);
     uint8_t td = entity_defense(defi);
-    ta = u8rand(ta + td);
+    ta = u8rand(ta + td) + 1;
     if(ta < td)
         return 0;
     return ta - td;
@@ -148,8 +148,11 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam, bool cansee)
     {
         if(cansee)
             status(PSTR("@S @V!"), te.type, te.type, PSTR("die"));
+        else
+            status(PSTR("You hear the sound of death."));
         uint8_t tt = te.type;
         te.type = entity::NONE;
+        maps[map_index].got_ents.set(defi);
         if(atti == 0)
             player_gain_xp(pgm_read_byte(&MONSTER_INFO[tt].xp));
     }
@@ -237,7 +240,6 @@ bool entity_perform_action(uint8_t i, action const& a)
         entity* te = get_entity(nx, ny);
         if(te)
         {
-            if(!info.mean && !e.confused) return true;
             bool cansee = player_can_see(e.x, e.y);
             uint8_t ti = index_of_entity(*te);
             entity_attack_entity(i, ti, cansee);
