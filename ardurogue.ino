@@ -5,10 +5,6 @@
 #include <Arduboy2.h>
 #include <Arduino.h>
 
-static constexpr uint8_t STACK_CANARY_VAL = 0x77;
-extern char* __bss_end;
-extern uint8_t __stack;
-
 static constexpr uint8_t LOOP_TIME_MS = 4;
 static constexpr uint8_t DEBOUNCE_NUM = 3;
 static constexpr uint8_t REP_INIT_NUM = 80;
@@ -141,8 +137,9 @@ void paint_right(bool clear)
     paint_half(buf.data(), clear);
 }
 
-void setup()
+int main()
 {
+    init();
     Arduboy2Base::boot();
     if(Arduboy2Core::buttonsState() & UP_BUTTON)
     {
@@ -151,15 +148,7 @@ void setup()
         Arduboy2Core::digitalWriteRGB(RED_LED, RGB_ON);
         for(;;);
     }
-
-    uint8_t *p = (uint8_t *)&__bss_end;  
-    while(p <= SP)
-      *p++ = STACK_CANARY_VAL;
   
-    game_setup();
-}
-
-void loop()
-{
-    game_loop();
+    run();
+    return 0;
 }

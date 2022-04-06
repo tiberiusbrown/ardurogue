@@ -282,9 +282,7 @@ int WINAPI WinMain(
 
     ShowWindow(hwnd, SW_NORMAL);
 
-    game_setup();
-    for(;;)
-        game_loop();
+    run();
 
 byebye:
     (void)0;

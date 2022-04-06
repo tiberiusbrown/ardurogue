@@ -5,6 +5,15 @@
 
 #include "version.hpp"
 
+// platform functionality
+uint8_t wait_btn(); // wait for button press
+void seed();        // initialize seed0 and seed1
+void paint_left(bool clear = true);  // draw to left half screen
+void paint_right(bool clear = true); // draw to right half screen
+
+// game logic
+void run();
+
 #ifdef ARDUINO
 #include <Arduino.h>
 
@@ -83,22 +92,12 @@ static void memzero(void* dst, uint16_t n)
         d[i] = 0;
 }
 
-// platform functionality
-uint8_t wait_btn(); // wait for button press
-void seed();        // initialize seed0 and seed1
-void paint_left(bool clear = true);  // draw to left half screen
-void paint_right(bool clear = true); // draw to right half screen
-
 static constexpr uint8_t BTN_UP    = 0x80;
 static constexpr uint8_t BTN_DOWN  = 0x10;
 static constexpr uint8_t BTN_LEFT  = 0x20;
 static constexpr uint8_t BTN_RIGHT = 0x40;
 static constexpr uint8_t BTN_A     = 0x08;
 static constexpr uint8_t BTN_B     = 0x04;
-
-// game logic
-void game_setup();
-void game_loop();
 
 static constexpr uint8_t MAP_W = 64;
 static constexpr uint8_t MAP_H = 32;
@@ -450,6 +449,7 @@ uint8_t index_of_entity(entity const& e);
 uint8_t xp_for_level();
 void player_gain_xp(uint8_t xp);
 void render();
+void process_input(uint8_t b);
 
 // font.cpp
 uint8_t draw_char(uint8_t x, uint8_t y, char c); // returns width of char

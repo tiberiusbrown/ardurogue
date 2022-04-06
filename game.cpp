@@ -126,7 +126,24 @@ static void init_perm(uint8_t* p, uint8_t n)
         swap(p[i], p[u8rand(n - i)]);
 }
 
-void game_setup()
+// advance all entities and effects
+static void advance()
+{
+    uint8_t pspeed = entity_speed(0);
+    for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
+    {
+        uint8_t espeed = entity_speed(i);
+        while(espeed >= pspeed)
+        {
+            advance_entity(i);
+            espeed -= pspeed;
+        }
+        if(u8rand(pspeed) < espeed)
+            advance_entity(i);
+    }
+}
+
+void run()
 {
     stack_canary_init();
     memzero(&globals_, sizeof(globals_));
@@ -154,32 +171,20 @@ void game_setup()
 
     update_light();
     render();
-}
 
-// advance all entities and effects
-static void advance()
-{
-    uint8_t pspeed = entity_speed(0);
-    for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
+    for(;;)
     {
-        uint8_t espeed = entity_speed(i);
-        while(espeed >= pspeed)
-        {
-            advance_entity(i);
-            espeed -= pspeed;
-        }
-        if(u8rand(pspeed) < espeed)
-            advance_entity(i);
+        uint8_t b = wait_btn();
+        process_input(b);
     }
 }
 
-void game_loop()
+void process_input(uint8_t b)
 {
     statusn = 0;
     statusx = 1;
     statusy = STATUS_START_Y;
     action a{};
-    uint8_t b = wait_btn();
     switch(b)
     {
     case BTN_UP   : a.type = action::MOVE; a.dir = 0; break;
