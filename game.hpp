@@ -182,18 +182,16 @@ struct action
 {
     enum
     {
-        WAIT,  // <nothing>
-        USE,   // index0 [index1, in case of identify/enchant]
-        SHOOT, // dir
-        DROP,  // index0
-        THROW, // dir index0
-        CLOSE, // dir
-        MOVE,  // dir
+        WAIT,
+        USE,
+        SHOOT,
+        DROP,
+        THROW,
+        CLOSE,
+        MOVE,
     };
     uint8_t type;
-    uint8_t dir;
-    uint8_t index0; // e.g. scroll of enchant
-    uint8_t index1; // e.g. item to enchant
+    uint8_t data; // dir or item
 };
 
 // potion types
@@ -201,7 +199,7 @@ enum
 {
     POT_HEALING,
     POT_CONFUSION,
-    POT_FLAME,
+    POT_POISON,
     POT_STRENGTH,
     POT_INVIS,
     NUM_POT,
@@ -396,6 +394,23 @@ inline bool amulet_is_identified(uint8_t subtype)
     return identified.test(NUM_POT + NUM_SCR + NUM_RNG + subtype);
 }
 
+inline void identify_potion(uint8_t subtype)
+{
+    identified.set(subtype);
+}
+inline void identify_scroll(uint8_t subtype)
+{
+    identified.set(NUM_POT + subtype);
+}
+inline void identify_ring(uint8_t subtype)
+{
+    identified.set(NUM_POT + NUM_SCR + subtype);
+}
+inline void identify_amulet(uint8_t subtype)
+{
+    identified.set(NUM_POT + NUM_SCR + NUM_RNG + subtype);
+}
+
 template<class T>
 inline T const& tmin(T const& a, T const& b)
 {
@@ -450,7 +465,8 @@ uint8_t index_of_door(door const& d);
 uint8_t index_of_entity(entity const& e);
 uint8_t xp_for_level();
 void player_gain_xp(uint8_t xp);
-void player_pickup_item(uint8_t i); // map item
+bool player_pickup_item(uint8_t i); // map item
+void player_remove_item(uint8_t i); // inv item
 void render();
 
 // font.cpp
@@ -496,6 +512,7 @@ extern int8_t const DIRY[4] PROGMEM;
 
 // light.cpp
 bool player_can_see(uint8_t x, uint8_t y);
+bool player_can_see_entity(uint8_t i);
 bool path_clear(
     uint8_t x0, uint8_t y0,
     uint8_t x1, uint8_t y1);
@@ -524,8 +541,10 @@ uint8_t entity_attack(uint8_t i);
 uint8_t entity_defense(uint8_t i);
 bool test_attack_hit(uint8_t atti, uint8_t defi); // 0 for miss
 uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi); // 0 for block
-void entity_heal(uint8_t i, uint8_t amount, bool cansee);
-void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam, bool cansee);
+void entity_heal(uint8_t i, uint8_t amount);
+void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam);
+void confuse_entity(uint8_t i);
+void poison_entity(uint8_t i);
 void advance_entity(uint8_t i);
 bool entity_perform_action(uint8_t i, action const& a);
 
@@ -537,13 +556,17 @@ void monster_ai(uint8_t i, action& a);
 // menus.cpp
 uint8_t inventory_menu(char const* s);
 bool yesno_menu(char const* fmt, ...);
-bool direction_menu(uint8_t& d, char const* s = nullptr);
+bool direction_menu(uint8_t& d, char const* s = nullptr, bool cancel = true);
 bool repeat_action(action& a);
 bool action_menu(action& a);
 
 // stack.cpp
 void stack_canary_init();
 uint8_t unused_stack();
+
+// use.cpp
+bool use_item(uint8_t i);
+void entity_apply_potion(uint8_t i, uint8_t subtype);
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);

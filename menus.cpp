@@ -182,7 +182,7 @@ bool yesno_menu(char const* fmt, ...)
     return false;
 }
 
-bool direction_menu(uint8_t& d, char const* s)
+bool direction_menu(uint8_t& d, char const* s, bool cancel)
 {
     draw_info_without_status();
     if(s)
@@ -201,14 +201,18 @@ bool direction_menu(uint8_t& d, char const* s)
         set_hline(X + 4 + i, X + 11 - i, Y + 10 + i);
     }
     paint_right();
-    uint8_t b = wait_btn();
-    switch(b)
+    for(;;)
     {
-    case BTN_UP   : return d = 0, true;
-    case BTN_DOWN : return d = 1, true;
-    case BTN_LEFT : return d = 2, true;
-    case BTN_RIGHT: return d = 3, true;
-    default: break;
+        uint8_t b = wait_btn();
+        switch(b)
+        {
+        case BTN_UP: return d = 0, true;
+        case BTN_DOWN: return d = 1, true;
+        case BTN_LEFT: return d = 2, true;
+        case BTN_RIGHT: return d = 3, true;
+        default: break;
+        }
+        if(cancel) break;
     }
     return false;
 }
@@ -257,7 +261,7 @@ static bool act_use(action& a)
     if(i < INV_ITEMS)
     {
         a.type = action::USE;
-        a.index0 = i;
+        a.data = i;
         return true;
     }
     return false;
@@ -281,7 +285,7 @@ static bool act_throw(action& a)
 static bool act_close(action& a)
 {
     a.type = action::CLOSE;
-    return direction_menu(a.dir, ACT_CLOSE);
+    return direction_menu(a.data, ACT_CLOSE);
 }
 
 using act_method = bool(*)(action&);

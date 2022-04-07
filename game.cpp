@@ -110,20 +110,72 @@ void player_gain_xp(uint8_t xp)
         pstats.xp += xp;
 }
 
-void player_pickup_item(uint8_t i)
+bool player_pickup_item(uint8_t i)
 {
-    uint8_t j;
-    for(j = 0; j < INV_ITEMS; ++j)
-        if(inv[j].type == item::NONE)
-            break;
+    uint8_t j = 255;
+    auto& it = items[i].it;
+    if(it.stackable())
+    {
+        for(j = 0; j < INV_ITEMS; ++j)
+            if(inv[j].type == it.type && inv[j].subtype == it.subtype)
+            {
+                if(inv[j].quant_or_level >= 63)
+                {
+                    status(PSTR("You can't hold any more of those."));
+                    return false;
+                }
+                break;
+            }
+    }
+    if(j >= INV_ITEMS)
+    {
+        for(j = 0; j < INV_ITEMS; ++j)
+            if(inv[j].type == item::NONE)
+                break;
+    }
     if(j >= INV_ITEMS)
     {
         status(PSTR("You can't hold any more items."));
+        return false;
+    }
+    if(inv[j].type != item::NONE)
+    {
+        // add to stackable
+        item tt = it;
+        uint8_t tot = inv[j].quant_or_level + it.quant_or_level + 1;
+        if(tot > 63)
+        {
+            // overflow back onto ground
+            tot -= 64; // remaining on the ground
+            tt.quant_or_level -= (tot + 1);
+            it.quant_or_level = tot;
+        }
+        else
+        {
+            it.type = item::NONE;
+        }
+        inv[j].quant_or_level += tt.quant_or_level + 1;
+        status(PSTR("You now have @i."), inv[j]);
+        return true;
+    }
+    else
+        inv[j] = it;
+    it.type = item::NONE;
+    status(PSTR("You got the @i."), inv[j]);
+    return true;
+}
+
+void player_remove_item(uint8_t i)
+{
+    if(inv[i].stackable() && inv[i].quant_or_level > 0)
+    {
+        --inv[i].quant_or_level;
         return;
     }
-    inv[j] = items[i].it;
-    items[i].it.type = item::NONE;
-    status(PSTR("You got the @i."), inv[j]);
+    // shift all items down. nice to retain ordering
+    for(uint8_t j = i; j < INV_ITEMS - 1; ++j)
+        inv[j] = inv[j + 1];
+    inv[INV_ITEMS - 1].type = item::NONE;
 }
 
 void render()
@@ -211,10 +263,10 @@ void step()
     uint8_t b = wait_btn();
     switch(b)
     {
-    case BTN_UP: a.type = action::MOVE; a.dir = 0; break;
-    case BTN_DOWN: a.type = action::MOVE; a.dir = 1; break;
-    case BTN_LEFT: a.type = action::MOVE; a.dir = 2; break;
-    case BTN_RIGHT: a.type = action::MOVE; a.dir = 3; break;
+    case BTN_UP: a.type = action::MOVE; a.data = 0; break;
+    case BTN_DOWN: a.type = action::MOVE; a.data = 1; break;
+    case BTN_LEFT: a.type = action::MOVE; a.data = 2; break;
+    case BTN_RIGHT: a.type = action::MOVE; a.data = 3; break;
     case BTN_A:
         //if(++opt.wall_style == NUM_WALL_STYLES) opt.wall_style = 0;
         repeat_action(a);

@@ -60,7 +60,7 @@ char const* const ITEM_NAMES[] PROGMEM =
 
 static char const NPOT_HEALING[] PROGMEM = "healing";
 static char const NPOT_CONFUSION[] PROGMEM = "confusion";
-static char const NPOT_FLAME[] PROGMEM = "flame";
+static char const NPOT_POISON[] PROGMEM = "poison";
 static char const NPOT_STRENGTH[] PROGMEM = "strength";
 static char const NPOT_INVIS[] PROGMEM = "invisibility";
 
@@ -68,7 +68,7 @@ char const* const POT_NAMES[NUM_POT] PROGMEM =
 {
     NPOT_HEALING,
     NPOT_CONFUSION,
-    NPOT_FLAME,
+    NPOT_POISON,
     NPOT_STRENGTH,
     NPOT_INVIS,
 };

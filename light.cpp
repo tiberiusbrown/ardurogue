@@ -11,6 +11,11 @@ bool player_can_see(uint8_t x, uint8_t y)
         path_clear(px, py, x, y);
 }
 
+bool player_can_see_entity(uint8_t i)
+{
+    return player_can_see(ents[i].x, ents[i].y);
+}
+
 bool path_clear(
     uint8_t x0, uint8_t y0,
     uint8_t x1, uint8_t y1)

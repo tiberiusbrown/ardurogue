@@ -86,7 +86,7 @@ void advance_entity(uint8_t i)
     if(i != 0 && !e.paralyzed)
     {
         if(e.confused)
-            a.type = action::MOVE, a.dir = u8rand() & 3;
+            a.type = action::MOVE, a.data = u8rand() & 3;
         else
             monster_ai(i, a);
         entity_perform_action(i, a);
@@ -141,16 +141,37 @@ uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi) // 0 for block
     return ta - td;
 }
 
-void entity_heal(uint8_t i, uint8_t amount, bool cansee)
+void entity_heal(uint8_t i, uint8_t amount)
 {
-
+    bool cansee = player_can_see_entity(i);
+    auto& e = ents[i];
+    if(cansee)
+    {
+        if(i == 0)
+        {
+            status(PSTR("You feel better."));
+            if(ents[0].weakened)
+            {
+                ents[0].weakened = 0;
+                status(PSTR("Your strength returns."));
+            }
+        }
+        else
+            status(PSTR("@S looks better."), e.type);
+    }
+    uint8_t mhp = entity_max_health(i);
+    if(mhp - e.health <= amount)
+        e.health = mhp;
+    else
+        e.health += amount;
 }
 
-void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam, bool cansee)
+void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
 {
     auto const& e = ents[atti];
     auto info = entity_get_info(atti);
     auto& te = ents[defi];
+    bool cansee = player_can_see_entity(defi);
     if(dam > te.health)
     {
         if(cansee)
@@ -178,30 +199,40 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam, bool cansee)
         }
 
         if(info.confuse && u8rand() < 40)
-        {
-            if(cansee)
-                status(PSTR("@S @V confused!"), te.type, te.type, PSTR("become"));
-            if(defi == 0)
-                pinfo.confuse_rem = u8rand() % 4 + 4;
-            te.confused = 1;
-        }
+            confuse_entity(defi);
 
-        if(info.poison && !te.weakened && u8rand() < 20)
-        {
-            if(cansee)
-                status(PSTR("@S @A weakened!"), te.type, te.type);
-            te.weakened = 1;
-        }
+        if(info.poison && u8rand() < 20)
+            poison_entity(defi);
 
         te.health -= dam;
     }
 }
 
-static void entity_attack_entity(uint8_t atti, uint8_t defi, bool cansee)
+void confuse_entity(uint8_t i)
+{
+    auto& te = ents[i];
+    if(player_can_see_entity(i))
+        status(PSTR("@S @V confused!"), te.type, te.type, PSTR("become"));
+    if(i == 0)
+        pinfo.confuse_rem = u8rand() % 4 + 4;
+    te.confused = 1;
+}
+
+void poison_entity(uint8_t i)
+{
+    auto& te = ents[i];
+    if(te.weakened) return;
+    if(player_can_see_entity(i))
+        status(PSTR("@S @A weakened!"), te.type, te.type);
+    te.weakened = 1;
+}
+
+static void entity_attack_entity(uint8_t atti, uint8_t defi)
 {
     bool hit = test_attack_hit(atti, defi);
     auto const& e = ents[atti];
     auto& te = ents[defi];
+    bool cansee = player_can_see_entity(defi);
     if(!hit && cansee)
         status(PSTR("@S @v @O."), e.type, e.type, PSTR("miss"), te.type);
     if(atti == 0)
@@ -216,14 +247,14 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi, bool cansee)
             else
                 status(PSTR("@S @V @P attack."), te.type, te.type, PSTR("block"), e.type);
         }
-        entity_take_damage(atti, defi, dam, cansee);
+        entity_take_damage(atti, defi, dam);
     }
 }
 
 bool entity_perform_action(uint8_t i, action const& a)
 {
     auto& e = ents[i];
-    uint8_t dir = a.dir;
+    uint8_t dir = a.data;
     if(a.type != action::WAIT)
     {
         if(e.paralyzed)
@@ -246,6 +277,10 @@ bool entity_perform_action(uint8_t i, action const& a)
     auto info = entity_get_info(i);
     switch(a.type)
     {
+    case action::USE:
+        if(i == 0)
+            return use_item(a.data);
+        return false;
     case action::CLOSE:
     {
         door* d = get_door(nx, ny);
@@ -279,9 +314,8 @@ bool entity_perform_action(uint8_t i, action const& a)
         entity* te = get_entity(nx, ny);
         if(te)
         {
-            bool cansee = player_can_see(e.x, e.y);
             uint8_t ti = index_of_entity(*te);
-            entity_attack_entity(i, ti, cansee);
+            entity_attack_entity(i, ti);
             return true;
         }
         e.x = nx;

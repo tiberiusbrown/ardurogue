@@ -49,9 +49,9 @@ void monster_ai(uint8_t i, action& a)
     bool mean = info.mean || e.aggro;
     if(!mean || pstats.invis || dp >= 10)
     {
-        a.dir = u8rand() & 3;
-        uint8_t nx = e.x + (int8_t)pgm_read_byte(&DIRX[a.dir]);
-        uint8_t ny = e.y + (int8_t)pgm_read_byte(&DIRY[a.dir]);
+        a.data = u8rand() & 3;
+        uint8_t nx = e.x + (int8_t)pgm_read_byte(&DIRX[a.data]);
+        uint8_t ny = e.y + (int8_t)pgm_read_byte(&DIRY[a.data]);
         entity* e = get_entity(nx, ny);
         if(e && (!mean || e->type != entity::PLAYER))
             return;
@@ -70,7 +70,7 @@ void monster_ai(uint8_t i, action& a)
         if(td < dp || (td == dp && (u8rand() & 1)))
         {
             a.type = action::MOVE;
-            dp = td, a.dir = i;
+            dp = td, a.data = i;
         }
     }
 }
