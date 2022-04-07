@@ -256,6 +256,7 @@ struct item
     uint8_t quant_or_level : 6;
     uint8_t identified     : 1;
     uint8_t cursed         : 1;
+    bool stackable() { return type <= ARROW; }
 };
 
 struct map_item

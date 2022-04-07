@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-#include <git.hpp>
+#include "git.hpp"
 
 static void draw_inventory(
     uint8_t x,
@@ -79,22 +79,43 @@ uint8_t inventory_menu(char const* prompt)
             *itp++ = i;
     if(itp == tp) --itp;
 
+    uint8_t n = (uint8_t)(ptrdiff_t)(itp - &its[0]);
     while(itp < &its[0] + sizeof(its))
         *itp++ = 255;
 
     uint8_t seli = 1;
+    uint8_t offi = 0;
     for(;;)
     {
-        draw_inventory(0           , prompt, its, 0, seli);
+        draw_inventory(0           , prompt, its, offi, seli);
         paint_left();
-        draw_inventory(uint8_t(-64), prompt, its, 0, seli);
+        draw_inventory(uint8_t(-64), prompt, its, offi, seli);
         paint_right();
 
         uint8_t b = wait_btn();
         if(b == BTN_B) break;
         if(b == BTN_A) return its[seli];
-        if(b == BTN_DOWN && its[seli + 1] != 255 && its[++seli] >= INV_ITEMS) ++seli;
-        if(b == BTN_UP && seli > 1 && its[--seli] >= INV_ITEMS) --seli;
+        if(b == BTN_DOWN)
+        {
+            if(seli < n - 1)
+            {
+                if(its[++seli] >= INV_ITEMS)
+                    ++seli;
+            }
+            else seli = 1;
+        }
+        if(b == BTN_UP)
+        {
+            if(seli > 1)
+            {
+                if(its[--seli] >= INV_ITEMS)
+                    --seli;
+            }
+            else seli = n - 1;
+        }
+
+        while(seli > offi + 9) offi += 3;
+        while(seli < offi) offi -= 3;
     }
     return 255;
 }
@@ -234,9 +255,11 @@ static bool act_use(action& a)
 {
     uint8_t i = inventory_menu(PSTR("Use which item?"));
     if(i < INV_ITEMS)
-        status(PSTR("You use the @i."), inv[i]);
-    else
-        status(PSTR("You decide not to use anything."));
+    {
+        a.type = action::USE;
+        a.index0 = i;
+        return true;
+    }
     return false;
 }
 
@@ -288,7 +311,9 @@ static void men_save() {}
 
 static void men_debug_offset(uint8_t x)
 {
-    draw_text(x, 0, PSTR(GIT_BRANCH " " GIT_DESCRIBE " " GIT_COMMIT_DAY));
+    static char const GIT_STUFF[] PROGMEM =
+        GIT_BRANCH " " GIT_DESCRIBE " " GIT_COMMIT_DAY;
+    draw_text(x, 0, GIT_STUFF);
     draw_textf(x, 6, PSTR("Rand: @x@x/@x@x"),
         game_seed >> 8, game_seed & 0xff,
         rand_seed >> 8, rand_seed & 0xff);

@@ -6,10 +6,11 @@ cmake_policy(SET CMP0117 NEW)
 project(ardurogue)
 
 set(PRE_CONFIGURE_FILE "git.hpp.in")
-set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/git.hpp")
+# write to source folder cause arduino ide :(
+set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/git.hpp")
 include(git_watcher.cmake)
 add_library(git INTERFACE ${POST_CONFIGURE_FILE})
-target_include_directories(git INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(git INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 add_dependencies(git check_git)
 
 set(WINFLAG)
