@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+#include <git.hpp>
+
 bool yesno_menu(char const* fmt, ...)
 {
     draw_info_without_status();
@@ -182,16 +184,20 @@ static void men_info() {}
 static void men_settings() {}
 static void men_save() {}
 
+static void men_debug_offset(uint8_t x)
+{
+    draw_text(x, 0, PSTR(GIT_BRANCH " " GIT_DESCRIBE " " GIT_COMMIT_DAY));
+    draw_textf(x, 6, PSTR("Rand: @x@x/@x@x"),
+        game_seed >> 8, game_seed & 0xff,
+        rand_seed >> 8, rand_seed & 0xff);
+    draw_textf(x, 12, PSTR("Stack: @u"), unused_stack());
+}
+
 static void men_debug()
 {
-    static char const VERSION_STR[] PROGMEM = "Version: " VERSION;
-    draw_text(1, 1, VERSION_STR);
-    draw_textf(1, 7, PSTR("Stack: @u"), unused_stack());
-    draw_textf(1, 13, PSTR("Seed: @x@x"),
-        game_seed >> 8, game_seed & 0xff);
-    draw_textf(1, 19, PSTR("Rand: @x@x"),
-        rand_seed >> 8, rand_seed & 0xff);
+    men_debug_offset(0);
     paint_left();
+    men_debug_offset(uint8_t(-64));
     paint_right();
     while(wait_btn() != BTN_B)
         (void)0;

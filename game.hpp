@@ -3,8 +3,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#include "version.hpp"
-
 // platform functionality
 uint8_t wait_btn(); // wait for button press
 void seed();        // initialize seed0 and seed1

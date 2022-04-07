@@ -175,7 +175,7 @@ void step()
         for(int8_t i = MAP_ITEMS - 1; i >= 0; --i)
         {
             map_item& mit = items[i];
-            if(mit.x != px || mit.y != py)
+            if(mit.it.type == item::NONE || mit.x != px || mit.y != py)
                 continue;
             if(yesno_menu(PSTR("Pick up the @i?"), mit.it))
             {

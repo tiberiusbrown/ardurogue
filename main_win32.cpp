@@ -293,11 +293,19 @@ byebye:
 
 #ifdef NDEBUG
 #pragma function(memset)
-void* __cdecl memset(void* dest, int c, size_t count)
+void* __cdecl memset(void* dst, int c, size_t count)
 {
-    char* bytes = (char*)dest;
+    char* bytes = (char*)dst;
     while(count--) *bytes++ = (char)c;
-    return dest;
+    return dst;
+}
+#pragma function(memcpy)
+void* __cdecl memcpy(void* dst, void const* src, size_t count)
+{
+    char* bytes = (char*)dst;
+    char const* src_bytes = (char*)src;
+    while(count--) *bytes++ = *src_bytes++;
+    return dst;
 }
 #endif
 

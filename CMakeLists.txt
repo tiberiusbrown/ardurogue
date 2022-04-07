@@ -5,6 +5,13 @@ cmake_policy(SET CMP0117 NEW)
 
 project(ardurogue)
 
+set(PRE_CONFIGURE_FILE "git.hpp.in")
+set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/git.hpp")
+include(git_watcher.cmake)
+add_library(git INTERFACE ${POST_CONFIGURE_FILE})
+target_include_directories(git INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
+add_dependencies(git check_git)
+
 set(WINFLAG)
 if(WIN32)
     set(WINFLAG WIN32)
@@ -14,7 +21,6 @@ add_executable(
     ${PROJECT_NAME} ${WINFLAG}
     .editorconfig
     game.hpp
-    version.hpp
     main_win32.cpp
     draw.cpp
     entity.cpp
@@ -31,6 +37,7 @@ add_executable(
     )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_link_libraries(${PROJECT_NAME} PUBLIC git)
 
 if(MSVC)
     set_property(TARGET ${PROJECT_NAME} PROPERTY
@@ -58,34 +65,3 @@ if(MSVC)
     #    string(REPLACE "/EHsc" "/EHs-c-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     #endif()
 endif()
-
-#set(FORCE_STATIC_VCRT ON  CACHE BOOL "" FORCE)
-#set(SDL_SHARED        OFF CACHE BOOL "" FORCE)
-#set(SDL_AUDIO         ON  CACHE BOOL "" FORCE)
-#set(SDL_CPUINFO       ON  CACHE BOOL "" FORCE)
-#if(MSVC)
-#    set(SDL_DLOPEN    OFF CACHE BOOL "" FORCE)
-#elseif(UNIX)
-#    set(SDL_DLOPEN    ON CACHE BOOL "" FORCE)
-#endif()
-#set(SDL_EVENTS        ON  CACHE BOOL "" FORCE)
-#set(SDL_FILE          OFF CACHE BOOL "" FORCE)
-#set(SDL_FILESYSTEM    ON  CACHE BOOL "" FORCE)
-#set(SDL_HAPTIC        ON  CACHE BOOL "" FORCE)
-#set(SDL_JOYSTICK      ON  CACHE BOOL "" FORCE)
-#set(SDL_LOADSO        ON  CACHE BOOL "" FORCE)
-#set(SDL_POWER         ON  CACHE BOOL "" FORCE)
-#set(SDL_RENDER        OFF CACHE BOOL "" FORCE)
-#set(SDL_THREADS       ON  CACHE BOOL "" FORCE)
-#set(SDL_TIMERS        ON  CACHE BOOL "" FORCE)
-#set(SDL_VIDEO         ON  CACHE BOOL "" FORCE)
-#set(SSE3              OFF CACHE BOOL "" FORCE)
-#add_subdirectory(SDL)
-#target_compile_definitions(SDL2main PUBLIC -DDECLSPEC=)
-#target_compile_definitions(SDL2-static PUBLIC -DDECLSPEC=)
-#target_compile_definitions(${PROJECT_NAME} PUBLIC -DHAVE_M_PI)
-#
-#target_link_libraries(${PROJECT_NAME} SDL2-static SDL2main)
-#target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
-#	$<TARGET_PROPERTY:SDL2-static,INCLUDE_DIRECTORIES>
-#	)

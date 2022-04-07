@@ -38,7 +38,7 @@ uint8_t entity_strength(uint8_t i)
     if(ents[i].weakened)
         r = (r + 1) / 2;
     if(i == 0)
-        ; // TODO: item modifiers
+        (void)0; // TODO: item modifiers
     return r;
 }
 
