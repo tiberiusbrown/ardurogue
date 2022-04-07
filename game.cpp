@@ -110,6 +110,22 @@ void player_gain_xp(uint8_t xp)
         pstats.xp += xp;
 }
 
+void player_pickup_item(uint8_t i)
+{
+    uint8_t j;
+    for(j = 0; j < INV_ITEMS; ++j)
+        if(inv[j].type == item::NONE)
+            break;
+    if(j >= INV_ITEMS)
+    {
+        status(PSTR("You can't hold any more items."));
+        return;
+    }
+    inv[j] = items[i].it;
+    items[i].it.type = item::NONE;
+    status(PSTR("You got the @i."), inv[j]);
+}
+
 void render()
 {
     draw_dungeon(ents[0].x, ents[0].y);
@@ -143,6 +159,85 @@ static void advance()
     }
 }
 
+void step()
+{
+    action a{};
+    render();
+
+    //
+    // checks after the player moved
+    //
+    if(just_moved)
+    {
+        uint8_t px = ents[0].x, py = ents[0].y;
+        // loop through items in reverse order
+        // so that rendered item is first
+        for(int8_t i = MAP_ITEMS - 1; i >= 0; --i)
+        {
+            map_item& mit = items[i];
+            if(mit.x != px || mit.y != py)
+                continue;
+            if(yesno_menu(PSTR("Pick up the @i?"), mit.it))
+            {
+                player_pickup_item(i);
+                render();
+            }
+        }
+
+        if(px == xdn && py == ydn &&
+            yesno_menu(PSTR("Go down to the next dungeon?")))
+        {
+            ++map_index;
+            generate_dungeon();
+            ents[0].x = xup, ents[0].y = yup;
+            update_light();
+            render();
+        }
+        else if(px == xup && py == yup &&
+            yesno_menu(PSTR("Go back up the stairs?")))
+        {
+            --map_index;
+            // TODO: test for returning to surface
+            generate_dungeon();
+            ents[0].x = xdn, ents[0].y = ydn;
+            update_light();
+            render();
+        }
+    }
+
+    statusn = 0;
+    statusx = 1;
+    statusy = STATUS_START_Y;
+    uint8_t b = wait_btn();
+    switch(b)
+    {
+    case BTN_UP: a.type = action::MOVE; a.dir = 0; break;
+    case BTN_DOWN: a.type = action::MOVE; a.dir = 1; break;
+    case BTN_LEFT: a.type = action::MOVE; a.dir = 2; break;
+    case BTN_RIGHT: a.type = action::MOVE; a.dir = 3; break;
+    case BTN_A:
+        //if(++opt.wall_style == NUM_WALL_STYLES) opt.wall_style = 0;
+        repeat_action(a);
+        break;
+    case BTN_B:
+        if(!action_menu(a))
+        {
+            render();
+            return;
+        }
+        break;
+    default: break;
+    }
+    uint8_t px = ents[0].x, py = ents[0].y;
+    if(entity_perform_action(0, a))
+    {
+        update_doors();
+        update_light();
+        advance();
+    }
+    just_moved = (px != ents[0].x || py != ents[0].y);
+}
+
 void run()
 {
     stack_canary_init();
@@ -174,66 +269,6 @@ void run()
 
     for(;;)
     {
-        uint8_t b = wait_btn();
-        process_input(b);
-    }
-}
-
-void process_input(uint8_t b)
-{
-    statusn = 0;
-    statusx = 1;
-    statusy = STATUS_START_Y;
-    action a{};
-    switch(b)
-    {
-    case BTN_UP   : a.type = action::MOVE; a.dir = 0; break;
-    case BTN_DOWN : a.type = action::MOVE; a.dir = 1; break;
-    case BTN_LEFT : a.type = action::MOVE; a.dir = 2; break;
-    case BTN_RIGHT: a.type = action::MOVE; a.dir = 3; break;
-    case BTN_A:
-        //if(++opt.wall_style == NUM_WALL_STYLES) opt.wall_style = 0;
-        repeat_action(a);
-        break;
-    case BTN_B:
-        if(!action_menu(a))
-        {
-            render();
-            return;
-        }
-        break;
-    default: break;
-    }
-    uint8_t px = ents[0].x, py = ents[0].y;
-    if(entity_perform_action(0, a))
-    {
-        update_doors();
-        update_light();
-        advance();
-    }
-    render();
-    
-    // checks after the player moved
-    if(px != ents[0].x || py != ents[0].y)
-    {
-        if(ents[0].x == xdn && ents[0].y == ydn &&
-            yesno_menu(PSTR("Go down to the next dungeon?")))
-        {
-            ++map_index;
-            generate_dungeon();
-            ents[0].x = xup, ents[0].y = yup;
-            update_light();
-            render();
-        }
-        else if(ents[0].x == xup && ents[0].y == yup &&
-            yesno_menu(PSTR("Go back up the stairs?")))
-        {
-            --map_index;
-            // TODO: test for returning to surface
-            generate_dungeon();
-            ents[0].x = xdn, ents[0].y = ydn;
-            update_light();
-            render();
-        }
+        step();
     }
 }

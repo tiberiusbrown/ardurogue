@@ -568,26 +568,38 @@ bool occupied(uint8_t x, uint8_t y)
     return false;
 }
 
-coord find_unoccupied()
+bool find_unoccupied(uint8_t& rx, uint8_t& ry)
 {
     for(uint16_t tries = 0; tries < 1024; ++tries)
     {
         uint8_t x = u8rand(MAP_W);
         uint8_t y = u8rand(MAP_H);
         if(!occupied(x, y))
-            return { x, y };
+            return rx = x, ry = y, true;
     }
-    for(uint8_t y = 0; y < MAP_H; ++y)
-        for(uint8_t x = 0; x < MAP_W; ++x)
-            if(!occupied(x, y))
-                return { x, y };
-    return { 255, 255 };
+    return false;
 }
 
-static void find_unoccupied(uint8_t& x, uint8_t& y)
+void find_unoccupied_guaranteed(uint8_t& x, uint8_t& y)
 {
-    coord c = find_unoccupied();
-    x = c.x, y = c.y;
+    while(!find_unoccupied(x, y))
+        (void)0;
+}
+
+coord find_unoccupied_guaranteed()
+{
+    coord c;
+    find_unoccupied_guaranteed(c.x, c.y);
+    return c;
+}
+
+static void generate_item(uint8_t i, item it)
+{
+    if(maps[map_index].got_items.test(i))
+        return;
+    auto& mit = items[i];
+    find_unoccupied_guaranteed(mit.x, mit.y);
+    mit.it = it;
 }
 
 void generate_dungeon()
@@ -624,15 +636,33 @@ void generate_dungeon()
     update_doors();
 
     if(map_index < NUM_MAPS - 1)
-        find_unoccupied(xdn, ydn);
-    find_unoccupied(xup, yup);
+        find_unoccupied_guaranteed(xdn, ydn);
+    find_unoccupied_guaranteed(xup, yup);
 
+    //
+    // add items
+    //
+
+    {
+        uint8_t i = 0;
+        generate_item(i++, { item::SCROLL, SCR_ENCHANT });
+        generate_item(i++, { item::POTION, POT_HEALING });
+        for(; i < MAP_ITEMS; ++i)
+        {
+            generate_item(i++, { item::POTION, POT_HEALING });
+        }
+    }
+
+    //
     // add monsters
+    //
+
     for(uint8_t i = 1; i < MAP_ENTITIES; ++i)
     {
         auto& e = ents[i];
         e = {};
-        find_unoccupied(e.x, e.y);
+        if(!find_unoccupied(e.x, e.y))
+            continue;
         for(;;)
         {
             uint8_t j = u8rand() % 8;
@@ -648,8 +678,6 @@ void generate_dungeon()
             }
         }
     }
-
-    //for(auto& t : tfog) t = 0xff;
 
     // clear buf
     for(auto& b : buf) b = 0;

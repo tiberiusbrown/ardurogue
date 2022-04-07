@@ -20,19 +20,20 @@ static char* tstrcpy_prog(char* dst, char const* src)
 static char* quantify_item(
     char* dst, uint8_t n, char const* s, char const* s2 = nullptr)
 {
-    if(n == 1)
+    if(n == 0)
     {
         dst = tstrcpy_prog(dst, s);
-        if(s2) dst = tstrcpy_prog(dst, s2);
+        if(s2) *dst++ = ' ', dst = tstrcpy_prog(dst, s2);
         return dst;
     }
+    ++n;
     uint8_t t = n % 10;
     n /= 10;
     if(n != 0) *dst++ = '0' + n;
     *dst++ = '0' + t;
     *dst++ = ' ';
     dst = tstrcpy_prog(dst, s);
-    if(s2) dst = tstrcpy_prog(dst, s2);
+    if(s2) *dst++ = ' ', dst = tstrcpy_prog(dst, s2);
     *dst++ = 's';
     return dst;
 }

@@ -337,6 +337,7 @@ struct globals
     array<uint8_t, NUM_SCR> perm_scr;
     array<uint8_t, NUM_RNG> perm_rng;
     array<uint8_t, NUM_AMU> perm_amu;
+    bool just_moved;
 };
 
 extern globals globals_;
@@ -377,6 +378,7 @@ inline constexpr auto& perm_amu = globals_.perm_amu;
 inline constexpr auto& identified = globals_.saved.identified;
 inline constexpr auto& prev_action = globals_.saved.prev_action;
 inline constexpr auto& plevel = globals_.saved.plevel;
+inline constexpr auto& just_moved = globals_.just_moved;
 
 inline bool potion_is_identified(uint8_t subtype)
 {
@@ -448,8 +450,8 @@ uint8_t index_of_door(door const& d);
 uint8_t index_of_entity(entity const& e);
 uint8_t xp_for_level();
 void player_gain_xp(uint8_t xp);
+void player_pickup_item(uint8_t i); // map item
 void render();
-void process_input(uint8_t b);
 
 // font.cpp
 uint8_t draw_char(uint8_t x, uint8_t y, char c); // returns width of char
@@ -486,7 +488,9 @@ void dig_nonsecret_door_tiles();
 void update_doors();   // set tile to solid for closed doors
 void generate_dungeon();
 bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
-coord find_unoccupied();
+bool find_unoccupied(uint8_t& x, uint8_t& y); // returns true if found
+void find_unoccupied_guaranteed(uint8_t& x, uint8_t& y);
+coord find_unoccupied_guaranteed();
 extern int8_t const DIRX[4] PROGMEM;
 extern int8_t const DIRY[4] PROGMEM;
 

@@ -212,26 +212,6 @@ static void draw_sprite(
     draw_sprite_precise(p, x * 5, y * 5);
 }
 
-static void draw_dungeon_minimap()
-{
-    static constexpr uint8_t OX = 3, OY = 2;
-#if 1
-    for(uint8_t y = 0; y < MAP_H; ++y)
-        for(uint8_t x = 0; x < MAP_W; ++x)
-            if(!tile_is_solid_or_unknown(x, y))
-                set_pixel(x + OX, y + OY);
-#else
-    for(uint8_t y = 0; y < MAP_H/2; ++y)
-        for(uint8_t x = 0; x < MAP_W/2; ++x)
-            if(2 <=
-                (uint8_t)(!tile_is_solid_or_unknown(x * 2 + 0, y * 2 + 0)) +
-                (uint8_t)(!tile_is_solid_or_unknown(x * 2 + 1, y * 2 + 0)) +
-                (uint8_t)(!tile_is_solid_or_unknown(x * 2 + 0, y * 2 + 1)) +
-                (uint8_t)(!tile_is_solid_or_unknown(x * 2 + 1, y * 2 + 1)))
-                set_pixel(x + OX, y + OY);
-#endif
-}
-
 static void draw_progress_bar(
     uint8_t x, uint8_t y,
     uint8_t a, uint8_t b)
@@ -331,6 +311,14 @@ void draw_map_offset(uint8_t ox)
         if(!tile_is_explored(d.x, d.y)) continue;
         uint8_t px = (d.x - ox) * 2, py = d.y * 2;
         clear_rect(px, px + 2, py, py + 2);
+        set_pixel(px + 1, py + 1);
+    }
+
+    // draw items
+    for(auto const& mit : items)
+    {
+        if(!tile_is_explored(mit.x, mit.y)) continue;
+        uint8_t px = (mit.x - ox) * 2, py = mit.y * 2;
         set_pixel(px + 1, py + 1);
     }
 
@@ -497,7 +485,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         uint8_t ix = i.x - mx;
         uint8_t iy = i.y - my;
         if(ix >= 13 || iy >= 13) continue;
-        if(player_can_see(i.x, i.y))
+        if(tile_is_explored(i.x, i.y))
             draw_sprite(&ITEM_IMGS[i.it.type], ix, iy);
     }
 
