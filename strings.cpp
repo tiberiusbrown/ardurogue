@@ -134,3 +134,20 @@ char const* const UNID_RNG_AMU_NAMES[NUM_RNG < NUM_AMU ? NUM_AMU : NUM_RNG] PROG
 {
     UNID_RNG_AMU_0,
 };
+
+static char const INV_CAT_WEAPON[] PROGMEM = "Weapons";
+static char const INV_CAT_ARMOR[] PROGMEM = "Armors";
+static char const INV_CAT_JEWELRY[] PROGMEM = "Jewelry";
+static char const INV_CAT_POTION[] PROGMEM = "Potions";
+static char const INV_CAT_SCROLL[] PROGMEM = "Scrolls";
+static char const INV_CAT_MISC[] PROGMEM = "Misc";
+
+char const* const INV_CATEGORIES[] PROGMEM =
+{
+    INV_CAT_WEAPON,
+    INV_CAT_ARMOR,
+    INV_CAT_JEWELRY,
+    INV_CAT_POTION,
+    INV_CAT_SCROLL,
+    INV_CAT_MISC,
+};

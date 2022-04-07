@@ -21,7 +21,7 @@ static uint16_t const ITEM_IMGS[] PROGMEM =
 {
     0x0000, // none
     0x9429, // food
-    0x00b0, // potion
+    0x0bb0, // potion
     0x01b3, // scroll
     0x8421, // arrow
     0x0960, // bow

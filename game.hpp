@@ -434,6 +434,7 @@ extern char const* const AMU_NAMES[] PROGMEM;
 extern char const* const UNID_POT_NAMES[] PROGMEM;
 extern char const* const UNID_SCR_NAMES[] PROGMEM;
 extern char const* const UNID_RNG_AMU_NAMES[] PROGMEM;
+extern char const* const INV_CATEGORIES[] PROGMEM;
 
 // game.cpp
 uint8_t u8rand();
@@ -533,6 +534,7 @@ entity_info entity_get_info(uint8_t i);
 void monster_ai(uint8_t i, action& a);
 
 // menus.cpp
+uint8_t inventory_menu(char const* s);
 bool yesno_menu(char const* fmt, ...);
 bool direction_menu(uint8_t& d, char const* s = nullptr);
 bool repeat_action(action& a);

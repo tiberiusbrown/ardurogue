@@ -144,7 +144,7 @@ void draw_text(uint8_t x, uint8_t y, char const* t, bool prog)
 
 void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...)
 {
-    char buf[32];
+    char buf[64];
     va_list ap;
     va_start(ap, fmt);
     tvsprintf(buf, fmt, ap);

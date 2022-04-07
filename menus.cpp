@@ -2,6 +2,103 @@
 
 #include <git.hpp>
 
+static void draw_inventory(
+    uint8_t x,
+    char const* prompt,
+    uint8_t* its,
+    uint8_t offi,
+    uint8_t seli)
+{
+    draw_text(x, 0, prompt);
+    set_hline(0, 63, 7);
+    for(uint8_t i = 0, y = 10; i < 9; ++i, y += 6)
+    {
+        uint8_t j = i + offi;
+        if(j >= INV_ITEMS + 6) continue;
+        uint8_t it = its[j];
+        if(it == 255) continue;
+        if(it < INV_ITEMS)
+        {
+            draw_textf(x + 4, y, PSTR("@i"), inv[it]);
+            if(j == seli)
+                inv_rect(0, 63, y - 1, y + 5); // TODO: width
+        }
+        else if(x == 0)
+            draw_text(0, y, pgmptr(&INV_CATEGORIES[it - INV_ITEMS]));
+
+    }
+}
+
+uint8_t inventory_menu(char const* prompt)
+{
+    uint8_t its[INV_ITEMS + 7];
+    uint8_t* itp = &its[0];
+    uint8_t* tp;
+
+    // TODO: reduce code size in this method?
+
+    *itp++ = INV_ITEMS + 0; // weapons
+    tp = itp;
+    for(uint8_t i = 0; i < INV_ITEMS; ++i)
+        if(inv[i].type == item::SWORD || inv[i].type == item::BOW || inv[i].type == item::ARROW)
+            *itp++ = i;
+    if(itp == tp) --itp;
+
+    *itp++ = INV_ITEMS + 1; // armor
+    tp = itp;
+    for(uint8_t i = 0; i < INV_ITEMS; ++i)
+        if(inv[i].type == item::ARMOR || inv[i].type == item::HELM || inv[i].type == item::BOOTS)
+            *itp++ = i;
+    if(itp == tp) --itp;
+
+    *itp++ = INV_ITEMS + 2; // jewelry
+    tp = itp;
+    for(uint8_t i = 0; i < INV_ITEMS; ++i)
+        if(inv[i].type == item::RING || inv[i].type == item::AMULET)
+            *itp++ = i;
+    if(itp == tp) --itp;
+
+    *itp++ = INV_ITEMS + 3; // potion
+    tp = itp;
+    for(uint8_t i = 0; i < INV_ITEMS; ++i)
+        if(inv[i].type == item::POTION)
+            *itp++ = i;
+    if(itp == tp) --itp;
+
+    *itp++ = INV_ITEMS + 4; // scroll
+    tp = itp;
+    for(uint8_t i = 0; i < INV_ITEMS; ++i)
+        if(inv[i].type == item::SCROLL)
+            *itp++ = i;
+    if(itp == tp) --itp;
+
+    *itp++ = INV_ITEMS + 5; // misc
+    tp = itp;
+    for(uint8_t i = 0; i < INV_ITEMS; ++i)
+        if(inv[i].type == item::FOOD)
+            *itp++ = i;
+    if(itp == tp) --itp;
+
+    while(itp < &its[0] + sizeof(its))
+        *itp++ = 255;
+
+    uint8_t seli = 1;
+    for(;;)
+    {
+        draw_inventory(0           , prompt, its, 0, seli);
+        paint_left();
+        draw_inventory(uint8_t(-64), prompt, its, 0, seli);
+        paint_right();
+
+        uint8_t b = wait_btn();
+        if(b == BTN_B) break;
+        if(b == BTN_A) return its[seli];
+        if(b == BTN_DOWN && its[seli + 1] != 255 && its[++seli] >= INV_ITEMS) ++seli;
+        if(b == BTN_UP && seli > 1 && its[--seli] >= INV_ITEMS) --seli;
+    }
+    return 255;
+}
+
 bool yesno_menu(char const* fmt, ...)
 {
     draw_info_without_status();
@@ -135,6 +232,11 @@ static bool act_wait(action& a)
 
 static bool act_use(action& a)
 {
+    uint8_t i = inventory_menu(PSTR("Use which item?"));
+    if(i < INV_ITEMS)
+        status(PSTR("You use the @i."), inv[i]);
+    else
+        status(PSTR("You decide not to use anything."));
     return false;
 }
 
