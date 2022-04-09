@@ -483,12 +483,14 @@ static void random_room_edge(uint8_t d, uint8_t t, uint8_t& rx, uint8_t& ry)
     room r = { 0, 0, t };
     for(;;)
     {
+        r.x = u8rand(r.w());
+        r.y = u8rand(r.h());
         switch(d)
         {
-        case 0: r.x = u8rand(r.w()), r.y = 0; break;
-        case 1: r.x = u8rand(r.w()), r.y = r.h() - 1; break;
-        case 2: r.x = 0, r.y = u8rand(r.h()); break;
-        case 3: r.x = r.w() - 1, r.y = u8rand(r.h()); break;
+        case 0: r.y = 0;         break;
+        case 1: r.y = r.h() - 1; break;
+        case 2: r.x = 0;         break;
+        case 3: r.x = r.w() - 1; break;
         default: break;
         }
         if(!r.solid(r.x, r.y)) break;
@@ -496,7 +498,10 @@ static void random_room_edge(uint8_t d, uint8_t t, uint8_t& rx, uint8_t& ry)
     rx = r.x, ry = r.y;
 }
 
-int8_t const DIRX[8] PROGMEM = { 0, 0, -1, 1, -1, 1, 0, 0 };
+int8_t const DIRX[8] PROGMEM =
+{
+    0, 0, -1, 1, -1, 1, 0, 0
+};
 
 static bool try_generate_room()
 {
@@ -510,10 +515,12 @@ static bool try_generate_room()
     uint8_t xr, yr; // new room
     random_room_edge(d, pr.type, x0, y0);
     random_room_edge(d ^ 1, t, x1, y1);
-    xd = pr.x + x0 + (int8_t)pgm_read_byte(&DIRX[d]);
-    yd = pr.y + y0 + (int8_t)pgm_read_byte(&DIRY[d]);
-    xr = xd - x1 + (int8_t)pgm_read_byte(&DIRX[d]);
-    yr = yd - y1 + (int8_t)pgm_read_byte(&DIRY[d]);
+    int8_t dx = (int8_t)pgm_read_byte(&DIRX[d]);
+    int8_t dy = (int8_t)pgm_read_byte(&DIRY[d]);
+    xd = pr.x + x0 + dx;
+    yd = pr.y + y0 + dy;
+    xr = xd - x1 + dx;
+    yr = yd - y1 + dy;
     if(!dig_room(t, xr, yr))
         return false;
     add_door(xd, yd);
