@@ -496,8 +496,7 @@ static void random_room_edge(uint8_t d, uint8_t t, uint8_t& rx, uint8_t& ry)
     rx = r.x, ry = r.y;
 }
 
-int8_t const DIRX[4] PROGMEM = { 0, 0, -1, 1 };
-int8_t const DIRY[4] PROGMEM = { -1, 1, 0, 0 };
+int8_t const DIRX[8] PROGMEM = { 0, 0, -1, 1, -1, 1, 0, 0 };
 
 static bool try_generate_room()
 {

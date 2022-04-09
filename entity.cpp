@@ -128,7 +128,8 @@ void advance_entity(uint8_t i)
 {
     auto& e = ents[i];
     if(e.type == entity::NONE) return;
-    auto info = entity_get_info(i);
+    entity_info info;
+    entity_get_info(i, info);
     action a;
 
     // moster ai
@@ -222,7 +223,8 @@ void entity_heal(uint8_t i, uint8_t amount)
 void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
 {
     auto const& e = ents[atti];
-    auto info = entity_get_info(atti);
+    entity_info info;
+    entity_get_info(atti, info);
     auto& te = ents[defi];
     bool cansee = player_can_see_entity(defi);
     if(dam > te.health)
@@ -314,7 +316,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
 bool entity_perform_action(uint8_t i, action const& a)
 {
     auto& e = ents[i];
-    uint8_t dir = a.data;
+    uint8_t dir = a.data & 3;
     if(a.type != action::WAIT)
     {
         if(e.paralyzed)
@@ -330,17 +332,17 @@ bool entity_perform_action(uint8_t i, action const& a)
                 status(PSTR("You are confused!"));
         }
     }
-    int8_t dx = (int8_t)pgm_read_byte(&DIRX[dir & 3]);
-    int8_t dy = (int8_t)pgm_read_byte(&DIRY[dir & 3]);
+    int8_t dx = (int8_t)pgm_read_byte(&DIRX[dir]);
+    int8_t dy = (int8_t)pgm_read_byte(&DIRY[dir]);
     uint8_t nx = e.x + dx;
     uint8_t ny = e.y + dy;
-    auto info = entity_get_info(i);
+    entity* te = get_entity(nx, ny);
+    entity_info info;
+    entity_get_info(i, info);
     switch(a.type)
     {
     case action::USE:
-        if(i == 0)
-            return use_item(a.data);
-        return false;
+        return use_item(a.data);
     case action::CLOSE:
     {
         door* d = get_door(nx, ny);
@@ -348,7 +350,7 @@ bool entity_perform_action(uint8_t i, action const& a)
         {
             if(!d->open)
                 status(PSTR("The door is already closed."));
-            else if(get_entity(nx, ny))
+            else if(te)
                 status(PSTR("The door is blocked."));
             else
             {
@@ -371,7 +373,6 @@ bool entity_perform_action(uint8_t i, action const& a)
         }
         if(tile_is_solid(nx, ny))
             return false;
-        entity* te = get_entity(nx, ny);
         if(te)
         {
             uint8_t ti = index_of_entity(*te);

@@ -142,10 +142,8 @@ void paint_right(bool clear)
     paint_half(buf.data(), clear);
 }
 
-//int main()
 void setup()
 {
-    init();
     Arduboy2Base::boot();
     if(Arduboy2Core::buttonsState() & UP_BUTTON)
     {
@@ -157,5 +155,4 @@ void setup()
     }
   
     run();
-    //return 0;
 }

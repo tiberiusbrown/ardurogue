@@ -525,8 +525,8 @@ bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
 bool find_unoccupied(uint8_t& x, uint8_t& y); // returns true if found
 void find_unoccupied_guaranteed(uint8_t& x, uint8_t& y);
 coord find_unoccupied_guaranteed();
-extern int8_t const DIRX[4] PROGMEM;
-extern int8_t const DIRY[4] PROGMEM;
+extern int8_t const DIRX[8] PROGMEM;
+inline constexpr int8_t const* DIRY = &DIRX[4];
 
 // light.cpp
 bool player_can_see(uint8_t x, uint8_t y);
@@ -569,7 +569,7 @@ bool entity_perform_action(uint8_t i, action const& a);
 
 // monsters.cpp
 extern entity_info const MONSTER_INFO[] PROGMEM;
-entity_info entity_get_info(uint8_t i);
+void entity_get_info(uint8_t i, entity_info& info);
 void monster_ai(uint8_t i, action& a);
 
 // menus.cpp

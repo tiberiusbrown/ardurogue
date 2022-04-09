@@ -311,41 +311,13 @@ static void init_all_perms()
 static void new_game()
 {
     rand_seed = game_seed = seed();
-
-    init_all_perms();
     map_index = 0;
-    generate_dungeon();
-
-    pinfo = {};
-    for(auto& i : pinfo.equipped) i = 255;
-    pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
-    new_entity(0, entity::PLAYER, xup, yup);
-    save();
-
-    statusn = 0;
-    statusx = 1;
-    statusy = STATUS_START_Y;
-    status(PSTR("Welcome @pto ArduRogue."), PSTR(""));
-
-    update_light();
-    render();
 }
 
 static void load_game()
 {
     load();
     rand_seed = game_seed;
-
-    init_all_perms();
-    generate_dungeon();
-    statusn = 0;
-    statusx = 1;
-    statusy = STATUS_START_Y;
-    status(PSTR("Welcome @pto ArduRogue.2222"), PSTR("back "));
-    destroy_save();
-
-    update_light();
-    render();
 }
 
 static void draw_title_screen(uint8_t x)
@@ -369,10 +341,32 @@ void run()
         paint_right();
         (void)wait_btn();
 
+        char const* back = PSTR("");
         if(save_exists())
+        {
             load_game();
+            back = PSTR("back ");
+        }
         else
             new_game();
+
+        init_all_perms();
+        generate_dungeon();
+
+        if(ents[0].type == entity::NONE)
+        {
+            for(auto& i : pinfo.equipped) i = 255;
+            pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
+            new_entity(0, entity::PLAYER, xup, yup);
+            //save();
+        }
+
+        statusx = 1;
+        statusy = STATUS_START_Y;
+        status(PSTR("Welcome @pto ArduRogue."), back);
+
+        update_light();
+        render();
 
         for(;;)
         {

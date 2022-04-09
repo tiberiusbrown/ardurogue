@@ -23,12 +23,12 @@ entity_info const MONSTER_INFO[] PROGMEM =
     { 1, 0, 0, 0, 0, 0, 0, 0, 1, 20,  4,  4,  8,  48, 20 }, // dragon
 };
 
-entity_info entity_get_info(uint8_t i)
+void entity_get_info(uint8_t i, entity_info& info)
 {
-    if(i == 0) return pstats;
-    entity_info r;
-    pgm_memcpy(&r, &MONSTER_INFO[ents[i].type], sizeof(r));
-    return r;
+    if(i == 0)
+        info = pstats;
+    else
+        pgm_memcpy(&info, &MONSTER_INFO[ents[i].type], sizeof(info));
 }
 
 static uint8_t dist_to_player(uint8_t x, uint8_t y)
@@ -41,7 +41,8 @@ static uint8_t dist_to_player(uint8_t x, uint8_t y)
 void monster_ai(uint8_t i, action& a)
 {
     auto& e = ents[i];
-    auto info = entity_get_info(i);
+    entity_info info;
+    entity_get_info(i, info);
     a.type = action::WAIT;
     if((info.nomove && !e.aggro) || player_is_dead())
         return;
