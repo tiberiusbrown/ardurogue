@@ -1,11 +1,12 @@
 #include "game.hpp"
 
-void tsprintf(char* b, char const* fmt, ...)
+uint8_t tsprintf(char* b, char const* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    tvsprintf(b, fmt, ap);
+    uint8_t r = tvsprintf(b, fmt, ap);
     va_end(ap);
+    return r;
 }
 
 // does not copy null char
@@ -70,12 +71,35 @@ static char* item_name(char* dst, item it)
         {
             dst = tstrcpy_prog(dst, PSTR("ring of "));
             dst = tstrcpy_prog(dst, pgmptr(&RNG_NAMES[st]));
+            if(it.identified)
+            {
+                switch(st)
+                {
+                case RNG_STRENGTH:
+                    dst += tsprintf(dst, PSTR(" [@c@u str]"),
+                        it.cursed ? '-' : '+',
+                        it.quant_or_level + 1) - 1;
+                    break;
+                case RNG_DEXTERITY:
+                    dst += tsprintf(dst, PSTR(" [@c@u dex]"),
+                        it.cursed ? '-' : '+',
+                        it.quant_or_level + 1) - 1;
+                    break;
+                case RNG_PROTECTION:
+                    dst += tsprintf(dst, PSTR(" [@c@u]"),
+                        it.cursed ? '-' : '+',
+                        it.quant_or_level + 1) - 1;
+                    break;
+                default:
+                    break;
+                }
+            }
             return dst;
         }
         else
         {
             dst = tstrcpy_prog(dst, pgmptr(&UNID_RNG_AMU_NAMES[perm_rng[st]]));
-            dst = tstrcpy_prog(dst, PSTR("ring"));
+            dst = tstrcpy_prog(dst, PSTR(" ring"));
             return dst;
         }
     case item::AMULET:
@@ -83,12 +107,25 @@ static char* item_name(char* dst, item it)
         {
             dst = tstrcpy_prog(dst, PSTR("amulet of "));
             dst = tstrcpy_prog(dst, pgmptr(&AMU_NAMES[st]));
+            if(it.identified)
+            {
+                switch(st)
+                {
+                case AMU_SPEED:
+                    dst += tsprintf(dst, PSTR(" [@c@u spd]"),
+                        it.cursed ? '-' : '+',
+                        it.quant_or_level / 2 + 1) - 1;
+                    break;
+                default:
+                    break;
+                }
+            }
             return dst;
         }
         else
         {
             dst = tstrcpy_prog(dst, pgmptr(&UNID_RNG_AMU_NAMES[perm_amu[st]]));
-            dst = tstrcpy_prog(dst, PSTR("amulet"));
+            dst = tstrcpy_prog(dst, PSTR(" amulet"));
             return dst;
         }
     case item::POTION:
@@ -128,19 +165,20 @@ static char* item_name(char* dst, item it)
 
 static char const HEX_CHARS[] PROGMEM = "0123456789ABCDEF";
 
-void tvsprintf(char* b, char const* fmt, va_list ap)
+uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
 {
     char c, ct;
     uint8_t u;
     uint8_t dec[2];
     char const* s;
+    char* b_orig = b;
     for(;;)
     {
         c = (char)pgm_read_byte(fmt++);
         if(c != '@')
         {
             *b++ = c;
-            if(c == '\0') return;
+            if(c == '\0') goto end;
             continue;
         }
         c = (char)pgm_read_byte(fmt++);
@@ -167,8 +205,9 @@ void tvsprintf(char* b, char const* fmt, va_list ap)
         case 'O': // object
         case 'T': // subject possessive
         case 'P': // object possessive
-            u = (uint8_t)va_arg(ap, int);
-            if(u == entity::PLAYER)
+            dec[0] = (uint8_t)va_arg(ap, int); // index
+            u = ents[dec[0]].type;
+            if(dec[0] == 0) // player
             {
                 *b++ = (c >= 'S' ? 'Y' : 'y');
                 *b++ = 'o';
@@ -177,11 +216,19 @@ void tvsprintf(char* b, char const* fmt, va_list ap)
             }
             else
             {
-                *b++ = (c >= 'S' ? 'T' : 't');
-                *b++ = 'h';
-                *b++ = 'e';
-                *b++ = ' ';
-                b = tstrcpy_prog(b, (char const*)pgm_read_ptr(&MONSTER_NAMES[u]));
+                if(player_can_see_entity(dec[0]))
+                {
+                    *b++ = (c >= 'S' ? 'T' : 't');
+                    *b++ = 'h';
+                    *b++ = 'e';
+                    *b++ = ' ';
+                    b = tstrcpy_prog(b, pgmptr(&MONSTER_NAMES[u]));
+                }
+                else
+                {
+                    *b++ = (c >= 'S' ? 'S' : 's');
+                    b = tstrcpy_prog(b, PSTR("omething"));
+                }
                 if(!(c & 1)) // 'T' or 'P'
                 {
                     *b++ = '\'';
@@ -191,7 +238,8 @@ void tvsprintf(char* b, char const* fmt, va_list ap)
             break;
         case 'V': // verb
         case 'v': // verb whose plural needs +es
-            u = (uint8_t)va_arg(ap, int);
+            u = (uint8_t)va_arg(ap, int); // index
+            u = ents[u].type;
             s = va_arg(ap, char const*);
             b = tstrcpy_prog(b, s);
             if(u != entity::PLAYER)
@@ -202,7 +250,8 @@ void tvsprintf(char* b, char const* fmt, va_list ap)
             break;
         case 'A': // is/are
             // TODO: combine this with S?
-            u = (uint8_t)va_arg(ap, int);
+            u = (uint8_t)va_arg(ap, int); // index
+            u = ents[u].type;
             b = tstrcpy_prog(b, u == entity::PLAYER ? PSTR("are") : PSTR("is"));
             break;
         case 'i': // item
@@ -229,6 +278,8 @@ void tvsprintf(char* b, char const* fmt, va_list ap)
             break;
         }
     }
+end:
+    return (uint8_t)(ptrdiff_t)(b - b_orig);
 }
 
 uint8_t tstrlen(char const* s)

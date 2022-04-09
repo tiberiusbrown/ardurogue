@@ -317,6 +317,7 @@ void draw_map_offset(uint8_t ox)
     // draw items
     for(auto const& mit : items)
     {
+        if(mit.it.type == item::NONE) continue;
         if(!tile_is_explored(mit.x, mit.y)) continue;
         uint8_t px = (mit.x - ox) * 2, py = mit.y * 2;
         set_pixel(px + 1, py + 1);
@@ -493,6 +494,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
     for(auto const& e : ents)
     {
         if(e.type == entity::NONE) continue;
+        if(e.type != entity::PLAYER && e.invis) continue;
         uint8_t ex = e.x - mx;
         uint8_t ey = e.y - my;
         if(ex >= 13 || ey >= 13) continue;

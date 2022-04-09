@@ -31,10 +31,12 @@ add_executable(
     light.cpp
     menus.cpp
     monsters.cpp
+    save.cpp
     sprintf.cpp
     stack.cpp
     status.cpp
     strings.cpp
+    use.cpp
     )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

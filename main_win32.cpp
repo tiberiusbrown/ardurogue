@@ -20,6 +20,11 @@ static constexpr int ZOOM = 6;
 static constexpr int FBW = 128;
 static constexpr int FBH = 64;
 
+uint16_t seed()
+{
+    return 0xbabe;
+}
+
 uint8_t wait_btn()
 {
     MSG msg{};

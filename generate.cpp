@@ -6,7 +6,7 @@ static constexpr uint8_t ROOM_BIG_CHANCE = 64;
 // chance to place a door
 static constexpr uint8_t DOOR_CHANCE = 196;
 // chance for any door to be secret
-static constexpr uint8_t DOOR_SECRET_CHANCE = 32;
+static constexpr uint8_t DOOR_SECRET_CHANCE = 48;
 // chance for isolated door (only door leading to a room) to be secret
 static constexpr uint8_t DOOR_ISOLATED_SECRET_CHANCE = 0;
 
@@ -649,7 +649,7 @@ void generate_dungeon()
         generate_item(i++, { item::POTION, POT_HEALING });
         for(; i < MAP_ITEMS; ++i)
         {
-            generate_item(i++, { item::POTION, POT_HEALING });
+            generate_item(i++, { item::RING, RNG_STRENGTH });
         }
     }
 

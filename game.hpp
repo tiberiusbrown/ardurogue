@@ -5,7 +5,7 @@
 
 // platform functionality
 uint8_t wait_btn(); // wait for button press
-void seed();        // initialize seed0 and seed1
+uint16_t seed();
 void paint_left(bool clear = true);  // draw to left half screen
 void paint_right(bool clear = true); // draw to right half screen
 
@@ -15,6 +15,7 @@ void run();
 #ifdef ARDUINO
 #include <Arduino.h>
 
+#if 1
 // http://michael-buschbeck.github.io/arduino/2013/10/20/string-merging-pstr/
 #undef PSTR
 #define PSTR(str) \
@@ -31,6 +32,7 @@ void run();
     ); \
     ptr; \
   }))
+#endif
 
 #else
 #define PSTR(str_) str_
@@ -50,13 +52,21 @@ struct array
     T d_[N];
     T* data() { return d_; }
     T const* data() const { return d_; }
-    T& operator[](size_t i) { return d_[i]; }
-    T const& operator[](size_t i) const { return d_[i]; }
+    T& operator[](size_t i) { verify(i); return d_[i]; }
+    T const& operator[](size_t i) const { verify(i); return d_[i]; }
     size_t size() { return N; }
     T* begin() { return d_; }
     T const* begin() const { return d_; }
     T* end() { return d_ + N; }
     T const* end() const { return d_ + N; }
+private:
+    void verify(size_t i) const
+    {
+        (void)i;
+#if defined(_MSC_VER) && !defined(NDEBUG)
+        if(i >= N) __debugbreak();
+#endif
+    }
 };
 
 template<size_t N> struct bitset
@@ -174,6 +184,7 @@ struct entity
     uint8_t paralyzed : 1;
     uint8_t weakened  : 1;
     uint8_t aggro     : 1; // when a non-mean monster is attacked by player
+    uint8_t invis     : 1;
     uint8_t health;
     uint8_t x, y;
 };
@@ -212,6 +223,7 @@ enum
     SCR_ENCHANT,
     SCR_REMOVE_CURSE,
     SCR_TELEPORT,
+    SCR_MAPPING,
     NUM_SCR,
 };
 
@@ -219,6 +231,9 @@ enum
 enum
 {
     RNG_SEE_INVIS,
+    RNG_STRENGTH,
+    RNG_DEXTERITY,
+    RNG_PROTECTION,
     NUM_RNG,
 };
 
@@ -226,6 +241,9 @@ enum
 enum
 {
     AMU_SPEED,
+    AMU_CLARITY,      // prevents becoming confused
+    AMU_CONSERVATION, // chance to prevent consuming potions/scrolls
+    AMU_REGENERATION, // (chance to) heal each turn
     NUM_AMU,
 };
 
@@ -512,7 +530,7 @@ extern int8_t const DIRY[4] PROGMEM;
 
 // light.cpp
 bool player_can_see(uint8_t x, uint8_t y);
-bool player_can_see_entity(uint8_t i);
+bool player_can_see_entity(uint8_t i); // takes into account invis
 bool path_clear(
     uint8_t x0, uint8_t y0,
     uint8_t x1, uint8_t y1);
@@ -520,8 +538,8 @@ void set_tile_explored(uint8_t x, uint8_t y);
 void update_light();
 
 // sprintf.cpp: expects fmt to be PROGMEM
-void tsprintf(char* b, char const* fmt, ...);
-void tvsprintf(char* b, char const* fmt, va_list ap);
+uint8_t tsprintf(char* b, char const* fmt, ...);
+uint8_t tvsprintf(char* b, char const* fmt, va_list ap);
 uint8_t tstrlen(char const* s); // s not progmem
 
 // status.cpp: fmt is PROGMEM
@@ -541,6 +559,7 @@ uint8_t entity_attack(uint8_t i);
 uint8_t entity_defense(uint8_t i);
 bool test_attack_hit(uint8_t atti, uint8_t defi); // 0 for miss
 uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi); // 0 for block
+void entity_restore_strength(uint8_t i);
 void entity_heal(uint8_t i, uint8_t amount);
 void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam);
 void confuse_entity(uint8_t i);
@@ -565,8 +584,16 @@ void stack_canary_init();
 uint8_t unused_stack();
 
 // use.cpp
+uint8_t slot_of_item(uint8_t type);
+bool item_is_equipped(uint8_t i);
 bool use_item(uint8_t i);
 void entity_apply_potion(uint8_t i, uint8_t subtype);
+
+// save.cpp
+void save();
+void destroy_save();
+bool save_exists();
+void load();
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);

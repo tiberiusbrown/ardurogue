@@ -15,6 +15,11 @@ static uint8_t button_rep[8];
 static uint8_t buttons, buttons_prev;
 static uint8_t just_pressed;
 
+uint16_t seed()
+{
+    return (uint16_t)Arduboy2::generateRandomSeed();
+}
+
 static void poll_buttons_debounce(uint8_t debounce_num)
 {
     uint8_t b = Arduboy2Core::buttonsState();
@@ -137,7 +142,8 @@ void paint_right(bool clear)
     paint_half(buf.data(), clear);
 }
 
-int main()
+//int main()
+void setup()
 {
     init();
     Arduboy2Base::boot();
@@ -146,9 +152,10 @@ int main()
         Arduboy2Core::sendLCDCommand(OLED_ALL_PIXELS_ON);
         Arduboy2Core::digitalWriteRGB(RGB_ON, RGB_ON, RGB_ON);
         Arduboy2Core::digitalWriteRGB(RED_LED, RGB_ON);
+        power_timer0_disable();
         for(;;);
     }
   
     run();
-    return 0;
+    //return 0;
 }

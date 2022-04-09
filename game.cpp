@@ -198,6 +198,16 @@ static void init_perm(uint8_t* p, uint8_t n)
 static void advance()
 {
     uint8_t pspeed = entity_speed(0);
+    // apply amulet of regeneration
+    {
+        uint8_t i = pinfo.equipped[SLOT_AMULET];
+        if(i < INV_ITEMS && inv[i].subtype == AMU_REGENERATION)
+        {
+            i = tmax<uint8_t>(entity_max_health(0), 48);
+            if(u8rand() < i)
+                entity_heal(0, 1);
+        }
+    }
     for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
     {
         uint8_t espeed = entity_speed(i);
@@ -290,37 +300,83 @@ void step()
     just_moved = (px != ents[0].x || py != ents[0].y);
 }
 
-void run()
+static void init_all_perms()
 {
-    stack_canary_init();
-    memzero(&globals_, sizeof(globals_));
-
-    game_seed = 0xbabe;
-    opt.wall_style = 2;
-
-    rand_seed = game_seed;
     init_perm(perm_pot.data(), perm_pot.size());
     init_perm(perm_scr.data(), perm_scr.size());
     init_perm(perm_rng.data(), perm_rng.size());
     init_perm(perm_amu.data(), perm_amu.size());
+}
 
+static void new_game()
+{
+    rand_seed = game_seed = seed();
+
+    init_all_perms();
     map_index = 0;
     generate_dungeon();
 
     pinfo = {};
+    for(auto& i : pinfo.equipped) i = 255;
     pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
     new_entity(0, entity::PLAYER, xup, yup);
+    save();
 
     statusn = 0;
     statusx = 1;
     statusy = STATUS_START_Y;
-    status(PSTR("Welcome to ArduRogue."));
+    status(PSTR("Welcome @pto ArduRogue."), PSTR(""));
 
     update_light();
     render();
+}
+
+static void load_game()
+{
+    load();
+    rand_seed = game_seed;
+
+    init_all_perms();
+    generate_dungeon();
+    statusn = 0;
+    statusx = 1;
+    statusy = STATUS_START_Y;
+    status(PSTR("Welcome @pto ArduRogue.2222"), PSTR("back "));
+    destroy_save();
+
+    update_light();
+    render();
+}
+
+static void draw_title_screen(uint8_t x)
+{
+    draw_text(x + 30, 24, PSTR("Welcome to ArduRogue."));
+    draw_text(x + 40, 34, PSTR("Press A to play."));
+}
+
+void run()
+{
+    stack_canary_init();
 
     for(;;)
     {
-        step();
+        memzero(&globals_, sizeof(globals_));
+        opt.wall_style = 2;
+
+        draw_title_screen(0);
+        paint_left();
+        draw_title_screen(uint8_t(-64));
+        paint_right();
+        (void)wait_btn();
+
+        if(save_exists())
+            load_game();
+        else
+            new_game();
+
+        for(;;)
+        {
+            step();
+        }
     }
 }

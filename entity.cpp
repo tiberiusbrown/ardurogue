@@ -5,12 +5,23 @@ uint8_t entity_speed(uint8_t i)
     uint8_t r;
     if(i == 0)
     {
-        // TODO: factor in item modifiers
         r = pstats.speed;
+        // amulet of speed
+        uint8_t j = pinfo.equipped[SLOT_AMULET];
+        if(j < INV_ITEMS && inv[j].subtype == AMU_SPEED)
+        {
+            item const& it = inv[j];
+            uint8_t n = it.quant_or_level / 2 + 1;
+            if(it.cursed)
+                r -= n;
+            else
+                r += n;
+        }
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].speed);
     // TODO: factor in slow/speed effect
+    if((r & 0x80) || r == 0) r = 1;
     return r;
 }
 
@@ -38,7 +49,20 @@ uint8_t entity_strength(uint8_t i)
     if(ents[i].weakened)
         r = (r + 1) / 2;
     if(i == 0)
-        (void)0; // TODO: item modifiers
+    {
+        // ring of strength
+        uint8_t j = pinfo.equipped[SLOT_RING];
+        if(j < INV_ITEMS && inv[j].subtype == RNG_STRENGTH)
+        {
+            item const& it = inv[j];
+            uint8_t n = it.quant_or_level + 1;
+            if(it.cursed)
+                r -= n;
+            else
+                r += n;
+        }
+    }
+    if(r & 0x80) r = 0;
     return r;
 }
 
@@ -47,18 +71,30 @@ uint8_t entity_dexterity(uint8_t i)
     uint8_t r;
     if(i == 0)
     {
-        // TODO: factor in item modifiers
         r = pstats.dexterity;
+        // ring of dexterity
+        uint8_t j = pinfo.equipped[SLOT_RING];
+        if(j < INV_ITEMS && inv[j].subtype == RNG_DEXTERITY)
+        {
+            item const& it = inv[j];
+            uint8_t n = it.quant_or_level + 1;
+            if(it.cursed)
+                r -= n;
+            else
+                r += n;
+        }
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].dexterity);
+    if(r & 0x80) r = 0;
     return r;
 }
 
 uint8_t entity_attack(uint8_t i)
 {
-    uint8_t r = entity_strength(i);
+    uint8_t r = 0;
     // TODO: factor in wielded item
+    if(r & 0x80) r = 0;
     return r;
 }
 
@@ -69,10 +105,22 @@ uint8_t entity_defense(uint8_t i)
     {
         // TODO: factor in item modifiers
         r = pstats.defense;
+        // ring of protection
+        uint8_t j = pinfo.equipped[SLOT_RING];
+        if(j < INV_ITEMS && inv[j].subtype == RNG_PROTECTION)
+        {
+            item const& it = inv[j];
+            uint8_t n = it.quant_or_level + 1;
+            if(it.cursed)
+                r -= n;
+            else
+                r += n;
+        }
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].defense);
     // TODO: factor in slow/speed effect
+    if(r & 0x80) r = 0;
     return r;
 }
 
@@ -80,6 +128,7 @@ void advance_entity(uint8_t i)
 {
     auto& e = ents[i];
     if(e.type == entity::NONE) return;
+    auto info = entity_get_info(i);
     action a;
 
     // moster ai
@@ -92,7 +141,7 @@ void advance_entity(uint8_t i)
         entity_perform_action(i, a);
     }
 
-    // advance confusion/paralysis
+    // advance confusion/paralysis/invis
     if(e.confused)
     {
         bool end;
@@ -101,7 +150,7 @@ void advance_entity(uint8_t i)
         if(end)
         {
             e.confused = 0;
-            status(PSTR("@S @A no longer confused."), e.type, e.type);
+            status(PSTR("@S @A no longer confused."), i, i);
         }
     }
     if(e.paralyzed)
@@ -112,15 +161,19 @@ void advance_entity(uint8_t i)
         if(end)
         {
             e.paralyzed = 0;
-            status(PSTR("@S @A no longer paralyzed."), e.type, e.type);
+            status(PSTR("@S @A no longer paralyzed."), i, i);
         }
     }
-    
-    // advance invis for player
-    if(i == 0 && pinfo.invis_rem > 0 && --pinfo.invis_rem == 0)
+    if(e.invis && !info.invis) // temporary invis
     {
-        pstats.invis = 0;
-        status(PSTR("You are no longer invisible."));
+        bool end;
+        if(i == 0) end = (--pinfo.invis_rem == 0);
+        else end = ((u8rand() & 15) == 0);
+        if(end)
+        {
+            e.invis = 0;
+            if(i == 0) status(PSTR("You are no longer invisible."));
+        }
     }
 }
 
@@ -133,33 +186,33 @@ bool test_attack_hit(uint8_t atti, uint8_t defi) // 0 for miss
 
 uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi) // 0 for block
 {
-    uint8_t ta = entity_attack(atti);
+    uint8_t ta = entity_strength(atti);
     uint8_t td = entity_defense(defi);
     ta = u8rand(ta + td) + 1;
     if(ta < td)
         return 0;
-    return ta - td;
+    return ta - td + entity_attack(atti);
+}
+
+void entity_restore_strength(uint8_t i)
+{
+    if(ents[i].weakened)
+    {
+        ents[i].weakened = 0;
+        if(i == 0) status(PSTR("Your strength returns."));
+    }
 }
 
 void entity_heal(uint8_t i, uint8_t amount)
 {
-    bool cansee = player_can_see_entity(i);
     auto& e = ents[i];
-    if(cansee)
-    {
-        if(i == 0)
-        {
-            status(PSTR("You feel better."));
-            if(ents[0].weakened)
-            {
-                ents[0].weakened = 0;
-                status(PSTR("Your strength returns."));
-            }
-        }
-        else
-            status(PSTR("@S looks better."), e.type);
-    }
     uint8_t mhp = entity_max_health(i);
+    if(e.health >= mhp) return;
+    char const* s = (amount < 3 ? PSTR("slightly ") : PSTR(""));
+    if(i == 0)
+        status(PSTR("You feel @pbetter."), s);
+    else if(player_can_see_entity(i))
+        status(PSTR("@S looks @pbetter."), i, s);
     if(mhp - e.health <= amount)
         e.health = mhp;
     else
@@ -175,7 +228,7 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
     if(dam > te.health)
     {
         if(cansee)
-            status(PSTR("@S @V!"), te.type, te.type, PSTR("die"));
+            status(PSTR("@S @V!"), defi, defi, PSTR("die"));
         else
             status(PSTR("You hear the sound of death."));
         uint8_t tt = te.type;
@@ -188,12 +241,12 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
     {
         if(defi == 0 && info.vampire && u8rand() < 40)
         {
-            status(PSTR("@S drains your health!"), e.type);
+            status(PSTR("@S drains your health!"), atti);
             pinfo.vamp_drain += 3;
             ents[0].health = tmin(ents[0].health, entity_max_health(0));
             if(ents[0].health == 0)
             {
-                status(PSTR("@S @V!"), te.type, te.type, PSTR("die"));
+                status(PSTR("@S @V!"), defi, defi, PSTR("die"));
                 return;
             }
         }
@@ -210,9 +263,16 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
 
 void confuse_entity(uint8_t i)
 {
+    if(i == 0)
+    {
+        // check for amulet of clarity
+        uint8_t j = pinfo.equipped[SLOT_AMULET];
+        if(j < INV_ITEMS && inv[j].subtype == AMU_CLARITY)
+            return;
+    }
     auto& te = ents[i];
     if(player_can_see_entity(i))
-        status(PSTR("@S @V confused!"), te.type, te.type, PSTR("become"));
+        status(PSTR("@S @V confused!"), i, i, PSTR("become"));
     if(i == 0)
         pinfo.confuse_rem = u8rand() % 4 + 4;
     te.confused = 1;
@@ -223,7 +283,7 @@ void poison_entity(uint8_t i)
     auto& te = ents[i];
     if(te.weakened) return;
     if(player_can_see_entity(i))
-        status(PSTR("@S @A weakened!"), te.type, te.type);
+        status(PSTR("@S @A weakened!"), i, i);
     te.weakened = 1;
 }
 
@@ -234,7 +294,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
     auto& te = ents[defi];
     bool cansee = player_can_see_entity(defi);
     if(!hit && cansee)
-        status(PSTR("@S @v @O."), e.type, e.type, PSTR("miss"), te.type);
+        status(PSTR("@S @v @O."), atti, atti, PSTR("miss"), defi);
     if(atti == 0)
         te.aggro = 1;
     if(hit)
@@ -243,9 +303,9 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
         if(cansee)
         {
             if(dam > 0)
-                status(PSTR("@S @V @O."), e.type, e.type, PSTR("hit"), te.type);
+                status(PSTR("@S @V @O."), atti, atti, PSTR("hit"), defi);
             else
-                status(PSTR("@S @V @P attack."), te.type, te.type, PSTR("block"), e.type);
+                status(PSTR("@S @V @P attack."), defi, defi, PSTR("block"), atti);
         }
         entity_take_damage(atti, defi, dam);
     }

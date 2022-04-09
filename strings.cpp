@@ -92,6 +92,7 @@ static char const NSCR_IDENTIFY[] PROGMEM = "identify";
 static char const NSCR_ENCHANT[] PROGMEM = "enchanting";
 static char const NSCR_REMOVE_CURSE[] PROGMEM = "remove curse";
 static char const NSCR_TELEPORT[] PROGMEM = "teleportation";
+static char const NSCR_MAPPING[] PROGMEM = "magic mapping";
 
 char const* const SCR_NAMES[NUM_SCR] PROGMEM =
 {
@@ -99,12 +100,14 @@ char const* const SCR_NAMES[NUM_SCR] PROGMEM =
     NSCR_ENCHANT,
     NSCR_REMOVE_CURSE,
     NSCR_TELEPORT,
+    NSCR_MAPPING,
 };
 
 static char const UNID_SCR_0[] PROGMEM = "faded";
 static char const UNID_SCR_1[] PROGMEM = "yellowed";
 static char const UNID_SCR_2[] PROGMEM = "tattered";
 static char const UNID_SCR_3[] PROGMEM = "glowing";
+static char const UNID_SCR_4[] PROGMEM = "shimmering";
 
 char const* const UNID_SCR_NAMES[NUM_SCR] PROGMEM =
 {
@@ -112,27 +115,52 @@ char const* const UNID_SCR_NAMES[NUM_SCR] PROGMEM =
     UNID_SCR_1,
     UNID_SCR_2,
     UNID_SCR_3,
+    UNID_SCR_4,
 };
 
 static char const NRNG_SEE_INVIS[] PROGMEM = "see invisible";
+static char const NRNG_STRENGTH[] PROGMEM = "strength";
+static char const NRNG_DEXTERITY[] PROGMEM = "dexterity";
+static char const NRNG_PROTECTION[] PROGMEM = "protection";
 
 char const* const RNG_NAMES[NUM_RNG] PROGMEM =
 {
     NRNG_SEE_INVIS,
+    NRNG_STRENGTH,
+    NRNG_DEXTERITY,
+    NRNG_PROTECTION,
 };
 
 static char const NAMU_SPEED[] PROGMEM = "speed";
+static char const NAMU_CLARITY[] PROGMEM = "clarity";
+static char const NAMU_CONSERVATION[] PROGMEM = "conservation";
+static char const NAMU_REGENERATION[] PROGMEM = "regeneration";
 
 char const* const AMU_NAMES[NUM_AMU] PROGMEM =
 {
     NAMU_SPEED,
+    NAMU_CLARITY,
+    NAMU_CONSERVATION,
+    NAMU_REGENERATION,
 };
 
 static char const UNID_RNG_AMU_0[] PROGMEM = "diamond";
+static char const UNID_RNG_AMU_1[] PROGMEM = "ruby";
+static char const UNID_RNG_AMU_2[] PROGMEM = "emerald";
+static char const UNID_RNG_AMU_3[] PROGMEM = "topaz";
+static char const UNID_RNG_AMU_4[] PROGMEM = "gold";
+static char const UNID_RNG_AMU_5[] PROGMEM = "silver";
+static char const UNID_RNG_AMU_6[] PROGMEM = "platinum";
 
 char const* const UNID_RNG_AMU_NAMES[NUM_RNG < NUM_AMU ? NUM_AMU : NUM_RNG] PROGMEM =
 {
     UNID_RNG_AMU_0,
+    UNID_RNG_AMU_1,
+    UNID_RNG_AMU_2,
+    UNID_RNG_AMU_3,
+    //UNID_RNG_AMU_4,
+    //UNID_RNG_AMU_5,
+    //UNID_RNG_AMU_6,
 };
 
 static char const INV_CAT_WEAPON[] PROGMEM = "Weapons";

@@ -19,13 +19,14 @@ static void draw_inventory(
         if(it == 255) continue;
         if(it < INV_ITEMS)
         {
-            draw_textf(x + 4, y, PSTR("@i"), inv[it]);
+            if(item_is_equipped(it))
+                draw_char(x + 1, y, '#');
+            draw_textf(x + 7, y, PSTR("@i"), inv[it]);
             if(j == seli)
                 inv_rect(0, 63, y - 1, y + 5); // TODO: width
         }
         else if(x == 0)
             draw_text(0, y, pgmptr(&INV_CATEGORIES[it - INV_ITEMS]));
-
     }
 }
 
@@ -235,6 +236,7 @@ static char const* const ACT_ITEMS[] PROGMEM =
 };
 
 static char const MEN_MAP[] PROGMEM = "Dungeon Map";
+static char const MEN_INV[] PROGMEM = "Inventory";
 static char const MEN_STATS[] PROGMEM = "Player Info";
 static char const MEN_SETTINGS[] PROGMEM = "Settings";
 static char const MEN_SAVE[] PROGMEM = "Save Progress";
@@ -243,6 +245,7 @@ static char const MEN_DEBUG[] PROGMEM = "Debug Info";
 static char const* const MEN_ITEMS[] PROGMEM =
 {
     MEN_MAP,
+    MEN_INV,
     MEN_STATS,
     MEN_SETTINGS,
     MEN_SAVE,
@@ -309,7 +312,49 @@ static void men_map()
         (void)0;
 }
 
-static void men_info() {}
+static void men_inv()
+{
+    (void)inventory_menu(PSTR("Inventory"));
+}
+
+static void draw_info_bonus(uint8_t x, uint8_t y, uint8_t val, uint8_t base)
+{
+    if(val > base)
+        draw_textf(x, y, PSTR("@u (+@u)"), val, val - base);
+    else if(val < base)
+        draw_textf(x, y, PSTR("@u (-@u)"), val, base - val);
+    else
+        draw_textf(x, y, PSTR("@u"), val);
+}
+static void draw_player_info(uint8_t x)
+{
+    draw_text(x + 30, 0, PSTR("Player Information"));
+    set_hline(0, 63, 7);
+    draw_text(x,  6 + 3, PSTR("Level:"));
+    draw_text(x, 12 + 3, PSTR("Max Health:"));
+    draw_text(x, 18 + 3, PSTR("Strength:"));
+    draw_text(x, 24 + 3, PSTR("Dexterity:"));
+    draw_text(x, 30 + 3, PSTR("Attack:"));
+    draw_text(x, 36 + 3, PSTR("Defense:"));
+    draw_text(x, 42 + 3, PSTR("Speed:"));
+    draw_textf(x + 40, 6 + 3, PSTR("@u"), plevel + 1);
+    draw_info_bonus(x + 40, 12 + 3, entity_max_health(0), pstats.max_health);
+    draw_info_bonus(x + 40, 18 + 3, entity_strength(0), pstats.strength);
+    draw_info_bonus(x + 40, 24 + 3, entity_dexterity(0), pstats.strength);
+    //draw_info_bonus(x + 40, 30 + 3, attack...); // TODO
+    draw_info_bonus(x + 40, 36 + 3, entity_defense(0), pstats.defense);
+    draw_info_bonus(x + 40, 42 + 3, entity_speed(0), pstats.speed);
+}
+static void men_info()
+{
+    draw_player_info(0);
+    paint_left();
+    draw_player_info(uint8_t(-64));
+    paint_right();
+    while(wait_btn() != BTN_B)
+        (void)0;
+}
+
 static void men_settings() {}
 static void men_save() {}
 
@@ -338,6 +383,7 @@ using men_method = void(*)(void);
 static men_method const MEN_METHODS[] PROGMEM =
 {
     men_map,
+    men_inv,
     men_info,
     men_settings,
     men_save,
@@ -371,7 +417,7 @@ bool action_menu(action& a)
             if(act)
             {
                 text = MEN_ITEMS;
-                n = 4;
+                n = 5;
                 i = 0;
             }
             else

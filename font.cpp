@@ -14,7 +14,7 @@ static uint16_t const FONT_DATA[] PROGMEM =
 
     fd(0x17            ), /* ! */
     fd(0x03, 0x00, 0x03), /* " */
-    fd(                ), /* # */
+    fd(0x0e, 0x0e, 0x0e), /* # */ /* used to indicate the item is used */
     fd(                ), /* $ */
     fd(0x19, 0x04, 0x13), /* % */
     fd(                ), /* & */
