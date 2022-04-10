@@ -344,7 +344,6 @@ void run()
         {
             draw_text(7, 24, PSTR("ArduRogue"));
             set_box(5, 42, 22, 30);
-            //set_hline(7, 40, 30);
             draw_text(0, 34, PSTR("Press A to play."));
             paint_offset(40);
             (void)wait_btn();

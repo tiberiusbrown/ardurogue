@@ -132,17 +132,32 @@ void paint_offset(uint8_t x, bool clear)
     paint_half(buf.data(), clear);
 }
 
+#define REMOVE_USB 0
+#if REMOVE_USB
+int main()
+#else
 void setup()
+#endif
 {
     Arduboy2Base::boot();
+#if REMOVE_USB
+
+    if(Arduboy2Core::buttonsState() & DOWN_BUTTON)
+    {
+        Arduboy2Core::exitToBootloader();
+    }
+#endif
     if(Arduboy2Core::buttonsState() & UP_BUTTON)
     {
         Arduboy2Core::sendLCDCommand(OLED_ALL_PIXELS_ON);
         Arduboy2Core::digitalWriteRGB(RGB_ON, RGB_ON, RGB_ON);
         Arduboy2Core::digitalWriteRGB(RED_LED, RGB_ON);
         power_timer0_disable();
-        for(;;);
+        for(;;) Arduboy2Core::idle();
     }
   
     run();
+#if REMOVE_USB
+    return 0;
+#endif
 }
