@@ -227,7 +227,8 @@ static char const* const ACT_ITEMS[] PROGMEM =
     ACT_CLOSE,
 };
 
-static char const MEN_MAP[] PROGMEM = "Dungeon Map";
+static char const MEN_MAP[] PROGMEM = "View Minimap";
+static char const MEN_SCROLL[] PROGMEM = "Scroll Dungeon";
 static char const MEN_INV[] PROGMEM = "Inventory";
 static char const MEN_STATS[] PROGMEM = "Player Info";
 static char const MEN_SETTINGS[] PROGMEM = "Settings";
@@ -237,6 +238,7 @@ static char const MEN_DEBUG[] PROGMEM = "Debug Info";
 static char const* const MEN_ITEMS[] PROGMEM =
 {
     MEN_MAP,
+    MEN_SCROLL,
     MEN_INV,
     MEN_STATS,
     MEN_SETTINGS,
@@ -395,10 +397,30 @@ static void men_debug()
         (void)0;
 }
 
+static void men_scroll()
+{
+    uint8_t x = ents[0].x, y = ents[0].y;
+    for(;;)
+    {
+        draw_dungeon(x, y);
+        paint_left();
+        uint8_t d;
+        if(!direction_menu(d, PSTR("Scroll Dungeon")))
+            break;
+        x += (int8_t)pgm_read_byte(&DIRX[d]) * 4;
+        y += (int8_t)pgm_read_byte(&DIRY[d]) * 4;
+        if(x & 0x80) x = 0;
+        if(y & 0x80) y = 0;
+        if(x >= MAP_W) x = MAP_W - 1;
+        if(y >= MAP_H) y = MAP_H - 1;
+    }
+}
+
 using men_method = void(*)(void);
 static men_method const MEN_METHODS[] PROGMEM =
 {
     men_map,
+    men_scroll,
     men_inv,
     men_info,
     men_settings,
@@ -417,13 +439,15 @@ bool action_menu(action& a)
     uint8_t n = 5;
     char const* const* text = ACT_ITEMS;
     bool act = true;
+    constexpr uint8_t START_Y = 9;
 
     for(;;)
     {
-        draw_info_without_status();
-        for(uint8_t j = 0, y = STATUS_START_Y; j <= n; ++j, y += 6)
+        draw_text(10, 0, act ? PSTR("{ Actions }") : PSTR("{ Game Menu }"));
+        set_hline(1, 63, 6);
+        for(uint8_t j = 0, y = START_Y; j <= n; ++j, y += 6)
             draw_text(8, y, (char const*)pgm_read_ptr(&text[j]));
-        inv_rect(1, 63, i * 6 + STATUS_START_Y - 1, i * 6 + STATUS_START_Y + 5);
+        inv_rect(1, 63, i * 6 + START_Y - 1, i * 6 + START_Y + 5);
         paint_right();
         uint8_t b = wait_btn();
         switch(b)
@@ -433,7 +457,7 @@ bool action_menu(action& a)
             if(act)
             {
                 text = MEN_ITEMS;
-                n = 5;
+                n = 6;
                 i = 0;
             }
             else

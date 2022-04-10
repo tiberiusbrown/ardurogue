@@ -71,16 +71,13 @@ Then walk next to the walls of the room and press A while standing next to each 
 
 ## TODO
 
-- Magic
-  - Strike (simple single-target damage)
-  - Heal
-  - Frenzy (target attacks any nearest entity)
 - Wands
   - Striking (simple single-target damage)
   - Force (pushes monsters back)
   - Fire (area of effect damage)
   - Lightning (arcs between monsters)
   - Teleportation (teleports target)
+  - Frenzy (target attacks any nearest entity)
 - Floor traps
 - Dragon breathes fire
 - Allow wearing up to two rings
