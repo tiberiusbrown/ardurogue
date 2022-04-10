@@ -270,7 +270,6 @@ void draw_map_offset(uint8_t ox)
 
     for(uint8_t y = 0; y < MAP_H; ++y)
     {
-        bool prior = false;
         for(uint8_t tx = 0; tx < 32; ++tx)
         {
             uint8_t x = tx + ox;
@@ -281,18 +280,26 @@ void draw_map_offset(uint8_t ox)
                 if(tile_is_solid(x, y) && (m = ddir_mask(x, y)) != 0xff)
                 {
                     clear_rect(px, px + 2, py, py + 2);
-                    set_rect(px, px + 1, py, py + 1);
+                    set_pixel(px + 1, py + 1);
 
-                    // thinner walls
-                    if(!(m & 0x1)) clear_hline(px, px + 1, py);
-                    if(!(m & 0x4)) clear_vline(px, py, py + 1);
-                    if((m & 0x85) == 0x05) clear_pixel(px, py);
+                    static uint8_t const TESTS[] PROGMEM =
+                    {
+                        0x09, 0x05, 0x49, 0x85,
+                        0x01, 0x01, 0x09, 0x05,
+                        0x06, 0x05, 0x26, 0x85,
+                        0x04, 0x04, 0x06, 0x05,
+                    };
 
-                    if(prior) clear_vline(px - 1, py, py + 2);
-                    prior = false;
+                    uint8_t i = 4;
+                    do
+                    {
+                        --i;
+                        if((m & pgm_read_byte(&TESTS[i])) == pgm_read_byte(&TESTS[i + 4]))
+                            set_pixel(px + 1, py);
+                        if((m & pgm_read_byte(&TESTS[i + 8])) == pgm_read_byte(&TESTS[i + 12]))
+                            set_pixel(px, py + 1);
+                    } while(i != 0);
                 }
-                else
-                    prior = true;
             }
             else
             {
@@ -367,8 +374,6 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         0x02, 0x03, 0x00, 0x00, 0x00,
     };
 
-    dig_nonsecret_door_tiles();
-
     for(uint8_t y = 0; y < 13; ++y)
     {
         for(uint8_t x = 0; x < 13; ++x)
@@ -419,8 +424,6 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         }
     }
 
-    update_doors();
-
     // draw doors
     for(uint8_t i = 0; i < num_doors; ++i)
     {
@@ -438,6 +441,11 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             if(ns) oy = opt.wall_style;
             clear_rect(px - 1, px + 4, py, py + 4 + oy);
             draw_sprite(&DOOR_IMGS[d.open], dx, dy);
+            if(tile_is_solid(d.x - 1, d.y))
+            {
+                set_vline(px - 2, py, py + 3);
+                set_vline(px + 5, py, py + 3);
+            }
         }
     }
 

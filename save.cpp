@@ -80,13 +80,13 @@ bool save_exists()
 bool save_is_alive()
 {
     // assumes save exists
-    return eeprom_read(EEPROM_START + offsetof(globals, saved.ents[0].type)) == entity::PLAYER;
+    return eeprom_read(EEPROM_START + offsetof(globals, saved.ents.d_[0].type)) == entity::PLAYER;
 }
 
 void destroy_save()
 {
     // set player type to NONE
-    eeprom_update(EEPROM_START + offsetof(globals, saved.ents[0].type), entity::NONE);
+    eeprom_update(EEPROM_START + offsetof(globals, saved.ents.d_[0].type), entity::NONE);
 }
 
 void save()
