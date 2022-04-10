@@ -9,12 +9,17 @@ static uint16_t const ENTITY_IMGS[] PROGMEM =
     0x0f5a, // rattlesnake
     0x9db9, // zombie
     0x0bf0, // goblin
+    0x0f52, // phantom
     0x0f9f, // orc
+    0x07a0, // tarantula
     0x0f2c, // hobgoblin
     0xefbe, // mimic (looks like a closed door)
+    0x09f9, // incubus
     0x01f1, // troll
     0x069d, // griffin
+    0x0e5e, // fallen angel
     0xf996, // dragon
+    0x0f88, // lord of darkness
 };
 
 static uint16_t const ITEM_IMGS[] PROGMEM =
@@ -262,7 +267,7 @@ static uint8_t ddir_mask(uint8_t tx, uint8_t ty)
 
 void draw_map_offset(uint8_t ox)
 {
-    for(uint8_t y = 0, t = 0; y < 64; y += 2, t ^= 1)
+    for(uint8_t y = 1, t = 0; y < 64; y += 2, t ^= 1)
         for(uint8_t x = 0; x < 64; x += 2)
         {
             set_pixel(x + t, y);
@@ -303,7 +308,7 @@ void draw_map_offset(uint8_t ox)
             }
             else
             {
-                clear_pixel(px + (y & 1), py);
+                clear_pixel(px + (y & 1), py + 1);
             }
         }
     }
@@ -319,6 +324,7 @@ void draw_map_offset(uint8_t ox)
         set_pixel(px + 1, py + 1);
     }
 
+#if 0
     // draw items
     for(auto const& mit : items)
     {
@@ -327,6 +333,7 @@ void draw_map_offset(uint8_t ox)
         uint8_t px = (mit.x - ox) * 2, py = mit.y * 2;
         set_pixel(px + 1, py + 1);
     }
+#endif
     
     // draw stairs
     if(tile_is_explored(xdn, ydn))

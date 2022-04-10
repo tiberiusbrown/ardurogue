@@ -323,7 +323,7 @@ static void draw_info_bonus(uint8_t x, uint8_t y, uint8_t val, uint8_t base)
 static void draw_player_info(uint8_t x)
 {
     draw_text(x + 30, 0, PSTR("Player Information"));
-    set_hline(0, 63, 7);
+    set_hline(0, 63, 6);
     draw_text(x,  6 + 3, PSTR("Level:"));
     draw_text(x, 12 + 3, PSTR("Max Health:"));
     draw_text(x, 18 + 3, PSTR("Strength:"));
@@ -338,6 +338,14 @@ static void draw_player_info(uint8_t x)
     //draw_info_bonus(x + 40, 30 + 3, attack...); // TODO
     draw_info_bonus(x + 40, 36 + 3, entity_defense(0), pstats.defense);
     draw_info_bonus(x + 40, 42 + 3, entity_speed(0), pstats.speed);
+
+    uint8_t y = 9;
+    draw_text(x + 70, y, PSTR("Effects:"));
+    if(ents[0].confused ) draw_text(x + 75, y += 6, PSTR("confused"));
+    if(ents[0].paralyzed) draw_text(x + 75, y += 6, PSTR("paralyzed"));
+    if(ents[0].weakened ) draw_text(x + 75, y += 6, PSTR("weakened"));
+    if(ents[0].invis    ) draw_text(x + 75, y += 6, PSTR("invisible"));
+    if(y == 9) draw_text(x + 75, 15, PSTR("none"));
 }
 static void men_info()
 {
@@ -357,8 +365,8 @@ static void men_settings()
         opt.wall_style &= 3;
         draw_dungeon(ents[0].x, ents[0].y);
         paint_left();
-        draw_info_without_status();
-        draw_textf(1, STATUS_START_Y, PSTR("Wall Style: { @u }"), opt.wall_style);
+        draw_text(20, 1, MEN_SETTINGS);
+        draw_textf(3, 9, PSTR("Wall Style: { @u }"), opt.wall_style);
         paint_right();
         uint8_t b = wait_btn();
         if(b == BTN_LEFT ) --opt.wall_style;

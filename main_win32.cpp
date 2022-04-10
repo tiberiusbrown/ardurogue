@@ -164,6 +164,7 @@ static LRESULT CALLBACK window_proc(HWND w, UINT msg, WPARAM wParam, LPARAM lPar
 {
     switch(msg)
     {
+#if 1
     case WM_SIZING:
     {
         RECT* r = (RECT*)lParam;
@@ -206,6 +207,7 @@ static LRESULT CALLBACK window_proc(HWND w, UINT msg, WPARAM wParam, LPARAM lPar
         }
         break;
     }
+#endif
     case WM_SIZE:
         ww = (int)LOWORD(lParam);
         wh = (int)HIWORD(lParam);
@@ -215,6 +217,7 @@ static LRESULT CALLBACK window_proc(HWND w, UINT msg, WPARAM wParam, LPARAM lPar
     case WM_CLOSE:
     case WM_DESTROY:
         PostQuitMessage(0);
+        break;
     case WM_PAINT:
         BeginPaint(w, &paint);
         if(ww == FBW && wh == FBH)
@@ -263,7 +266,7 @@ int WINAPI WinMain(
     BITMAPINFO bmi{};
     RECT wr;
     HBITMAP hbitmap;
-    static char const* const CLASS_NAME = "ardurogue";
+    static char const* const CLASS_NAME = "ArduRogue";
 
     wc.lpfnWndProc = window_proc;
     wc.hInstance = hInstance;

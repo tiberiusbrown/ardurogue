@@ -126,10 +126,10 @@ bool equip_item(uint8_t i)
     if(j < INV_ITEMS && !unequip_item(j))
         return false;
     bool weap = type <= item::SWORD;
+    identify_item(i);
     status(PSTR("You @p the @i."),
         weap ? PSTR("wield") : PSTR("put on"),
         inv[i]);
-    identify_item(i);
     j = i;
     return true;
 }

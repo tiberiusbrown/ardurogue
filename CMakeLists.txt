@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0091 NEW)
 cmake_policy(SET CMP0117 NEW)
 
-project(ardurogue)
+project(ArduRogue)
 
 set(PRE_CONFIGURE_FILE "git.hpp.in")
 # write to source folder cause arduino ide :(

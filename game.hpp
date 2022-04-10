@@ -171,12 +171,17 @@ struct entity
         RATTLESNAKE,
         ZOMBIE,
         GOBLIN,
+        PHANTOM,
         ORC,
+        TARANTULA,
         HOBGOBLIN,
         MIMIC,
+        INCUBUS,
         TROLL,
         GRIFFIN,
+        ANGEL,
         DRAGON,
+        DARKNESS,
     };
     uint8_t type;
     uint8_t confused  : 1;
