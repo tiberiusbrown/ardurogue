@@ -142,12 +142,8 @@ bool yesno_menu(char const* fmt, ...)
             {
                 x = 1;
                 y += 6;
-                draw_text(x, y, &t[n], false);
             }
-            else
-            {
-                draw_text(x, y, &t[n], false);
-            }
+            draw_text(x, y, &t[n], false);
             x += w + SPACE_WIDTH + 1;
             while(t[n++] != '\0')
                 ;
@@ -155,19 +151,15 @@ bool yesno_menu(char const* fmt, ...)
     }
     constexpr uint8_t Y = 55;
     constexpr int8_t OX = -4;
-    for(uint8_t i = 0; i < 2; ++i)
+
+    static uint8_t const CIRCLE[7] PROGMEM =
     {
-        uint8_t x = i * 32;
-        set_vline(x + 10 + OX, Y + 2, Y + 6);
-        set_vline(x + 18 + OX, Y + 2, Y + 6);
-        set_hline(x + 12 + OX, x + 16 + OX, Y);
-        set_hline(x + 12 + OX, x + 16 + OX, Y + 8);
-        set_pixel(x + 11 + OX, Y + 1);
-        set_pixel(x + 17 + OX, Y + 1);
-        set_pixel(x + 11 + OX, Y + 7);
-        set_pixel(x + 17 + OX, Y + 7);
-        draw_char(x + 13 + OX, Y + 2, 'A' + i);
-    }
+        0x1c, 0x3e, 0x7f, 0x7f, 0x7f, 0x3e, 0x1c,
+    };
+    set_img_prog(CIRCLE, 7,  0 + 11 + OX, Y + 1);
+    set_img_prog(CIRCLE, 7, 32 + 11 + OX, Y + 1);
+    draw_char( 0 + 13 + OX, Y + 2, 'A');
+    draw_char(32 + 13 + OX, Y + 2, 'B');
     draw_text(22 + OX, Y + 2, PSTR("Yes"));
     draw_text(54 + OX, Y + 2, PSTR("No"));
     paint_right();

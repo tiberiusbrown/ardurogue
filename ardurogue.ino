@@ -122,22 +122,12 @@ static void paint_half(uint8_t const* b, bool clear)
     );
 }
 
-void paint_left(bool clear)
+void paint_offset(uint8_t x, bool clear)
 {
     Arduboy2Core::LCDCommandMode();
     Arduboy2Core::SPItransfer(0x21);
-    Arduboy2Core::SPItransfer(0);
-    Arduboy2Core::SPItransfer(63);
-    Arduboy2Core::LCDDataMode();
-    paint_half(buf.data(), clear);
-}
-
-void paint_right(bool clear)
-{
-    Arduboy2Core::LCDCommandMode();
-    Arduboy2Core::SPItransfer(0x21);
-    Arduboy2Core::SPItransfer(64);
-    Arduboy2Core::SPItransfer(127);
+    Arduboy2Core::SPItransfer(x);
+    Arduboy2Core::SPItransfer(x + 63);
     Arduboy2Core::LCDDataMode();
     paint_half(buf.data(), clear);
 }

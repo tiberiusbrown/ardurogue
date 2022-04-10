@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+static constexpr uint8_t SAVE_VERSION = 1;
+
 #ifdef ARDUINO
 #include <EEPROM.h>
 static inline void eeprom_update(int addr, uint8_t data)
@@ -25,9 +27,7 @@ static inline uint8_t eeprom_read(int addr)
 static constexpr int EEPROM_END = 1024;
 static constexpr int EEPROM_START = EEPROM_END - SAVE_FILE_BYTES - 3;
 static constexpr int CHECKSUM_ADDR = EEPROM_END - 2;
-static constexpr int VALID_ADDR = EEPROM_END - 3;
-
-static constexpr uint8_t VALID_VAL = 0x42;
+static constexpr int VERSION_ADDR = EEPROM_END - 3;
 
 static void set_save_checksum(uint16_t x)
 {
@@ -62,7 +62,7 @@ static uint16_t compute_checksum()
 
 static bool save_is_valid()
 {
-    return eeprom_read(VALID_ADDR) == VALID_VAL;
+    return eeprom_read(VERSION_ADDR) == SAVE_VERSION;
 }
 
 bool save_exists()
@@ -72,14 +72,14 @@ bool save_exists()
 
 void destroy_save()
 {
-    eeprom_update(VALID_ADDR, ~VALID_VAL);
+    eeprom_update(VERSION_ADDR, ~SAVE_VERSION);
 }
 
 void save()
 {
     for(uint16_t i = 0; i < SAVE_FILE_BYTES; ++i)
         eeprom_update(EEPROM_START + i, ((uint8_t*)&globals_.saved)[i]);
-    eeprom_update(VALID_ADDR, VALID_VAL);
+    eeprom_update(VERSION_ADDR, SAVE_VERSION);
     set_save_checksum(compute_checksum());
 }
 

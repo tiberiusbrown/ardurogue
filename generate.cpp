@@ -622,7 +622,6 @@ void generate_dungeon()
     memzero(&items, sizeof(items));
     memzero(&rooms, sizeof(rooms));
     memzero(&doors, sizeof(doors));
-    num_ents = 1;
     num_rooms = 0;
     num_doors = 0;
     xdn = ydn = xup = yup = 255;

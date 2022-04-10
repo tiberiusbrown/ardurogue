@@ -268,8 +268,6 @@ void draw_map_offset(uint8_t ox)
             set_pixel(x + t, y);
         }
 
-    //dig_nonsecret_door_tiles();
-
     for(uint8_t y = 0; y < MAP_H; ++y)
     {
         bool prior = false;
@@ -279,8 +277,8 @@ void draw_map_offset(uint8_t ox)
             uint8_t px = tx * 2, py = y * 2;
             if(tile_is_solid_or_unknown(x, y))
             {
-                uint8_t m = ddir_mask(x, y);
-                if(tile_is_solid(x, y) && m != 0xff)
+                uint8_t m;
+                if(tile_is_solid(x, y) && (m = ddir_mask(x, y)) != 0xff)
                 {
                     clear_rect(px, px + 2, py, py + 2);
                     set_rect(px, px + 1, py, py + 1);
@@ -322,8 +320,6 @@ void draw_map_offset(uint8_t ox)
         uint8_t px = (mit.x - ox) * 2, py = mit.y * 2;
         set_pixel(px + 1, py + 1);
     }
-
-    //update_doors();
     
     // draw stairs
     if(tile_is_explored(xdn, ydn))

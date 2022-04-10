@@ -73,26 +73,24 @@ static char* item_name(char* dst, item it)
             dst = tstrcpy_prog(dst, pgmptr(&RNG_NAMES[st]));
             if(it.identified)
             {
+                char const* s = PSTR("");
+                uint8_t q = it.quant_or_level + 1;
+                char pm = it.cursed ? '-' : '+';
                 switch(st)
                 {
                 case RNG_STRENGTH:
-                    dst += tsprintf(dst, PSTR(" [@c@u str]"),
-                        it.cursed ? '-' : '+',
-                        it.quant_or_level + 1) - 1;
+                    s = PSTR(" [@c@u str]");
                     break;
                 case RNG_DEXTERITY:
-                    dst += tsprintf(dst, PSTR(" [@c@u dex]"),
-                        it.cursed ? '-' : '+',
-                        it.quant_or_level + 1) - 1;
+                    s = PSTR(" [@c@u dex]");
                     break;
                 case RNG_PROTECTION:
-                    dst += tsprintf(dst, PSTR(" [@c@u]"),
-                        it.cursed ? '-' : '+',
-                        it.quant_or_level + 1) - 1;
+                    s = PSTR(" [@c@u]");
                     break;
                 default:
                     break;
                 }
+                dst += tsprintf(dst, s, pm, q) - 1;
             }
             return dst;
         }
@@ -153,7 +151,7 @@ static char* item_name(char* dst, item it)
         else
         {
             return quantify_item(dst, n,
-                pgmptr(&UNID_SCR_NAMES[perm_scr[it.subtype]]),
+                pgmptr(&UNID_SCR_NAMES[perm_scr[st]]),
                 PSTR("scroll"));
         }
 

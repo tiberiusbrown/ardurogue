@@ -320,11 +320,8 @@ static void load_game()
     rand_seed = game_seed;
 }
 
-static void draw_title_screen(uint8_t x)
-{
-    draw_text(x + 30, 24, PSTR("Welcome to ArduRogue."));
-    draw_text(x + 40, 34, PSTR("Press A to play."));
-}
+void paint_left(bool clear) { paint_offset(0, clear); }
+void paint_right(bool clear) { paint_offset(64, clear); }
 
 void run()
 {
@@ -332,14 +329,10 @@ void run()
 
     for(;;)
     {
+        paint_left();
+        paint_right();
         memzero(&globals_, sizeof(globals_));
         opt.wall_style = 2;
-
-        draw_title_screen(0);
-        paint_left();
-        draw_title_screen(uint8_t(-64));
-        paint_right();
-        (void)wait_btn();
 
         char const* back = PSTR("");
         if(save_exists())
@@ -348,17 +341,25 @@ void run()
             back = PSTR("back ");
         }
         else
+        {
+            draw_text(7, 24, PSTR("ArduRogue"));
+            set_box(5, 42, 22, 30);
+            //set_hline(7, 40, 30);
+            draw_text(0, 34, PSTR("Press A to play."));
+            paint_offset(40);
+            (void)wait_btn();
             new_game();
+        }
 
         init_all_perms();
         generate_dungeon();
 
         if(ents[0].type == entity::NONE)
         {
+            // initialize player for new game
             for(auto& i : pinfo.equipped) i = 255;
             pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
             new_entity(0, entity::PLAYER, xup, yup);
-            //save();
         }
 
         statusx = 1;
@@ -371,6 +372,14 @@ void run()
         for(;;)
         {
             step();
+            if(ents[0].health == 0)
+            {
+                destroy_save();
+                // player is dead!
+                // handle this here: high score list? TODO
+                (void)wait_btn();
+                break;
+            }
         }
     }
 }

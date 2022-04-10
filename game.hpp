@@ -6,8 +6,7 @@
 // platform functionality
 uint8_t wait_btn(); // wait for button press
 uint16_t seed();
-void paint_left(bool clear = true);  // draw to left half screen
-void paint_right(bool clear = true); // draw to right half screen
+void paint_offset(uint8_t x, bool clear = true);
 
 // game logic
 void run();
@@ -318,8 +317,6 @@ struct saved_data
     array<map_item, MAP_ITEMS>  items;
     array<room, MAP_ROOMS>      rooms;
     array<door, MAP_DOORS>      doors;
-    uint8_t                     num_ents;  // only used for generation
-    uint8_t                     num_items; // only used for generation
     uint8_t                     num_rooms;
     uint8_t                     num_doors;
     uint8_t                     map_index;
@@ -365,8 +362,6 @@ inline constexpr auto& xdn = globals_.xdn;
 inline constexpr auto& ydn = globals_.ydn;
 inline constexpr auto& xup = globals_.xup;
 inline constexpr auto& yup = globals_.yup;
-inline constexpr auto& num_ents  = globals_.saved.num_ents;
-inline constexpr auto& num_items = globals_.saved.num_items;
 inline constexpr auto& num_rooms = globals_.saved.num_rooms;
 inline constexpr auto& num_doors = globals_.saved.num_doors;
 inline constexpr auto& ents = globals_.saved.ents;
@@ -471,6 +466,8 @@ extern char const* const UNID_RNG_AMU_NAMES[] PROGMEM;
 extern char const* const INV_CATEGORIES[] PROGMEM;
 
 // game.cpp
+void paint_left(bool clear = true);  // draw to left half screen
+void paint_right(bool clear = true); // draw to right half screen
 uint8_t u8rand();
 uint8_t u8rand(uint8_t m);
 bool tile_is_solid(uint8_t x, uint8_t y);

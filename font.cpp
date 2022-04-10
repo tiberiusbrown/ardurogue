@@ -122,7 +122,7 @@ uint8_t draw_char(uint8_t x, uint8_t y, char c)
     {
         uint8_t t = d[i];
         for(uint8_t j = y; t; ++j, t >>= 1)
-            if(t & 1) set_pixel(x, j);
+            if(t & 1) inv_pixel(x, j);
     }
     return n;
 }

@@ -23,15 +23,9 @@ void draw_status()
     {
         uint8_t w = text_width(&statusbuf[n], false);
         if(sx + w > 64)
-        {
             sx = 1, sy += 6;
-            draw_text(sx, sy, &statusbuf[n], false);
-        }
-        else
-        {
-            draw_text(sx, sy, &statusbuf[n], false);
-            sx += w + SPACE_WIDTH + 1;
-        }
+        draw_text(sx, sy, &statusbuf[n], false);
+        sx += w + SPACE_WIDTH + 1;
         while(statusbuf[n++] != '\0')
             ;
     }
@@ -68,16 +62,9 @@ void status(char const* fmt, ...)
             statusbuf[statusn++] = buf[i];
 		uint8_t n = text_width(&buf[a], false);
 		if(statusy >= 59 && statusx + n > 64 - MORE_WIDTH)
-		{
             status_more();
-			continue;
-		}
-		if(statusx + n > 64)
-		{
-			statusx = 1;
-			statusy += 6;
-			continue;
-		}
+		else if(statusx + n > 64)
+			statusx = 1, statusy += 6;
 		statusx += n + SPACE_WIDTH + 1;
 		if(b >= len) break;
 		a = b;

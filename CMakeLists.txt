@@ -20,6 +20,7 @@ endif()
 
 add_executable(
     ${PROJECT_NAME} ${WINFLAG}
+    README.md
     .editorconfig
     game.hpp
     main_win32.cpp

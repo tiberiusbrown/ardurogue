@@ -5,6 +5,16 @@
 
 #include "game.hpp"
 
+#ifndef NDEBUG
+#include <stdio.h>
+#include <time.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#define STBIR_DEFAULT_FILTER_UPSAMPLE STBIR_FILTER_BOX
+#include "stb_image_write.h"
+#include "stb_image_resize.h"
+#endif
+
 static HWND hwnd;
 static uint8_t* pixels;
 static HDC hdc;
@@ -20,9 +30,32 @@ static constexpr int ZOOM = 6;
 static constexpr int FBW = 128;
 static constexpr int FBH = 64;
 
+static constexpr int SZOOM = 2; // screenshot zoom
+
 uint16_t seed()
 {
     return 0xbabe;
+}
+
+static void screenshot()
+{
+#ifndef NDEBUG
+    char fname[256];
+    time_t rawtime;
+    struct tm* ti;
+    time(&rawtime);
+    ti = localtime(&rawtime);
+    snprintf(fname, sizeof(fname), "screenshot_%04d%02d%02d%02d%02d%02d.png",
+        ti->tm_year + 1900, ti->tm_mon + 1, ti->tm_mday,
+        ti->tm_hour + 1, ti->tm_min, ti->tm_sec);
+    uint8_t* resized = (uint8_t*)malloc(FBW * FBH * SZOOM * SZOOM * 4);
+    stbir_resize_uint8(
+        pixels, FBW, FBH, 0,
+        resized, FBW * SZOOM, FBH * SZOOM, 0,
+        4);
+    stbi_write_png(fname, FBW * SZOOM, FBH * SZOOM, 4, resized, 0);
+    free(resized);
+#endif
 }
 
 uint8_t wait_btn()
@@ -44,6 +77,7 @@ uint8_t wait_btn()
             case VK_RIGHT  : return BTN_RIGHT;
             case 'A'       : return BTN_A;
             case 'B'       : return BTN_B;
+            case VK_F2     : screenshot(); break;
             case VK_ESCAPE : ExitProcess(0);
             default        : break;
             }
@@ -57,7 +91,7 @@ static void refresh()
     InvalidateRect(hwnd, NULL, FALSE);
 }
 
-static void paint_offset(int offset, bool clear)
+void paint_offset(uint8_t offset, bool clear)
 {
     for(int i = 0; i < 512; ++i)
     {
@@ -71,21 +105,12 @@ static void paint_offset(int offset, bool clear)
             *p++ = color;
             *p++ = color;
             *p++ = color;
+            *p++ = 0xff;
         }
     }
     refresh();
     if(clear)
         for(auto& b : buf) b = 0;
-}
-
-void paint_left(bool clear)
-{
-    paint_offset(0, clear);
-}
-
-void paint_right(bool clear)
-{
-    paint_offset(64, clear);
 }
 
 static constexpr int RESIZE_SNAP_PIXELS = 32;

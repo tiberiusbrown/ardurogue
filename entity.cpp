@@ -227,13 +227,14 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
     entity_get_info(atti, info);
     auto& te = ents[defi];
     bool cansee = player_can_see_entity(defi);
-    if(dam > te.health)
+    if(dam >= te.health)
     {
         if(cansee)
             status(PSTR("@S @V!"), defi, defi, PSTR("die"));
         else
             status(PSTR("You hear the sound of death."));
         uint8_t tt = te.type;
+        te.health = 0;
         te.type = entity::NONE;
         maps[map_index].got_ents.set(defi);
         if(atti == 0)
