@@ -107,6 +107,10 @@ static uint16_t const FONT_DATA[] PROGMEM =
     fd(0x12, 0x0c, 0x12), /* x */
     fd(0x02, 0x14, 0x0e), /* y */
     fd(0x1a, 0x16      ), /* z */
+    fd(0x04, 0x0e, 0x1f), /* { (left arrow) */
+    fd(                ), /* | */
+    fd(0x1f, 0x0e, 0x04), /* } (right arrow) */
+
 
 };
 

@@ -347,8 +347,32 @@ static void men_info()
         (void)0;
 }
 
-static void men_settings() {}
-static void men_save() {}
+static void men_settings()
+{
+    uint8_t ws = opt.wall_style;
+    for(;;)
+    {
+        opt.wall_style &= 3;
+        draw_dungeon(ents[0].x, ents[0].y);
+        paint_left();
+        draw_info_without_status();
+        draw_textf(1, STATUS_START_Y, PSTR("Wall Style: { @u }"), opt.wall_style);
+        paint_right();
+        uint8_t b = wait_btn();
+        if(b == BTN_LEFT ) --opt.wall_style;
+        if(b == BTN_RIGHT) ++opt.wall_style;
+        if(b & (BTN_B | BTN_A))
+        {
+            if(b == BTN_B) opt.wall_style = ws;
+            return;
+        }
+    }
+}
+
+static void men_save()
+{
+    save();
+}
 
 static void men_debug_offset(uint8_t x)
 {

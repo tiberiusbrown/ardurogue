@@ -1,6 +1,8 @@
+# ArduRogue
+
 ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/).
 
-# Game Help
+## Introduction
 
 This is you: ![](img/player.png)
 
@@ -80,5 +82,7 @@ Then walk next to the walls of the room and press A while standing next to each 
   - Lightning (arcs between monsters)
   - Teleportation (teleports target)
 - Floor traps
+- Dragon breathes fire
 - Allow wearing up to two rings
 - Different map types (cave style?)
+- High Score List

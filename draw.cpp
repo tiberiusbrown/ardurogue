@@ -397,6 +397,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
                     a += (a >> 7);
                     for(uint8_t j = 0; j < opt.wall_style; ++j)
                         set_hline(a, b, py - 1 + j);
+                    clear_hline(a, b, py - 1 + opt.wall_style);
                 }
                 continue;
             }

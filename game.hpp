@@ -243,6 +243,7 @@ enum
     AMU_CLARITY,      // prevents becoming confused
     AMU_CONSERVATION, // chance to prevent consuming potions/scrolls
     AMU_REGENERATION, // (chance to) heal each turn
+    AMU_YENDOR,
     NUM_AMU,
 };
 

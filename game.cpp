@@ -372,12 +372,14 @@ void run()
         for(;;)
         {
             step();
-            if(ents[0].health == 0)
+            if(ents[0].type == entity::NONE)
             {
                 destroy_save();
+                render();
                 // player is dead!
                 // handle this here: high score list? TODO
-                (void)wait_btn();
+                while(wait_btn() != BTN_B)
+                    (void)0;
                 break;
             }
         }
