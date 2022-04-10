@@ -308,6 +308,12 @@ struct door
     uint8_t secret : 1; // must be zero if open
 };
 
+static constexpr uint8_t NUM_WALL_STYLES = 4;
+struct options
+{
+    uint8_t wall_style;
+};
+
 struct saved_data
 {
     uint16_t                    game_seed;
@@ -326,12 +332,7 @@ struct saved_data
     bitset<NUM_IDENT>           identified;
     uint8_t                     prev_action;
     uint8_t                     plevel;
-};
-
-static constexpr uint8_t NUM_WALL_STYLES = 4;
-struct options
-{
-    uint8_t wall_style;
+    options                     opt;
 };
 
 struct globals
@@ -343,7 +344,6 @@ struct globals
     uint8_t xdn, ydn; // coords of down stairs
     uint8_t xup, yup; // coords of up stairs
     saved_data saved;
-    options opt;
     char statusbuf[128];
     uint8_t statusn, statusx, statusy;
     array<uint8_t, NUM_POT> perm_pot;
@@ -377,7 +377,7 @@ inline constexpr auto& game_seed = globals_.saved.game_seed;
 inline constexpr auto& pstats = globals_.saved.pstats;
 inline constexpr auto& pinfo = globals_.saved.pinfo;
 inline constexpr auto& rand_seed = globals_.rand_seed;
-inline constexpr auto& opt = globals_.opt;
+inline constexpr auto& opt = globals_.saved.opt;
 inline constexpr auto& statusbuf = globals_.statusbuf;
 inline constexpr auto& statusn = globals_.statusn;
 inline constexpr auto& statusx = globals_.statusx;
@@ -591,7 +591,9 @@ void entity_apply_potion(uint8_t i, uint8_t subtype);
 void save();
 void destroy_save();
 bool save_exists();
+bool save_is_alive();
 void load();
+void load_options();
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);

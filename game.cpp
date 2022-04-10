@@ -256,7 +256,9 @@ void step()
             render();
         }
         else if(px == xup && py == yup &&
-            yesno_menu(PSTR("Go back up the stairs?")))
+            yesno_menu(map_index == 0 ?
+                PSTR("Return to the surface?") :
+                PSTR("Go back up the stairs?")))
         {
             --map_index;
             // TODO: test for returning to surface
@@ -334,8 +336,11 @@ void run()
         memzero(&globals_, sizeof(globals_));
         opt.wall_style = 2;
 
+        bool saved = save_exists();
+        if(saved) load_options();
+
         char const* back = PSTR("");
-        if(save_exists())
+        if(saved && save_is_alive())
         {
             load_game();
             back = PSTR("back ");

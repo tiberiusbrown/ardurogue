@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+#include <stddef.h>
+
 static constexpr uint8_t SAVE_VERSION = 1;
 
 #ifdef ARDUINO
@@ -67,12 +69,24 @@ static bool save_is_valid()
 
 bool save_exists()
 {
-    return save_is_valid() && compute_checksum() == get_save_checksum();
+    // verify:
+    //    1. save version is current
+    //    2. checksum is valid
+    return
+        save_is_valid() &&
+        compute_checksum() == get_save_checksum();
+}
+
+bool save_is_alive()
+{
+    // assumes save exists
+    return eeprom_read(EEPROM_START + offsetof(globals, saved.ents[0].type)) == entity::PLAYER;
 }
 
 void destroy_save()
 {
-    eeprom_update(VERSION_ADDR, ~SAVE_VERSION);
+    // set player type to NONE
+    eeprom_update(EEPROM_START + offsetof(globals, saved.ents[0].type), entity::NONE);
 }
 
 void save()
@@ -87,4 +101,13 @@ void load()
 {
     for(uint16_t i = 0; i < SAVE_FILE_BYTES; ++i)
         ((uint8_t*)&globals_.saved)[i] = eeprom_read(EEPROM_START + i);
+}
+
+void load_options()
+{
+    uint8_t i = sizeof(options);
+    do
+    {
+        ((uint8_t*)&opt)[i] = eeprom_read(EEPROM_START + offsetof(globals, saved.opt) + i - 1);
+    } while(--i != 0);
 }

@@ -125,7 +125,7 @@ bool yesno_menu(char const* fmt, ...)
 {
     draw_info_without_status();
     {
-        char t[64];
+        char t[128];
         va_list ap;
         va_start(ap, fmt);
         tvsprintf(t, fmt, ap);
