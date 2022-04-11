@@ -82,6 +82,14 @@ uint8_t xp_for_level()
     return tmin<uint8_t>(plevel, 15) * 16 + 10;
 }
 
+uint8_t armor_item_defense(item it)
+{
+    // assumes item is armor, helm, or boots
+    uint8_t level = it.quant_or_level;
+    if(it.cursed) level = -(level + 2);
+    return item::BOOTS - it.type + level + 1;
+}
+
 void player_gain_xp(uint8_t xp)
 {
     uint8_t txp = xp_for_level();
@@ -312,7 +320,8 @@ static void init_all_perms()
 
 static void new_game()
 {
-    rand_seed = game_seed = seed();
+    seed();
+    game_seed = rand_seed;
     map_index = 0;
 }
 

@@ -63,6 +63,7 @@ static void use_scroll(uint8_t subtype)
             else
             {
                 it.cursed = 0;
+                it.quant_or_level = 0;
                 status(PSTR("The @i glows white for a moment."), it);
             }
         }
@@ -70,14 +71,12 @@ static void use_scroll(uint8_t subtype)
             status(PSTR("Nothing happens."));
         break;
     case SCR_TELEPORT:
-        find_unoccupied_guaranteed(ents[0].x, ents[0].y);
-        status(PSTR("You find yourself in another location."));
-        confuse_entity(0);
+        teleport_entity(0);
         break;
     case SCR_MAPPING:
         for(auto& t : tfog)
             t = 0xff;
-        status(PSTR("You become aware of the dungeon's layout."));
+        status(PSTR("You become aware of your surroundings."));
         break;
     default:
         break;

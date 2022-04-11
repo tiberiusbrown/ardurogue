@@ -103,7 +103,6 @@ uint8_t entity_defense(uint8_t i)
     uint8_t r;
     if(i == 0)
     {
-        // TODO: factor in item modifiers
         r = pstats.defense;
         // ring of protection
         uint8_t j = pinfo.equipped[SLOT_RING];
@@ -115,6 +114,13 @@ uint8_t entity_defense(uint8_t i)
                 r -= n;
             else
                 r += n;
+        }
+        // armor
+        for(uint8_t i = SLOT_ARMOR; i <= SLOT_BOOTS; ++i)
+        {
+            uint8_t j = pinfo.equipped[i];
+            if(j < INV_ITEMS)
+                r += armor_item_defense(inv[j]);
         }
     }
     else
@@ -262,6 +268,14 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
 
         te.health -= dam;
     }
+}
+
+void teleport_entity(uint8_t i)
+{
+    find_unoccupied_guaranteed(ents[i].x, ents[i].y);
+    if(i == 0)
+        status(PSTR("You find yourself in another location."));
+    confuse_entity(i);
 }
 
 void confuse_entity(uint8_t i)

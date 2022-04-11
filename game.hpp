@@ -5,7 +5,7 @@
 
 // platform functionality
 uint8_t wait_btn(); // wait for button press
-uint16_t seed();
+void seed(); // sets rand_seed
 void paint_offset(uint8_t x, bool clear = true);
 
 // game logic
@@ -127,6 +127,7 @@ struct entity_info
     uint8_t vampire  : 1; // chance to drain max hp on hit
     uint8_t confuse  : 1; // chance to confuse on hit
     uint8_t paralyze : 1; // chance to paralyze on hit
+    uint8_t fbreath  : 1; // ranged attack: breathe fire
     uint8_t opener   : 1; // whether it can open doors
 
     uint8_t strength;    // higher is better
@@ -142,8 +143,8 @@ struct entity_info
 enum
 {
     SLOT_WEAPON,
-    SLOT_HELM,
     SLOT_ARMOR,
+    SLOT_HELM,
     SLOT_BOOTS,
     SLOT_RING,
     SLOT_AMULET,
@@ -249,7 +250,7 @@ enum
     AMU_CONSERVATION, // chance to prevent consuming potions/scrolls
     AMU_REGENERATION, // (chance to) heal each turn
     AMU_YENDOR,
-    NUM_AMU,
+    NUM_AMU = AMU_YENDOR,
 };
 
 static constexpr uint8_t NUM_IDENT =
@@ -271,6 +272,7 @@ struct item
         ARMOR,  // level
         HELM,   // level
         BOOTS,  // level
+        NUM_ITEM_TYPES,
     };
     uint8_t type           : 4;
     uint8_t subtype        : 4;
@@ -485,6 +487,7 @@ entity* get_entity(uint8_t x, uint8_t y);
 uint8_t index_of_door(door const& d);
 uint8_t index_of_entity(entity const& e);
 uint8_t xp_for_level();
+uint8_t armor_item_defense(item it);
 void player_gain_xp(uint8_t xp);
 bool player_pickup_item(uint8_t i); // map item
 void player_remove_item(uint8_t i); // inv item
@@ -565,6 +568,7 @@ uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi); // 0 for block
 void entity_restore_strength(uint8_t i);
 void entity_heal(uint8_t i, uint8_t amount);
 void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam);
+void teleport_entity(uint8_t i);
 void confuse_entity(uint8_t i);
 void poison_entity(uint8_t i);
 void advance_entity(uint8_t i);

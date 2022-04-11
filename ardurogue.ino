@@ -15,9 +15,9 @@ static uint8_t button_rep[8];
 static uint8_t buttons, buttons_prev;
 static uint8_t just_pressed;
 
-uint16_t seed()
+void seed()
 {
-    return (uint16_t)Arduboy2::generateRandomSeed();
+    rand_seed = Arduboy2::generateRandomSeed();
 }
 
 static void poll_buttons_debounce(uint8_t debounce_num)

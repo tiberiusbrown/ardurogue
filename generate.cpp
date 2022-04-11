@@ -608,6 +608,49 @@ static void generate_item(uint8_t i, item it)
     mit.it = it;
 }
 
+static void generate_random_item(uint8_t i)
+{
+    item it{};
+    uint8_t type = u8rand(item::NUM_ITEM_TYPES);
+    it.type = type;
+    bool cursed = (u8rand() < 32);
+    uint8_t enchant = (u8rand() < 64);
+    switch(type)
+    {
+    case item::ARROW:
+        it.quant_or_level = u8rand() % 4 + 3;
+        [[fallthrough]];
+    case item::FOOD:
+        it.cursed = 0;
+        break;
+    case item::POTION:
+        it.subtype = u8rand(NUM_POT);
+        break;
+    case item::SCROLL:
+        it.subtype = u8rand(NUM_POT);
+        break;
+    case item::RING:
+        it.cursed = cursed;
+        it.quant_or_level = enchant;
+        it.subtype = u8rand(NUM_POT);
+        break;
+    case item::AMULET:
+        it.subtype = u8rand(NUM_AMU);
+        [[fallthrough]];
+    case item::SWORD:
+    case item::BOW:
+    case item::HELM:
+    case item::ARMOR:
+    case item::BOOTS:
+        it.cursed = cursed;
+        it.quant_or_level = enchant;
+        break;
+    default:
+        break;
+    }
+    generate_item(i, it);
+}
+
 void generate_dungeon()
 {
     if(map_index & 0x80) return;
@@ -652,10 +695,10 @@ void generate_dungeon()
         uint8_t i = 0;
         generate_item(i++, { item::SCROLL, SCR_ENCHANT });
         generate_item(i++, { item::POTION, POT_HEALING });
-        for(; i < MAP_ITEMS; ++i)
-        {
-            generate_item(i++, { item::RING, RNG_STRENGTH });
-        }
+        generate_item(i++, { item::POTION, POT_STRENGTH });
+        generate_item(i++, { item::FOOD });
+        for(; i < MAP_ITEMS - 4; ++i)
+            generate_random_item(i++);
     }
 
     //
@@ -686,6 +729,9 @@ void generate_dungeon()
 
     // clear buf
     for(auto& b : buf) b = 0;
+
+    // reseed rng
+    seed();
 }
 
 void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y)

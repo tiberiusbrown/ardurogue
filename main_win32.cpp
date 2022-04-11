@@ -32,9 +32,9 @@ static constexpr int FBH = 64;
 
 static constexpr int SZOOM = 2; // screenshot zoom
 
-uint16_t seed()
+void seed()
 {
-    return 0xbabe;
+    rand_seed = 0xbabe;
 }
 
 static void screenshot()

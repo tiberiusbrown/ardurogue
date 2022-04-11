@@ -149,7 +149,7 @@ static char const NAMU_CONSERVATION[] PROGMEM = "conservation";
 static char const NAMU_REGENERATION[] PROGMEM = "regeneration";
 static char const NAMU_YENDOR[] PROGMEM = "Yendor";
 
-char const* const AMU_NAMES[NUM_AMU] PROGMEM =
+char const* const AMU_NAMES[NUM_AMU + 1] PROGMEM =
 {
     NAMU_SPEED,
     NAMU_CLARITY,
@@ -172,7 +172,7 @@ char const* const UNID_RNG_AMU_NAMES[NUM_RNG < NUM_AMU ? NUM_AMU : NUM_RNG] PROG
     UNID_RNG_AMU_1,
     UNID_RNG_AMU_2,
     UNID_RNG_AMU_3,
-    UNID_RNG_AMU_4,
+    //UNID_RNG_AMU_4,
     //UNID_RNG_AMU_5,
     //UNID_RNG_AMU_6,
 };

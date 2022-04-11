@@ -39,10 +39,23 @@ static char* quantify_item(
     return dst;
 }
 
+static char const ITEM_NAME_ARMOR[] PROGMEM = "armor";
+static char const ITEM_NAME_HELM [] PROGMEM = "helm";
+static char const ITEM_NAME_BOOTS[] PROGMEM = "boots";
+static char const* const ITEM_NAME_ARMORS[] PROGMEM =
+{
+    ITEM_NAME_ARMOR,
+    ITEM_NAME_HELM,
+    ITEM_NAME_BOOTS,
+};
+
 static char* item_name(char* dst, item it)
 {
     uint8_t n = it.quant_or_level;
     uint8_t st = it.subtype;
+    char pm = it.cursed ? '-' : '+';
+    if(it.cursed && it.identified)
+        dst = tstrcpy_prog(dst, PSTR("cursed "));
     switch(it.type)
     {
     case item::FOOD:
@@ -57,14 +70,12 @@ static char* item_name(char* dst, item it)
     case item::SWORD:
         dst = tstrcpy_prog(dst, PSTR("sword"));
         return dst;
-    case item::BOOTS:
-        dst = tstrcpy_prog(dst, PSTR("boots"));
-        return dst;
-    case item::HELM:
-        dst = tstrcpy_prog(dst, PSTR("helm"));
-        return dst;
     case item::ARMOR:
-        dst = tstrcpy_prog(dst, PSTR("armor"));
+    case item::HELM:
+    case item::BOOTS:
+        dst = tstrcpy_prog(dst, pgmptr(&ITEM_NAME_ARMORS[it.type - item::ARMOR]));
+        if(it.identified)
+            dst += tsprintf(dst, PSTR(" [@d def]"), armor_item_defense(it));
         return dst;
     case item::RING:
         if(ring_is_identified(st))
@@ -75,7 +86,6 @@ static char* item_name(char* dst, item it)
             {
                 char const* s = PSTR("");
                 uint8_t q = it.quant_or_level + 1;
-                char pm = it.cursed ? '-' : '+';
                 switch(st)
                 {
                 case RNG_STRENGTH:
@@ -258,8 +268,14 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             b = item_name(b, it);
             break;
         }
+        case 'd':
         case 'u': // uint8_t
             u = (uint8_t)va_arg(ap, int);
+            if(c == 'd')
+            {
+                *b++ = (u & 0x80 ? '-' : '+');
+                u &= 0x7f;
+            }
             dec[0] = u % 10;
             u /= 10;
             if(u != 0)

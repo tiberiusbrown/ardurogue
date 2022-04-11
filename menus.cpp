@@ -115,7 +115,7 @@ uint8_t inventory_menu(char const* prompt)
             else seli = n - 1;
         }
 
-        while(seli > offi + 9) offi += 3;
+        while(seli > offi + 8) offi += 3;
         while(seli < offi) offi -= 3;
     }
     return 255;
