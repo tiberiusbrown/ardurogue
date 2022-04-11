@@ -605,6 +605,8 @@ static void generate_item(uint8_t i, item it)
         return;
     auto& mit = items[i];
     find_unoccupied_guaranteed(mit.x, mit.y);
+    if(maps[map_index].got_items.test(i))
+        it.type = item::NONE;
     mit.it = it;
 }
 
@@ -669,8 +671,7 @@ void generate_dungeon()
     num_doors = 0;
     xdn = ydn = xup = yup = 255;
 
-    render();
-    //wait_btn();
+    render(); // show "Loading..."
 
     dig_initial_room();
     for(uint16_t i = 0; i < 4096; ++i)
@@ -686,7 +687,10 @@ void generate_dungeon()
     if(map_index < NUM_MAPS - 1)
         find_unoccupied_guaranteed(xdn, ydn);
     find_unoccupied_guaranteed(xup, yup);
+}
 
+void generate_items_and_ents()
+{
     //
     // add items
     //
@@ -717,21 +721,14 @@ void generate_dungeon()
             j = pgm_read_byte(&MAP_GEN_INFOS[map_index].monster_types[j]);
             if(j != 0)
             {
-                if(!maps[map_index].got_ents.test(i))
-                {
-                    e.type = j;
-                    e.health = entity_max_health(i);
-                }
+                e.type = j;
+                e.health = entity_max_health(i);
+                if(maps[map_index].got_ents.test(i))
+                    e.type = entity::NONE;
                 break;
             }
         }
     }
-
-    // clear buf
-    for(auto& b : buf) b = 0;
-
-    // reseed rng
-    seed();
 }
 
 void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y)

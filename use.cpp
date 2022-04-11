@@ -127,7 +127,7 @@ bool equip_item(uint8_t i)
     bool weap = type <= item::SWORD;
     identify_item(i);
     status(PSTR("You @p the @i."),
-        weap ? PSTR("wield") : PSTR("put on"),
+        weap ? PSTR("ready") : PSTR("put on"),
         inv[i]);
     j = i;
     return true;
@@ -137,7 +137,6 @@ bool use_item(uint8_t i)
 {
     item& it = inv[i];
     uint8_t subtype = it.subtype;
-    inv[i].identified = 1;
     switch(it.type)
     {
     case item::POTION:

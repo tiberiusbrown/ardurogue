@@ -100,7 +100,7 @@ static char* item_name(char* dst, item it)
                 default:
                     break;
                 }
-                dst += tsprintf(dst, s, pm, q) - 1;
+                dst += tsprintf(dst, s, pm, q);
             }
             return dst;
         }
@@ -122,7 +122,7 @@ static char* item_name(char* dst, item it)
                 case AMU_SPEED:
                     dst += tsprintf(dst, PSTR(" [@c@u spd]"),
                         it.cursed ? '-' : '+',
-                        it.quant_or_level / 2 + 1) - 1;
+                        it.quant_or_level / 2 + 1);
                     break;
                 default:
                     break;
@@ -293,7 +293,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         }
     }
 end:
-    return (uint8_t)(ptrdiff_t)(b - b_orig);
+    return (uint8_t)(ptrdiff_t)(b - b_orig) - 1;
 }
 
 uint8_t tstrlen(char const* s)

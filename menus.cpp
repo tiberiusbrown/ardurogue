@@ -359,21 +359,21 @@ static void men_info()
 
 static void men_settings()
 {
-    uint8_t ws = opt.wall_style;
+    uint8_t ws = wall_style;
     for(;;)
     {
-        opt.wall_style &= 3;
+        wall_style &= 3;
         draw_dungeon(ents[0].x, ents[0].y);
         paint_left();
         draw_text(20, 1, MEN_SETTINGS);
-        draw_textf(3, 9, PSTR("Wall Style: { @u }"), opt.wall_style);
+        draw_textf(3, 9, PSTR("Wall Style: { @u }"), wall_style);
         paint_right();
         uint8_t b = wait_btn();
-        if(b == BTN_LEFT ) --opt.wall_style;
-        if(b == BTN_RIGHT) ++opt.wall_style;
+        if(b == BTN_LEFT ) --wall_style;
+        if(b == BTN_RIGHT) ++wall_style;
         if(b & (BTN_B | BTN_A))
         {
-            if(b == BTN_B) opt.wall_style = ws;
+            if(b == BTN_B) wall_style = ws;
             return;
         }
     }

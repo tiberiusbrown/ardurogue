@@ -399,7 +399,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             if(!tile_is_solid_or_unknown(tx, ty))
             {
                 if(player_can_see(tx, ty))
-                    set_pixel(px + 2, py + 2 + (opt.wall_style == 3));
+                    set_pixel(px + 2, py + 2 + (wall_style == 3));
                 if(tile_is_solid(tx, ty - 1))
                 {
                     uint8_t a = px - 1;
@@ -407,9 +407,9 @@ void draw_dungeon(uint8_t mx, uint8_t my)
                     if(!(i & 0x80)) ++a;
                     if(!(i & 0x40)) --b;
                     a += (a >> 7);
-                    for(uint8_t j = 0; j < opt.wall_style; ++j)
+                    for(uint8_t j = 0; j < wall_style; ++j)
                         set_hline(a, b, py - 1 + j);
-                    clear_hline(a, b, py - 1 + opt.wall_style);
+                    clear_hline(a, b, py - 1 + wall_style);
                 }
                 continue;
             }
@@ -445,7 +445,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             uint8_t px = dx * 5;
             uint8_t py = dy * 5;
             bool ns = !tile_is_solid_or_unknown(d.x, d.y + 1);
-            if(ns) oy = opt.wall_style;
+            if(ns) oy = wall_style;
             clear_rect(px - 1, px + 4, py, py + 4 + oy);
             draw_sprite(&DOOR_IMGS[d.open], dx, dy);
             if(tile_is_solid(d.x - 1, d.y))

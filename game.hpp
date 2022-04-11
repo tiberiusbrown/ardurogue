@@ -7,6 +7,9 @@
 uint8_t wait_btn(); // wait for button press
 void seed(); // sets rand_seed
 void paint_offset(uint8_t x, bool clear = true);
+uint8_t read_persistent(uint16_t addr);
+void update_persistent(uint16_t addr, uint8_t data);
+void flush_persistent();
 
 // game logic
 void run();
@@ -315,18 +318,28 @@ struct door
     uint8_t secret : 1; // must be zero if open
 };
 
-static constexpr uint8_t NUM_WALL_STYLES = 4;
-struct options
+struct high_score
 {
-    uint8_t wall_style;
+    enum
+    {
+        HS_ESCAPED,  // escaped with the amulet
+        HS_RETURNED, // returned to the surface without the amulet
+        HS_ENTITY,   // killed by entity
+        HS_TRAP,     // killed by trap
+    };
+    uint16_t score;
+    uint8_t type;
+    uint8_t data;
 };
+
+static constexpr uint8_t NUM_WALL_STYLES = 4;
 
 struct saved_data
 {
     uint16_t                    game_seed;
+    uint16_t                    score;
     array<map_info, NUM_MAPS>   maps;
     array<item, INV_ITEMS>      inv;
-    bitset<INV_ITEMS>           equipped;
     array<entity, MAP_ENTITIES> ents;
     array<map_item, MAP_ITEMS>  items;
     array<room, MAP_ROOMS>      rooms;
@@ -339,7 +352,10 @@ struct saved_data
     bitset<NUM_IDENT>           identified;
     uint8_t                     prev_action;
     uint8_t                     plevel;
-    options                     opt;
+
+    // options, high score table, etc
+    uint8_t                     wall_style;
+    array<high_score, 4>        high_scores;
 };
 
 struct globals
@@ -379,12 +395,11 @@ inline constexpr auto& rooms = globals_.saved.rooms;
 inline constexpr auto& doors = globals_.saved.doors;
 inline constexpr auto& map_index = globals_.saved.map_index;
 inline constexpr auto& inv = globals_.saved.inv;
-inline constexpr auto& equipped = globals_.saved.equipped;
 inline constexpr auto& game_seed = globals_.saved.game_seed;
 inline constexpr auto& pstats = globals_.saved.pstats;
 inline constexpr auto& pinfo = globals_.saved.pinfo;
 inline constexpr auto& rand_seed = globals_.rand_seed;
-inline constexpr auto& opt = globals_.saved.opt;
+inline constexpr auto& wall_style = globals_.saved.wall_style;
 inline constexpr auto& statusbuf = globals_.statusbuf;
 inline constexpr auto& statusn = globals_.statusn;
 inline constexpr auto& statusx = globals_.statusx;
@@ -397,6 +412,7 @@ inline constexpr auto& identified = globals_.saved.identified;
 inline constexpr auto& prev_action = globals_.saved.prev_action;
 inline constexpr auto& plevel = globals_.saved.plevel;
 inline constexpr auto& just_moved = globals_.just_moved;
+inline constexpr auto& high_scores = globals_.saved.high_scores;
 
 inline bool potion_is_identified(uint8_t subtype)
 {
@@ -527,6 +543,7 @@ void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y);
 void dig_nonsecret_door_tiles();
 void update_doors();   // set tile to solid for closed doors
 void generate_dungeon();
+void generate_items_and_ents();
 bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
 bool find_unoccupied(uint8_t& x, uint8_t& y); // returns true if found
 void find_unoccupied_guaranteed(uint8_t& x, uint8_t& y);
@@ -599,10 +616,8 @@ void entity_apply_potion(uint8_t i, uint8_t subtype);
 // save.cpp
 void save();
 void destroy_save();
-bool save_exists();
-bool save_is_alive();
+bool save_valid();
 void load();
-void load_options();
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);

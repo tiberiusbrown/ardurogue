@@ -1,6 +1,8 @@
 #if defined(_WIN32)
 
+#define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
+#include <Shlobj.h>
 #include <stdlib.h>
 
 #include "game.hpp"
@@ -31,6 +33,29 @@ static constexpr int FBW = 128;
 static constexpr int FBH = 64;
 
 static constexpr int SZOOM = 2; // screenshot zoom
+
+static char persistent_path[MAX_PATH] = {};
+static uint8_t persistent_data[1024];
+
+uint8_t read_persistent(uint16_t addr)
+{
+    return persistent_data[addr % 1024];
+}
+
+void update_persistent(uint16_t addr, uint8_t data)
+{
+    persistent_data[addr % 1024] = data;
+}
+
+void flush_persistent()
+{
+    FILE* f = fopen(persistent_path, "wb");
+    if(f)
+    {
+        fwrite(persistent_data, 1, 1024, f);
+        fclose(f);
+    }
+}
 
 void seed()
 {
@@ -267,6 +292,22 @@ int WINAPI WinMain(
     RECT wr;
     HBITMAP hbitmap;
     static char const* const CLASS_NAME = "ArduRogue";
+
+    char appdata[MAX_PATH];
+    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, appdata)))
+    {
+        snprintf(
+            persistent_path,
+            sizeof(persistent_path),
+            "%s\\ardurogue_save",
+            appdata);
+        FILE* f = fopen(persistent_path, "rb");
+        if(f)
+        {
+            fread(persistent_data, 1, 1024, f);
+            fclose(f);
+        }
+    }
 
     wc.lpfnWndProc = window_proc;
     wc.hInstance = hInstance;

@@ -343,13 +343,14 @@ void run()
         paint_left();
         paint_right();
         memzero(&globals_, sizeof(globals_));
-        opt.wall_style = 2;
+        wall_style = 2;
 
-        bool saved = save_exists();
-        if(saved) load_options();
+        bool saved = save_valid();
+        if(saved) load();
 
         char const* back = PSTR("");
-        if(saved && save_is_alive())
+        saved &= (ents[0].type == entity::PLAYER);
+        if(saved)
         {
             load_game();
             back = PSTR("back ");
@@ -367,8 +368,9 @@ void run()
         init_all_perms();
         generate_dungeon();
 
-        if(ents[0].type == entity::NONE)
+        if(!saved)
         {
+            generate_items_and_ents();
             // initialize player for new game
             for(auto& i : pinfo.equipped) i = 255;
             pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
@@ -387,7 +389,7 @@ void run()
             step();
             if(ents[0].type == entity::NONE)
             {
-                destroy_save();
+                if(saved) destroy_save();
                 render();
                 // player is dead!
                 // handle this here: high score list? TODO
