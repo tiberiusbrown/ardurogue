@@ -15,6 +15,18 @@ static uint8_t button_rep[8];
 static uint8_t buttons, buttons_prev;
 static uint8_t just_pressed;
 
+uint8_t read_persistent(uint16_t addr)
+{
+    return EEPROM.read((int)addr);
+}
+
+void update_persistent(uint16_t addr, uint8_t data)
+{
+    EEPROM.update((int)addr, data);
+}
+
+void flush_persistent() {}
+
 void seed()
 {
     rand_seed = Arduboy2::generateRandomSeed();
