@@ -175,7 +175,7 @@ static char const HEX_CHARS[] PROGMEM = "0123456789ABCDEF";
 
 uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
 {
-    char c, ct;
+    char c;
     uint8_t u;
     uint8_t dec[2];
     char const* s;

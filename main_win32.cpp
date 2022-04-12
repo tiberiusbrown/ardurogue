@@ -3,6 +3,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 #include <Shlobj.h>
+#include <strsafe.h>
 #include <stdlib.h>
 
 #include "game.hpp"
@@ -36,6 +37,7 @@ static constexpr int SZOOM = 2; // screenshot zoom
 
 static char persistent_path[MAX_PATH] = {};
 static uint8_t persistent_data[1024];
+static bool path_defined = false;
 
 uint8_t read_persistent(uint16_t addr)
 {
@@ -49,11 +51,14 @@ void update_persistent(uint16_t addr, uint8_t data)
 
 void flush_persistent()
 {
-    FILE* f = fopen(persistent_path, "wb");
-    if(f)
+    if(!path_defined) return;
+    HANDLE f = CreateFile(
+    persistent_path, GENERIC_WRITE, 0, NULL, CREATE_NEW,
+    FILE_ATTRIBUTE_NORMAL, NULL);
+    if(f != INVALID_HANDLE_VALUE)
     {
-        fwrite(persistent_data, 1, 1024, f);
-        fclose(f);
+        (void)WriteFile(f, persistent_data, 1024, NULL, NULL);
+        CloseHandle(f);
     }
 }
 
@@ -293,20 +298,18 @@ int WINAPI WinMain(
     HBITMAP hbitmap;
     static char const* const CLASS_NAME = "ArduRogue";
 
-    char appdata[MAX_PATH];
-    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, appdata)))
+    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, persistent_path)))
     {
-        snprintf(
-            persistent_path,
-            sizeof(persistent_path),
-            "%s\\ardurogue_save",
-            appdata);
-        FILE* f = fopen(persistent_path, "rb");
-        if(f)
+        StringCchCatA(persistent_path, sizeof(persistent_path), "\\ardurogue_save");
+        HANDLE f = CreateFile(
+            persistent_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL, NULL);
+        if(f != INVALID_HANDLE_VALUE)
         {
-            fread(persistent_data, 1, 1024, f);
-            fclose(f);
+            (void)ReadFile(f, persistent_data, 1024, NULL, NULL);
+            CloseHandle(f);
         }
+        path_defined = true;
     }
 
     wc.lpfnWndProc = window_proc;
