@@ -52,9 +52,9 @@ void update_persistent(uint16_t addr, uint8_t data)
 void flush_persistent()
 {
     if(!path_defined) return;
-    HANDLE f = CreateFile(
-    persistent_path, GENERIC_WRITE, 0, NULL, CREATE_NEW,
-    FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE f = CreateFileA(
+        persistent_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL, NULL);
     if(f != INVALID_HANDLE_VALUE)
     {
         (void)WriteFile(f, persistent_data, 1024, NULL, NULL);

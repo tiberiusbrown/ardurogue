@@ -436,19 +436,22 @@ void draw_dungeon(uint8_t mx, uint8_t my)
     {
         auto const& d = doors[i];
         if(d.secret) continue;
-        uint8_t dx = d.x - mx;
-        uint8_t dy = d.y - my;
+        uint8_t x = d.x, y = d.y;
+        uint8_t dx = x - mx;
+        uint8_t dy = y - my;
         if(dx >= 13 || dy >= 13) continue;
-        if(tile_is_explored(d.x, d.y))
+        //if(tile_is_explored(x, y))
+        if(tile_is_explored(x, y) ||
+            (!tile_is_solid(x, y + 1) && tile_is_explored(x, y + 1)))
         {
             uint8_t oy = 0;
             uint8_t px = dx * 5;
             uint8_t py = dy * 5;
-            bool ns = !tile_is_solid_or_unknown(d.x, d.y + 1);
-            if(ns) oy = wall_style;
-            clear_rect(px - 1, px + 4, py, py + 4 + oy);
+            if(!tile_is_solid_or_unknown(x, y + 1))
+                oy = wall_style;
+            clear_rect(px == 0 ? 0 : px - 1, px + 4, py, py + 4 + oy);
             draw_sprite(&DOOR_IMGS[d.open], dx, dy);
-            if(tile_is_solid(d.x - 1, d.y))
+            if(tile_is_solid(x - 1, d.y))
             {
                 set_vline(px - 2, py, py + 3);
                 set_vline(px + 5, py, py + 3);
