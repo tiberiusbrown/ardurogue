@@ -2,6 +2,47 @@
 
 #include "git.hpp"
 
+static void show_high_scores_offset(uint8_t x)
+{
+    draw_text(x + 46, 0, PSTR("High Scores"));
+    set_hline(0, 63, 6);
+    for(uint8_t i = 0, y = 9; i < NUM_HIGH_SCORES; ++i, y += 6)
+    {
+        auto const& h = high_scores[i];
+        switch(h.type)
+        {
+        case HS_ESCAPED:
+            draw_text(x, y, PSTR("Escaped with the amulet"));
+            break;
+        case HS_RETURNED:
+            draw_text(x, y, PSTR("Returned to the surface"));
+            break;
+        case HS_ABANDONED:
+            draw_text(x, y, PSTR("Abandoned the game"));
+            break;
+        case HS_ENTITY:
+            draw_textf(x, y, PSTR("Death by @M"), h.data);
+            break;
+        case HS_TRAP:
+            // TODO
+        case HS_NONE:
+        default:
+            continue;
+        }
+        draw_textf(x + 106, y, PSTR("@u"), h.score);
+    }
+}
+
+void show_high_scores()
+{
+    show_high_scores_offset(0);
+    paint_left();
+    show_high_scores_offset(uint8_t(-64));
+    paint_right();
+    while(wait_btn() != BTN_B)
+        (void)0;
+}
+
 static void draw_inventory(
     uint8_t x,
     char const* prompt,
@@ -231,6 +272,7 @@ static char const MEN_MAP[] PROGMEM = "View Minimap";
 static char const MEN_SCROLL[] PROGMEM = "Scroll Dungeon";
 static char const MEN_INV[] PROGMEM = "Inventory";
 static char const MEN_STATS[] PROGMEM = "Player Info";
+static char const MEN_HS[] PROGMEM = "High Scores";
 static char const MEN_SETTINGS[] PROGMEM = "Settings";
 static char const MEN_SAVE[] PROGMEM = "Save Progress";
 static char const MEN_DEBUG[] PROGMEM = "Debug Info";
@@ -241,6 +283,7 @@ static char const* const MEN_ITEMS[] PROGMEM =
     MEN_SCROLL,
     MEN_INV,
     MEN_STATS,
+    MEN_HS,
     MEN_SETTINGS,
     MEN_SAVE,
     MEN_DEBUG,
@@ -324,20 +367,25 @@ static void draw_player_info(uint8_t x)
 {
     draw_text(x + 30, 0, PSTR("Player Information"));
     set_hline(0, 63, 6);
-    draw_text(x,  6 + 3, PSTR("Level:"));
-    draw_text(x, 12 + 3, PSTR("Max Health:"));
-    draw_text(x, 18 + 3, PSTR("Strength:"));
-    draw_text(x, 24 + 3, PSTR("Dexterity:"));
-    draw_text(x, 30 + 3, PSTR("Attack:"));
-    draw_text(x, 36 + 3, PSTR("Defense:"));
-    draw_text(x, 42 + 3, PSTR("Speed:"));
-    draw_textf(x + 40, 6 + 3, PSTR("@u"), plevel + 1);
-    draw_info_bonus(x + 40, 12 + 3, entity_max_health(0), pstats.max_health);
-    draw_info_bonus(x + 40, 18 + 3, entity_strength(0), pstats.strength);
-    draw_info_bonus(x + 40, 24 + 3, entity_dexterity(0), pstats.strength);
-    //draw_info_bonus(x + 40, 30 + 3, attack...); // TODO
-    draw_info_bonus(x + 40, 36 + 3, entity_defense(0), pstats.defense);
-    draw_info_bonus(x + 40, 42 + 3, entity_speed(0), pstats.speed);
+    draw_text(x,  6 + 3, PSTR("Score:"));
+    draw_text(x, 12 + 3, PSTR("Level:"));
+    draw_text(x, 18 + 3, PSTR("Max Health:"));
+    draw_text(x, 24 + 3, PSTR("Strength:"));
+    draw_text(x, 30 + 3, PSTR("Dexterity:"));
+    draw_text(x, 36 + 3, PSTR("Attack:"));
+    draw_text(x, 42 + 3, PSTR("Defense:"));
+    draw_text(x, 48 + 3, PSTR("Speed:"));
+    draw_textf(x + 40, 6 + 3, PSTR("@u"), hs.score);
+    draw_textf(x + 40, 12 + 3, PSTR("@u"), plevel + 1);
+    draw_info_bonus(x + 40, 18 + 3, entity_max_health(0), pstats.max_health);
+    draw_info_bonus(x + 40, 24 + 3, entity_strength(0), pstats.strength);
+    draw_info_bonus(x + 40, 30 + 3, entity_dexterity(0), pstats.strength);
+    {
+        uint8_t t = entity_attack(0);
+        draw_info_bonus(x + 40, 36 + 3, t, t);
+    }
+    draw_info_bonus(x + 40, 42 + 3, entity_defense(0), pstats.defense);
+    draw_info_bonus(x + 40, 48 + 3, entity_speed(0), pstats.speed);
 
     uint8_t y = 9;
     draw_text(x + 70, y, PSTR("Effects:"));
@@ -431,6 +479,7 @@ static men_method const MEN_METHODS[] PROGMEM =
     men_scroll,
     men_inv,
     men_info,
+    show_high_scores,
     men_settings,
     men_save,
     men_debug,
@@ -465,7 +514,7 @@ bool action_menu(action& a)
             if(act)
             {
                 text = MEN_ITEMS;
-                n = 6;
+                n = 7;
                 i = 0;
             }
             else

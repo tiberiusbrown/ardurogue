@@ -31,6 +31,13 @@ void draw_status()
     }
 }
 
+void reset_status()
+{
+    statusn = 0;
+    statusx = 1;
+    statusy = STATUS_START_Y;
+}
+
 void status_more()
 {
     draw_dungeon(ents[0].x, ents[0].y);
@@ -40,9 +47,7 @@ void status_more()
     paint_right();
     while(wait_btn() != BTN_A)
         ;
-    statusn = 0;
-    statusx = 1;
-    statusy = STATUS_START_Y;
+    reset_status();
 }
 
 void status(char const* fmt, ...)

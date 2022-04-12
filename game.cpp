@@ -229,6 +229,11 @@ static void advance()
     }
 }
 
+void end_game()
+{
+
+}
+
 void step()
 {
     action a{};
@@ -268,18 +273,25 @@ void step()
                 PSTR("Return to the surface?") :
                 PSTR("Go back up the stairs?")))
         {
-            --map_index;
-            // TODO: test for returning to surface
-            generate_dungeon();
-            ents[0].x = xdn, ents[0].y = ydn;
-            update_light();
-            render();
+            if(map_index == 0)
+            {
+                hs.type = HS_RETURNED;
+                ents[0].type = entity::NONE;
+                return;
+            }
+            else
+            {
+                --map_index;
+                // TODO: test for returning to surface
+                generate_dungeon();
+                ents[0].x = xdn, ents[0].y = ydn;
+                update_light();
+                render();
+            }
         }
     }
 
-    statusn = 0;
-    statusx = 1;
-    statusy = STATUS_START_Y;
+    reset_status();
     uint8_t b = wait_btn();
     switch(b)
     {
@@ -320,15 +332,31 @@ static void init_all_perms()
 
 static void new_game()
 {
+    memzero(&globals_.saved,
+        sizeof(globals_.saved) - sizeof(wall_style) - sizeof(high_scores));
     seed();
     game_seed = rand_seed;
-    map_index = 0;
 }
 
 static void load_game()
 {
     load();
     rand_seed = game_seed;
+}
+
+void process_high_score()
+{
+    uint8_t i;
+    for(i = 0; i < NUM_HIGH_SCORES; ++i)
+    {
+        if(hs.score > high_scores[i].score)
+            break;
+    }
+    if(i >= NUM_HIGH_SCORES) return;
+    for(uint8_t j = NUM_HIGH_SCORES - 1; j > i; --j)
+        high_scores[j] = high_scores[j - 1];
+    high_scores[i] = hs;
+    save();
 }
 
 void paint_left(bool clear) { paint_offset(0, clear); }
@@ -342,11 +370,15 @@ void run()
     {
         paint_left();
         paint_right();
-        memzero(&globals_, sizeof(globals_));
-        wall_style = 2;
+        reset_status();
 
         bool saved = save_valid();
         if(saved) load();
+        else
+        {
+            memzero(&globals_, sizeof(globals_));
+            wall_style = 2;
+        }
 
         char const* back = PSTR("");
         saved &= (ents[0].type == entity::PLAYER);
@@ -390,11 +422,14 @@ void run()
             if(ents[0].type == entity::NONE)
             {
                 if(saved) destroy_save();
+                status(PSTR("Press B to continue."));
                 render();
-                // player is dead!
+                // game is over!
                 // handle this here: high score list? TODO
                 while(wait_btn() != BTN_B)
                     (void)0;
+                process_high_score();
+                show_high_scores();
                 break;
             }
         }

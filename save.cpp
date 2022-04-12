@@ -2,18 +2,12 @@
 
 #include <stddef.h>
 
-static constexpr uint8_t SAVE_VERSION = 1;
+static constexpr uint8_t SAVE_VERSION = 2;
 
 static constexpr int EEPROM_END = 1024;
 static constexpr int EEPROM_START = EEPROM_END - SAVE_FILE_BYTES - 3;
 static constexpr int CHECKSUM_ADDR = EEPROM_END - 2;
 static constexpr int VERSION_ADDR = EEPROM_END - 3;
-
-static void set_save_checksum(uint16_t x)
-{
-    update_persistent(CHECKSUM_ADDR + 0, *((uint8_t*)&x + 0));
-    update_persistent(CHECKSUM_ADDR + 1, *((uint8_t*)&x + 1));
-}
 
 static uint16_t get_save_checksum()
 {
@@ -40,6 +34,13 @@ static uint16_t compute_checksum()
     return crc;
 }
 
+static void update_checksum()
+{
+    uint16_t x = compute_checksum();
+    update_persistent(CHECKSUM_ADDR + 0, *((uint8_t*)&x + 0));
+    update_persistent(CHECKSUM_ADDR + 1, *((uint8_t*)&x + 1));
+}
+
 bool save_valid()
 {
     return
@@ -59,7 +60,7 @@ void save()
     for(uint16_t i = 0; i < SAVE_FILE_BYTES; ++i)
         update_persistent(EEPROM_START + i, ((uint8_t*)&globals_.saved)[i]);
     update_persistent(VERSION_ADDR, SAVE_VERSION);
-    set_save_checksum(compute_checksum());
+    update_checksum();
     flush_persistent();
 }
 

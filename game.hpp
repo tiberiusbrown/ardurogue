@@ -53,14 +53,20 @@ struct array
 {
     T d_[N];
     T* data() { return d_; }
-    T const* data() const { return d_; }
+    constexpr T const* data() const { return d_; }
     T& operator[](size_t i) { verify(i); return d_[i]; }
-    T const& operator[](size_t i) const { verify(i); return d_[i]; }
-    size_t size() { return N; }
+    constexpr T const& operator[](size_t i) const
+    {
+#if defined(_MSC_VER) && !defined(NDEBUG)
+        verify(i);
+#endif
+        return d_[i];
+    }
+    constexpr size_t size() const { return N; }
     T* begin() { return d_; }
-    T const* begin() const { return d_; }
+    constexpr T const* begin() const { return d_; }
     T* end() { return d_ + N; }
-    T const* end() const { return d_ + N; }
+    constexpr T const* end() const { return d_ + N; }
 private:
     void verify(size_t i) const
     {
@@ -75,7 +81,7 @@ template<size_t N> struct bitset
 {
     static constexpr size_t ND = (N + 7) / 8;
     array<uint8_t, ND> d_;
-    bool test(size_t i) const { return (d_[i / 8] >> (i % 8)) & 1; }
+    constexpr bool test(size_t i) const { return (d_[i / 8] >> (i % 8)) & 1; }
     void set(size_t i) { d_[i / 8] |= (1 << (i % 8)); }
     void clear(size_t i) { d_[i / 8] &= ~(1 << (i % 8)); }
 };
@@ -318,18 +324,20 @@ struct door
     uint8_t secret : 1; // must be zero if open
 };
 
+enum
+{
+    HS_NONE,
+    HS_ESCAPED,   // escaped with the amulet
+    HS_RETURNED,  // returned to the surface without the amulet
+    HS_ABANDONED, // chose to end the game
+    HS_ENTITY,    // killed by entity
+    HS_TRAP,      // killed by trap
+};
 struct high_score
 {
-    enum
-    {
-        HS_ESCAPED,  // escaped with the amulet
-        HS_RETURNED, // returned to the surface without the amulet
-        HS_ENTITY,   // killed by entity
-        HS_TRAP,     // killed by trap
-    };
     uint16_t score;
     uint8_t type;
-    uint8_t data;
+    uint8_t data;     // type of entity/trap
 };
 
 static constexpr uint8_t NUM_WALL_STYLES = 4;
@@ -337,7 +345,7 @@ static constexpr uint8_t NUM_WALL_STYLES = 4;
 struct saved_data
 {
     uint16_t                    game_seed;
-    uint16_t                    score;
+    high_score                  hs;
     array<map_info, NUM_MAPS>   maps;
     array<item, INV_ITEMS>      inv;
     array<entity, MAP_ENTITIES> ents;
@@ -412,7 +420,10 @@ inline constexpr auto& identified = globals_.saved.identified;
 inline constexpr auto& prev_action = globals_.saved.prev_action;
 inline constexpr auto& plevel = globals_.saved.plevel;
 inline constexpr auto& just_moved = globals_.just_moved;
+inline constexpr auto& hs = globals_.saved.hs;
 inline constexpr auto& high_scores = globals_.saved.high_scores;
+
+static constexpr uint8_t NUM_HIGH_SCORES = high_scores.size();
 
 inline bool potion_is_identified(uint8_t subtype)
 {
@@ -508,6 +519,7 @@ void player_gain_xp(uint8_t xp);
 bool player_pickup_item(uint8_t i); // map item
 void player_remove_item(uint8_t i); // inv item
 void render();
+void process_high_score();
 
 // font.cpp
 uint8_t draw_char(uint8_t x, uint8_t y, char c); // returns width of char
@@ -572,6 +584,7 @@ uint8_t advance_white(char* b, uint8_t i);
 void draw_status();
 void status(char const* fmt, ...);
 void status_more();
+void reset_status();
 
 // entity.cpp
 uint8_t entity_speed(uint8_t i);
@@ -584,7 +597,8 @@ bool test_attack_hit(uint8_t atti, uint8_t defi); // 0 for miss
 uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi); // 0 for block
 void entity_restore_strength(uint8_t i);
 void entity_heal(uint8_t i, uint8_t amount);
-void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam);
+void entity_take_damage(uint8_t i, uint8_t dam);
+void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam);
 void teleport_entity(uint8_t i);
 void confuse_entity(uint8_t i);
 void poison_entity(uint8_t i);
@@ -598,6 +612,7 @@ void monster_ai(uint8_t i, action& a);
 
 // menus.cpp
 uint8_t inventory_menu(char const* s);
+void show_high_scores();
 bool yesno_menu(char const* fmt, ...);
 bool direction_menu(uint8_t& d, char const* s = nullptr, bool cancel = true);
 bool repeat_action(action& a);

@@ -226,27 +226,51 @@ void entity_heal(uint8_t i, uint8_t amount)
         e.health += amount;
 }
 
-void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
+void entity_take_damage(uint8_t i, uint8_t dam)
 {
-    auto const& e = ents[atti];
-    entity_info info;
-    entity_get_info(atti, info);
-    auto& te = ents[defi];
-    bool cansee = player_can_see_entity(defi);
+    auto& te = ents[i];
+    bool cansee = player_can_see_entity(i);
     if(dam >= te.health)
     {
         if(cansee)
-            status(PSTR("@S @V!"), defi, defi, PSTR("die"));
+            status(PSTR("@S @V!"), i, i, PSTR("die"));
         else
             status(PSTR("You hear the sound of death."));
         uint8_t tt = te.type;
         te.health = 0;
         te.type = entity::NONE;
-        maps[map_index].got_ents.set(defi);
-        if(atti == 0)
-            player_gain_xp(pgm_read_byte(&MONSTER_INFO[tt].xp));
+        maps[map_index].got_ents.set(i);            
     }
     else
+    {
+        te.health -= dam;
+    }
+}
+
+void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
+{
+    auto const& e = ents[atti];
+    entity_info info;
+    entity_get_info(atti, info);
+    auto& te = ents[defi];
+    uint8_t tetype = te.type;
+
+    if(defi == 0)
+    {
+        hs.type = HS_ENTITY;
+        hs.data = e.type;
+    }
+    entity_take_damage(defi, dam);
+    if(te.type == entity::NONE) // entity was killed
+    {
+        if(atti == 0)
+        {
+            uint8_t xp = pgm_read_byte(&MONSTER_INFO[tetype].xp);
+            player_gain_xp(xp);
+            hs.score += xp;
+        }
+    }
+    else // entity was damaged but not killed: on hit effects
     {
         if(defi == 0 && info.vampire && u8rand() < 40)
         {
@@ -265,8 +289,6 @@ void entity_take_damage(uint8_t atti, uint8_t defi, uint8_t dam)
 
         if(info.poison && u8rand() < 20)
             poison_entity(defi);
-
-        te.health -= dam;
     }
 }
 
@@ -324,7 +346,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
             else
                 status(PSTR("@S @V @P attack."), defi, defi, PSTR("block"), atti);
         }
-        entity_take_damage(atti, defi, dam);
+        entity_take_damage_from_entity(atti, defi, dam);
     }
 }
 

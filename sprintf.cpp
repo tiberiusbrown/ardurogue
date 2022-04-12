@@ -177,7 +177,8 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
 {
     char c;
     uint8_t u;
-    uint8_t dec[2];
+    uint16_t u16;
+    uint8_t dec[5];
     char const* s;
     char* b_orig = b;
     for(;;)
@@ -208,6 +209,10 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         case 'p': // progmem string
             s = va_arg(ap, char const*);
             b = tstrcpy_prog(b, s);
+            break;
+        case 'M': // monster type
+            u = (uint8_t)va_arg(ap, int);
+            b = tstrcpy_prog(b, pgmptr(&MONSTER_NAMES[u]));
             break;
         case 'S': // subject
         case 'O': // object
@@ -268,25 +273,24 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             b = item_name(b, it);
             break;
         }
-        case 'd':
-        case 'u': // uint8_t
-            u = (uint8_t)va_arg(ap, int);
+        case 'd': // int8_t only (int16_t not supported)
+        case 'u': // uint8_t or uint16_t
+            u16 = (uint16_t)va_arg(ap, int);
             if(c == 'd')
             {
-                *b++ = (u & 0x80 ? '-' : '+');
-                u &= 0x7f;
+                *b++ = (u16 & 0x80 ? '-' : '+');
+                u16 &= 0x7f;
             }
-            dec[0] = u % 10;
-            u /= 10;
-            if(u != 0)
+            u = 0;
+            do
             {
-                dec[1] = u % 10;
-                u /= 10;
-                if(u != 0)
-                    *b++ = '0' + u;
-                *b++ = '0' + dec[1];
-            }
-            *b++ = '0' + dec[0];
+                dec[u++] = u16 % 10;
+                u16 /= 10;
+            } while(u16 != 0);
+            do
+            {
+                *b++ = '0' + dec[--u];
+            } while(u != 0);
             break;
         default:
             break;

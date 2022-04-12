@@ -440,7 +440,6 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         uint8_t dx = x - mx;
         uint8_t dy = y - my;
         if(dx >= 13 || dy >= 13) continue;
-        //if(tile_is_explored(x, y))
         if(tile_is_explored(x, y) ||
             (!tile_is_solid(x, y + 1) && tile_is_explored(x, y + 1)))
         {
