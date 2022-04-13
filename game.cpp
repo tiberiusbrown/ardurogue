@@ -414,7 +414,8 @@ void run()
             set_box(5, 42, 22, 30);
             draw_text(0, 34, PSTR("Press A to play."));
             paint_offset(40);
-            (void)wait_btn();
+            while(wait_btn() != BTN_A)
+                (void)0;
             new_game();
         }
 

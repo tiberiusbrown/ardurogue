@@ -471,8 +471,11 @@ static void add_door(uint8_t x, uint8_t y)
         set_tile_explored(x, y);
         d.open = 1;
     }
-    else
-        d.secret = (t < DOOR_SECRET_CHANCE);
+    else if(t < DOOR_SECRET_CHANCE)
+    {
+        d.secret = 1;
+        set_tile_explored(x, y);
+    }
     d.x = x;
     d.y = y;
     ++num_doors;
