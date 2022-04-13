@@ -2,11 +2,12 @@
 
 #include "git.hpp"
 
-static void show_high_scores_offset(uint8_t x)
+static void show_high_scores_offset(uint8_t x, uint8_t ti)
 {
     draw_text(x + 46, 0, PSTR("High Scores"));
     set_hline(0, 63, 6);
-    for(uint8_t i = 0, y = 9; i < NUM_HIGH_SCORES; ++i, y += 6)
+    ++x;
+    for(uint8_t i = 0, y = 11; i < NUM_HIGH_SCORES; ++i, y += 7)
     {
         auto const& h = high_scores[i];
         switch(h.type)
@@ -29,15 +30,19 @@ static void show_high_scores_offset(uint8_t x)
         default:
             continue;
         }
-        draw_textf(x + 106, y, PSTR("@u"), h.score);
+        char tn[6];
+        uint8_t n = tsprintf(tn, PSTR("@u"), h.score);
+        draw_text(x + 127 - n * 4, y, tn, false);
+        if(ti == i)
+            inv_rect(0, 63, y - 1, y + 5);
     }
 }
 
-void show_high_scores()
+void show_high_scores(uint8_t i)
 {
-    show_high_scores_offset(0);
+    show_high_scores_offset(0, i);
     paint_left();
-    show_high_scores_offset(uint8_t(-64));
+    show_high_scores_offset(uint8_t(-64), i);
     paint_right();
     while(wait_btn() != BTN_B)
         (void)0;
@@ -378,12 +383,10 @@ static void draw_player_info(uint8_t x)
     draw_textf(x + 40, 6 + 3, PSTR("@u"), hs.score);
     draw_textf(x + 40, 12 + 3, PSTR("@u"), plevel + 1);
     draw_info_bonus(x + 40, 18 + 3, entity_max_health(0), pstats.max_health);
-    draw_info_bonus(x + 40, 24 + 3, entity_strength(0), pstats.strength);
-    draw_info_bonus(x + 40, 30 + 3, entity_dexterity(0), pstats.strength);
-    {
-        uint8_t t = entity_attack(0);
-        draw_info_bonus(x + 40, 36 + 3, t, t);
-    }
+    uint8_t t = entity_strength(0);
+    draw_info_bonus(x + 40, 24 + 3, t, pstats.strength);
+    draw_info_bonus(x + 40, 30 + 3, entity_dexterity(0), pstats.dexterity);
+    draw_info_bonus(x + 40, 36 + 3, entity_attack(0), t);
     draw_info_bonus(x + 40, 42 + 3, entity_defense(0), pstats.defense);
     draw_info_bonus(x + 40, 48 + 3, entity_speed(0), pstats.speed);
 
@@ -472,6 +475,11 @@ static void men_scroll()
     }
 }
 
+static void men_high_scores()
+{
+    show_high_scores(255);
+}
+
 using men_method = void(*)(void);
 static men_method const MEN_METHODS[] PROGMEM =
 {
@@ -479,7 +487,7 @@ static men_method const MEN_METHODS[] PROGMEM =
     men_scroll,
     men_inv,
     men_info,
-    show_high_scores,
+    men_high_scores,
     men_settings,
     men_save,
     men_debug,

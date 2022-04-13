@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+#include <stddef.h>
+
 static uint8_t simple_mod(uint8_t n, uint8_t d)
 {
     while(n >= d) n -= d;
@@ -88,6 +90,16 @@ uint8_t armor_item_defense(item it)
     uint8_t level = it.quant_or_level;
     if(it.cursed) level = -(level + 2);
     return item::BOOTS - it.type + level + 1;
+}
+
+uint8_t weapon_item_attack(item it)
+{
+    // assumes item is sword or bow
+    uint8_t level = it.quant_or_level;
+    if(it.cursed) level = -(level + 2);
+    uint8_t m = 3;
+    if(it.type == item::BOW) m = 1;
+    return level + m;
 }
 
 void player_gain_xp(uint8_t xp)
@@ -275,7 +287,17 @@ void step()
         {
             if(map_index == 0)
             {
-                hs.type = HS_RETURNED;
+                bool have_amulet = false;
+                if(have_amulet)
+                {
+                    hs.type = HS_ESCAPED;
+                    status(PSTR("You have escaped with the amulet of Yendor!"));
+                }
+                else
+                {
+                    hs.type = HS_RETURNED;
+                    status(PSTR("You leave without the amulet of Yendor."));
+                }
                 ents[0].type = entity::NONE;
                 return;
             }
@@ -332,8 +354,7 @@ static void init_all_perms()
 
 static void new_game()
 {
-    memzero(&globals_.saved,
-        sizeof(globals_.saved) - sizeof(wall_style) - sizeof(high_scores));
+    memzero(&globals_.saved, offsetof(saved_data, wall_style));
     seed();
     game_seed = rand_seed;
 }
@@ -352,11 +373,14 @@ void process_high_score()
         if(hs.score > high_scores[i].score)
             break;
     }
-    if(i >= NUM_HIGH_SCORES) return;
-    for(uint8_t j = NUM_HIGH_SCORES - 1; j > i; --j)
-        high_scores[j] = high_scores[j - 1];
-    high_scores[i] = hs;
-    save();
+    if(i < NUM_HIGH_SCORES)
+    {
+        for(uint8_t j = NUM_HIGH_SCORES - 1; j > i; --j)
+            high_scores[j] = high_scores[j - 1];
+        high_scores[i] = hs;
+        save();
+    }
+    show_high_scores(i);
 }
 
 void paint_left(bool clear) { paint_offset(0, clear); }
@@ -371,14 +395,11 @@ void run()
         paint_left();
         paint_right();
         reset_status();
+        memzero(&globals_, sizeof(globals_));
 
         bool saved = save_valid();
         if(saved) load();
-        else
-        {
-            memzero(&globals_, sizeof(globals_));
-            wall_style = 2;
-        }
+        else wall_style = 2;
 
         char const* back = PSTR("");
         saved &= (ents[0].type == entity::PLAYER);
@@ -429,7 +450,6 @@ void run()
                 while(wait_btn() != BTN_B)
                     (void)0;
                 process_high_score();
-                show_high_scores();
                 break;
             }
         }

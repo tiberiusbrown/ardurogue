@@ -65,10 +65,10 @@ static char* item_name(char* dst, item it)
         dst = quantify_item(dst, n, PSTR("arrow"));
         return dst;
     case item::BOW:
-        dst = tstrcpy_prog(dst, PSTR("bow"));
-        return dst;
     case item::SWORD:
-        dst = tstrcpy_prog(dst, PSTR("sword"));
+        dst = tstrcpy_prog(dst, it.type == item::SWORD ? PSTR("sword") : PSTR("bow"));
+        if(it.identified)
+            dst += tsprintf(dst, PSTR(" [@d atk]"), weapon_item_attack(it));
         return dst;
     case item::ARMOR:
     case item::HELM:

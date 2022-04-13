@@ -64,7 +64,8 @@ void flush_persistent()
 
 void seed()
 {
-    rand_seed = 0xbabe;
+    rand_seed = (uint16_t)__rdtsc();
+    if(rand_seed == 0) rand_seed = 0xbabe;
 }
 
 static void screenshot()

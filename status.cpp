@@ -52,7 +52,7 @@ void status_more()
 
 void status(char const* fmt, ...)
 {
-	char buf[64];
+	char buf[128];
 	va_list ap;
 	va_start(ap, fmt);
 	tvsprintf(buf, fmt, ap);

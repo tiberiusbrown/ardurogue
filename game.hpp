@@ -515,6 +515,7 @@ uint8_t index_of_door(door const& d);
 uint8_t index_of_entity(entity const& e);
 uint8_t xp_for_level();
 uint8_t armor_item_defense(item it);
+uint8_t weapon_item_attack(item it);
 void player_gain_xp(uint8_t xp);
 bool player_pickup_item(uint8_t i); // map item
 void player_remove_item(uint8_t i); // inv item
@@ -612,7 +613,7 @@ void monster_ai(uint8_t i, action& a);
 
 // menus.cpp
 uint8_t inventory_menu(char const* s);
-void show_high_scores();
+void show_high_scores(uint8_t i);
 bool yesno_menu(char const* fmt, ...);
 bool direction_menu(uint8_t& d, char const* s = nullptr, bool cancel = true);
 bool repeat_action(action& a);

@@ -62,7 +62,7 @@ uint8_t entity_strength(uint8_t i)
                 r += n;
         }
     }
-    if(r & 0x80) r = 0;
+    if((int8_t)r < 0) r = 0;
     return r;
 }
 
@@ -86,15 +86,20 @@ uint8_t entity_dexterity(uint8_t i)
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].dexterity);
-    if(r & 0x80) r = 0;
+    if((int8_t)r < 0) r = 0;
     return r;
 }
 
 uint8_t entity_attack(uint8_t i)
 {
-    uint8_t r = 0;
-    // TODO: factor in wielded item
-    if(r & 0x80) r = 0;
+    uint8_t r = entity_strength(i);
+    if(i == 0)
+    {
+        uint8_t j = pinfo.equipped[SLOT_WEAPON];
+        if(j < INV_ITEMS)
+            r += weapon_item_attack(inv[j]);
+    }
+    if((int8_t)r < 0) r = 0;
     return r;
 }
 
@@ -126,7 +131,7 @@ uint8_t entity_defense(uint8_t i)
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].defense);
     // TODO: factor in slow/speed effect
-    if(r & 0x80) r = 0;
+    if((int8_t)r < 0) r = 0;
     return r;
 }
 
@@ -191,14 +196,22 @@ bool test_attack_hit(uint8_t atti, uint8_t defi) // 0 for miss
     return u8rand(ta * 2 + td) >= td;
 }
 
+static uint8_t att_def_mod(uint8_t x)
+{
+    uint8_t a = ((x + 1) * 3 + 1) / 4;
+    uint8_t b = x - a;
+    return u8rand(a) + b + 1;
+}
+
 uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi) // 0 for block
 {
-    uint8_t ta = entity_strength(atti);
+    uint8_t ta = entity_attack(atti);
     uint8_t td = entity_defense(defi);
-    ta = u8rand(ta + td) + 1;
-    if(ta < td)
-        return 0;
-    return ta - td + entity_attack(atti);
+    ta = att_def_mod(ta);
+    td = att_def_mod(td);
+    uint8_t dam = (ta * ta + ta / 2 + 1) / (ta + td + 1);
+    if(dam == 0) dam = 1;
+    return dam;
 }
 
 void entity_restore_strength(uint8_t i)

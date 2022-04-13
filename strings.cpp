@@ -178,7 +178,7 @@ char const* const UNID_RNG_AMU_NAMES[NUM_RNG < NUM_AMU ? NUM_AMU : NUM_RNG] PROG
 };
 
 static char const INV_CAT_WEAPON[] PROGMEM = "Weapons";
-static char const INV_CAT_ARMOR[] PROGMEM = "Armors";
+static char const INV_CAT_ARMOR[] PROGMEM = "Armor";
 static char const INV_CAT_JEWELRY[] PROGMEM = "Jewelry";
 static char const INV_CAT_POTION[] PROGMEM = "Potions";
 static char const INV_CAT_SCROLL[] PROGMEM = "Scrolls";

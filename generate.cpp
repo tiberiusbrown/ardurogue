@@ -629,12 +629,12 @@ static void generate_random_item(uint8_t i)
         it.subtype = u8rand(NUM_POT);
         break;
     case item::SCROLL:
-        it.subtype = u8rand(NUM_POT);
+        it.subtype = u8rand(NUM_SCR);
         break;
     case item::RING:
         it.cursed = cursed;
         it.quant_or_level = enchant;
-        it.subtype = u8rand(NUM_POT);
+        it.subtype = u8rand(NUM_RNG);
         break;
     case item::AMULET:
         it.subtype = u8rand(NUM_AMU);
