@@ -71,8 +71,6 @@ void update_light()
     uint8_t ax = px < r ? 0 : px - r;
     uint8_t by = py + r;
     uint8_t bx = px + r;
-    if(by >= MAP_H) by = MAP_H - 1;
-    if(bx >= MAP_W) bx = MAP_W - 1;
     for(uint8_t y = ay; y <= by; ++y)
         for(uint8_t x = ax; x <= bx; ++x)
         {
@@ -86,7 +84,7 @@ void update_light()
     for(uint8_t i = 0; i < num_rooms; ++i)
     {
         if(maps[map_index].got_rooms.test(i)) continue;
-        room const& r = rooms[i];
+        room r = rooms[i];
         uint8_t bx = r.x + r.w();
         uint8_t by = r.y + r.h();
         for(uint8_t y = r.y; y < by; ++y)

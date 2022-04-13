@@ -268,10 +268,8 @@ static uint8_t ddir_mask(uint8_t tx, uint8_t ty)
 void draw_map_offset(uint8_t ox)
 {
     for(uint8_t y = 1, t = 0; y < 64; y += 2, t ^= 1)
-        for(uint8_t x = 0; x < 64; x += 2)
-        {
-            set_pixel(x + t, y);
-        }
+        for(uint8_t x = t; x < 64; x += 2)
+            set_pixel(x, y);
 
     for(uint8_t y = 0; y < MAP_H; ++y)
     {
@@ -289,26 +287,24 @@ void draw_map_offset(uint8_t ox)
 
                     static uint8_t const TESTS[] PROGMEM =
                     {
-                        0x09, 0x05, 0x49, 0x85,
-                        0x01, 0x01, 0x09, 0x05,
-                        0x06, 0x05, 0x26, 0x85,
-                        0x04, 0x04, 0x06, 0x05,
+                        0x09, 0x01, 0x06, 0x04, 0x05, 0x01, 0x05, 0x04,
+                        0x49, 0x09, 0x26, 0x06, 0x85, 0x05, 0x85, 0x05,
                     };
 
-                    uint8_t i = 4;
+                    uint8_t i = 16;
                     do
                     {
-                        --i;
-                        if((m & pgm_read_byte(&TESTS[i])) == pgm_read_byte(&TESTS[i + 4]))
+                        i -= 4;
+                        if((m & pgm_read_byte(&TESTS[i])) == pgm_read_byte(&TESTS[i + 1]))
                             set_pixel(px + 1, py);
-                        if((m & pgm_read_byte(&TESTS[i + 8])) == pgm_read_byte(&TESTS[i + 12]))
+                        if((m & pgm_read_byte(&TESTS[i + 2])) == pgm_read_byte(&TESTS[i + 3]))
                             set_pixel(px, py + 1);
                     } while(i != 0);
                 }
             }
             else
             {
-                clear_pixel(px + (y & 1), py + 1);
+                clear_hline(px, px + 1, py + 1);
             }
         }
     }
@@ -316,10 +312,11 @@ void draw_map_offset(uint8_t ox)
     // draw doors
     for(uint8_t i = 0; i < num_doors; ++i)
     {
-        auto const& d = doors[i];
-        if(d.secret || d.open) continue;
-        if(!tile_is_explored(d.x, d.y)) continue;
-        uint8_t px = (d.x - ox) * 2, py = d.y * 2;
+        auto d = doors[i];
+        if(d.secret | d.open) continue;
+        uint8_t x = d.x, y = d.y;
+        if(!tile_is_explored(x, y)) continue;
+        uint8_t px = (x - ox) * 2, py = y * 2;
         clear_rect(px, px + 2, py, py + 2);
         set_pixel(px + 1, py + 1);
     }

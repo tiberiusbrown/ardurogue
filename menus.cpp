@@ -2,34 +2,29 @@
 
 #include "git.hpp"
 
+static char const HS_MSG_ESCAPED[] PROGMEM = "Escaped with the amulet";
+static char const HS_MSG_RETURNED[] PROGMEM = "Returned to the surface";
+static char const HS_MSG_ABANDONED[] PROGMEM = "Abandoned the game";
+static char const HS_MSG_ENTITY[] PROGMEM = "Death by @M";
+static char const HS_MSG_TRAP[] PROGMEM = "";
+static char const* const HS_MSGS[5] PROGMEM =
+{
+    HS_MSG_ESCAPED,
+    HS_MSG_RETURNED,
+    HS_MSG_ABANDONED,
+    HS_MSG_ENTITY,
+    HS_MSG_TRAP,
+};
+
 static void show_high_scores_offset(uint8_t x, uint8_t ti)
 {
     draw_text(x + 46, 0, PSTR("High Scores"));
     set_hline(0, 63, 6);
-    ++x;
     for(uint8_t i = 0, y = 11; i < NUM_HIGH_SCORES; ++i, y += 7)
     {
         auto const& h = high_scores[i];
-        switch(h.type)
-        {
-        case HS_ESCAPED:
-            draw_text(x, y, PSTR("Escaped with the amulet"));
-            break;
-        case HS_RETURNED:
-            draw_text(x, y, PSTR("Returned to the surface"));
-            break;
-        case HS_ABANDONED:
-            draw_text(x, y, PSTR("Abandoned the game"));
-            break;
-        case HS_ENTITY:
-            draw_textf(x, y, PSTR("Death by @M"), h.data);
-            break;
-        case HS_TRAP:
-            // TODO
-        case HS_NONE:
-        default:
-            continue;
-        }
+        if(h.type == HS_NONE) continue;
+        draw_textf(x, y, pgmptr(&HS_MSGS[h.type - 1]), h.data);
         char tn[6];
         uint8_t n = tsprintf(tn, PSTR("@u"), h.score);
         draw_text(x + 127 - n * 4, y, tn, false);
@@ -40,9 +35,9 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
 
 void show_high_scores(uint8_t i)
 {
-    show_high_scores_offset(0, i);
+    show_high_scores_offset(1, i);
     paint_left();
-    show_high_scores_offset(uint8_t(-64), i);
+    show_high_scores_offset(uint8_t(-63), i);
     paint_right();
     while(wait_btn() != BTN_B)
         (void)0;

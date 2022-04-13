@@ -93,20 +93,8 @@ template<class T> void swap(T& a, T& b)
     b = c;
 }
 
-static void pgm_memcpy(void* dst, void const* src, uint8_t n)
-{
-    uint8_t* d = (uint8_t*)dst;
-    uint8_t const* s = (uint8_t const*)src;
-    for(uint8_t i = 0; i < n; ++i)
-        d[i] = pgm_read_byte(&s[i]);
-}
-
-static void memzero(void* dst, uint16_t n)
-{
-    uint8_t* d = (uint8_t*)dst;
-    for(uint16_t i = 0; i < n; ++i)
-        d[i] = 0;
-}
+void pgm_memcpy(void* dst, void const* src, uint8_t n);
+void memzero(void* dst, uint16_t n);
 
 static constexpr uint8_t BTN_UP    = 0x80;
 static constexpr uint8_t BTN_DOWN  = 0x10;
@@ -193,14 +181,14 @@ struct entity
         DRAGON,
         DARKNESS,
     };
-    uint8_t type;
+    uint8_t x, y;
     uint8_t confused  : 1;
     uint8_t paralyzed : 1;
     uint8_t weakened  : 1;
     uint8_t aggro     : 1; // when a non-mean monster is attacked by player
     uint8_t invis     : 1;
     uint8_t health;
-    uint8_t x, y;
+    uint8_t type;
 };
 
 struct action
@@ -283,11 +271,11 @@ struct item
         BOOTS,  // level
         NUM_ITEM_TYPES,
     };
-    uint8_t type           : 4;
-    uint8_t subtype        : 4;
     uint8_t quant_or_level : 6;
     uint8_t identified     : 1;
     uint8_t cursed         : 1;
+    uint8_t type           : 4;
+    uint8_t subtype        : 4;
     bool stackable() { return type <= ARROW; }
 };
 
@@ -319,9 +307,9 @@ struct room
 struct door
 {
     uint8_t x : 7;
-    uint8_t open : 1;
-    uint8_t y : 7;
     uint8_t secret : 1; // must be zero if open
+    uint8_t y : 7;
+    uint8_t open : 1;
 };
 
 enum

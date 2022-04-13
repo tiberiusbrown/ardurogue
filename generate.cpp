@@ -506,7 +506,7 @@ int8_t const DIRX[8] PROGMEM =
 static bool try_generate_room()
 {
     if(num_rooms >= MAP_ROOMS) return false;
-    room const& pr = rooms[u8rand(num_rooms)];
+    room pr = rooms[u8rand(num_rooms)];
     uint8_t d = u8rand() % 4; // direction to place new room
     uint8_t t = random_room_type(); // new room type
     uint8_t x0, y0; // current room edge (rel)
@@ -529,7 +529,7 @@ static bool try_generate_room()
 
 static void try_add_random_door()
 {
-    auto const& r = rooms[u8rand(num_rooms)];
+    auto r = rooms[u8rand(num_rooms)];
     uint8_t d = u8rand() % 4;
     uint8_t x, y;
     random_room_edge(d, r.type, x, y);

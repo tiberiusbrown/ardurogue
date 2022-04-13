@@ -2,6 +2,21 @@
 
 #include <stddef.h>
 
+void pgm_memcpy(void* dst, void const* src, uint8_t n)
+{
+    uint8_t* d = (uint8_t*)dst;
+    uint8_t const* s = (uint8_t const*)src;
+    for(uint8_t i = 0; i < n; ++i)
+        d[i] = pgm_read_byte(&s[i]);
+}
+
+void memzero(void* dst, uint16_t n)
+{
+    uint8_t* d = (uint8_t*)dst;
+    for(uint16_t i = 0; i < n; ++i)
+        d[i] = 0;
+}
+
 static uint8_t simple_mod(uint8_t n, uint8_t d)
 {
     while(n >= d) n -= d;
