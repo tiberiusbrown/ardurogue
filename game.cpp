@@ -288,6 +288,9 @@ void step()
             if(map_index == 0)
             {
                 bool have_amulet = false;
+                for(auto it : inv)
+                    if(it.type == item::AMULET && it.subtype == AMU_YENDOR)
+                        have_amulet = true;
                 if(have_amulet)
                 {
                     hs.type = HS_ESCAPED;
@@ -365,7 +368,7 @@ static void load_game()
     rand_seed = game_seed;
 }
 
-void process_high_score()
+uint8_t process_high_score()
 {
     uint8_t i;
     for(i = 0; i < NUM_HIGH_SCORES; ++i)
@@ -380,7 +383,7 @@ void process_high_score()
         high_scores[i] = hs;
         save();
     }
-    show_high_scores(i);
+    return i;
 }
 
 void paint_left(bool clear) { paint_offset(0, clear); }
@@ -442,14 +445,15 @@ void run()
             step();
             if(ents[0].type == entity::NONE)
             {
-                if(saved) destroy_save();
                 status(PSTR("Press B to continue."));
                 render();
+                if(saved) destroy_save();
+                uint8_t hsi = process_high_score();
                 // game is over!
                 // handle this here: high score list? TODO
                 while(wait_btn() != BTN_B)
                     (void)0;
-                process_high_score();
+                show_high_scores(hsi);
                 break;
             }
         }

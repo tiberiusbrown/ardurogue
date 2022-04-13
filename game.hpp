@@ -520,7 +520,7 @@ void player_gain_xp(uint8_t xp);
 bool player_pickup_item(uint8_t i); // map item
 void player_remove_item(uint8_t i); // inv item
 void render();
-void process_high_score();
+uint8_t process_high_score();
 
 // font.cpp
 uint8_t draw_char(uint8_t x, uint8_t y, char c); // returns width of char
