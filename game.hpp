@@ -411,7 +411,7 @@ inline constexpr auto& just_moved = globals_.just_moved;
 inline constexpr auto& hs = globals_.saved.hs;
 inline constexpr auto& high_scores = globals_.saved.high_scores;
 
-static constexpr uint8_t NUM_HIGH_SCORES = high_scores.size();
+static constexpr uint8_t NUM_HIGH_SCORES = (uint8_t)high_scores.size();
 
 inline bool potion_is_identified(uint8_t subtype)
 {
