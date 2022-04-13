@@ -346,10 +346,10 @@ void step()
 
 static void init_all_perms()
 {
-    init_perm(perm_pot.data(), perm_pot.size());
-    init_perm(perm_scr.data(), perm_scr.size());
-    init_perm(perm_rng.data(), perm_rng.size());
-    init_perm(perm_amu.data(), perm_amu.size());
+    init_perm(perm_pot.data(), (uint8_t)perm_pot.size());
+    init_perm(perm_scr.data(), (uint8_t)perm_scr.size());
+    init_perm(perm_rng.data(), (uint8_t)perm_rng.size());
+    init_perm(perm_amu.data(), (uint8_t)perm_amu.size());
 }
 
 static void new_game()
