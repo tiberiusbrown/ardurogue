@@ -507,6 +507,7 @@ uint8_t weapon_item_attack(item it);
 void player_gain_xp(uint8_t xp);
 bool player_pickup_item(uint8_t i); // map item
 void player_remove_item(uint8_t i); // inv item
+void put_item_on_ground(uint8_t x, uint8_t y, item it);
 void render();
 uint8_t process_high_score();
 

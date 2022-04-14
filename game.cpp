@@ -213,6 +213,33 @@ void player_remove_item(uint8_t i)
     inv[INV_ITEMS - 1].type = item::NONE;
 }
 
+void put_item_on_ground(uint8_t x, uint8_t y, item it)
+{
+    // try to combine with existing stackable item on ground
+    if(it.stackable())
+    {
+        for(auto& t : items)
+        {
+            if(t.it.type == it.type && t.it.subtype == it.subtype)
+            {
+                uint8_t n = t.it.quant_or_level;
+                if(n < 63) ++n;
+                t.it.quant_or_level = n;
+                return;
+            }
+        }
+    }
+    for(auto& t : items)
+        if(t.it.type == item::NONE)
+        {
+            t.x = x;
+            t.y = y;
+            t.it = it;
+            return;
+        }
+    status(PSTR("The @i breaks."), it);
+}
+
 void render()
 {
     draw_dungeon(ents[0].x, ents[0].y);

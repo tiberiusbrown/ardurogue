@@ -286,6 +286,14 @@ static bool act_shoot(action& a)
 
 static bool act_drop(action& a)
 {
+    uint8_t i = inventory_menu(PSTR("Drop which item?"));
+    if(i < INV_ITEMS)
+    {
+        status(PSTR("You drop the @i."), inv[i]);
+        put_item_on_ground(ents[0].x, ents[0].y, inv[i]);
+        inv[i].type = item::NONE;
+        return true;
+    }
     return false;
 }
 
