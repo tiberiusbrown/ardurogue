@@ -289,8 +289,14 @@ static bool act_drop(action& a)
     uint8_t i = inventory_menu(PSTR("Drop which item?"));
     if(i < INV_ITEMS)
     {
-        status(PSTR("You drop the @i."), inv[i]);
-        put_item_on_ground(ents[0].x, ents[0].y, inv[i]);
+        item it = inv[i];
+        if(it.type == item::AMULET && it.subtype == AMU_YENDOR)
+        {
+            status(PSTR("You are unable to drop the @i."), it);
+            return false;
+        }
+        status(PSTR("You drop the @i."), it);
+        put_item_on_ground(ents[0].x, ents[0].y, it);
         inv[i].type = item::NONE;
         return true;
     }
