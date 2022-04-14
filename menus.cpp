@@ -75,51 +75,23 @@ uint8_t inventory_menu(char const* prompt)
 {
     uint8_t its[INV_ITEMS + 7];
     uint8_t* itp = &its[0];
-    uint8_t* tp;
 
-    // TODO: reduce code size in this method?
+    static uint8_t const ITEM_CATS[item::NUM_ITEM_TYPES] PROGMEM =
+    {
+        255, 5, 3, 4, 0, 0, 0, 2, 2, 1, 1, 1,
+    };
 
-    *itp++ = INV_ITEMS + 0; // weapons
-    tp = itp;
-    for(uint8_t i = 0; i < INV_ITEMS; ++i)
-        if(inv[i].type == item::SWORD || inv[i].type == item::BOW || inv[i].type == item::ARROW)
-            *itp++ = i;
-    if(itp == tp) --itp;
-
-    *itp++ = INV_ITEMS + 1; // armor
-    tp = itp;
-    for(uint8_t i = 0; i < INV_ITEMS; ++i)
-        if(inv[i].type == item::ARMOR || inv[i].type == item::HELM || inv[i].type == item::BOOTS)
-            *itp++ = i;
-    if(itp == tp) --itp;
-
-    *itp++ = INV_ITEMS + 2; // jewelry
-    tp = itp;
-    for(uint8_t i = 0; i < INV_ITEMS; ++i)
-        if(inv[i].type == item::RING || inv[i].type == item::AMULET)
-            *itp++ = i;
-    if(itp == tp) --itp;
-
-    *itp++ = INV_ITEMS + 3; // potion
-    tp = itp;
-    for(uint8_t i = 0; i < INV_ITEMS; ++i)
-        if(inv[i].type == item::POTION)
-            *itp++ = i;
-    if(itp == tp) --itp;
-
-    *itp++ = INV_ITEMS + 4; // scroll
-    tp = itp;
-    for(uint8_t i = 0; i < INV_ITEMS; ++i)
-        if(inv[i].type == item::SCROLL)
-            *itp++ = i;
-    if(itp == tp) --itp;
-
-    *itp++ = INV_ITEMS + 5; // misc
-    tp = itp;
-    for(uint8_t i = 0; i < INV_ITEMS; ++i)
-        if(inv[i].type == item::FOOD)
-            *itp++ = i;
-    if(itp == tp) --itp;
+    for(uint8_t j = 0; j < 6; ++j)
+    {
+        *itp++ = INV_ITEMS + j;
+        uint8_t* tp = itp;
+        for(uint8_t i = 0; i < INV_ITEMS; ++i)
+        {
+            if(pgm_read_byte(&ITEM_CATS[inv[i].type]) == j)
+                *itp++ = i;
+        }
+        if(itp == tp) --itp;
+    }
 
     uint8_t n = (uint8_t)(ptrdiff_t)(itp - &its[0]);
     while(itp < &its[0] + sizeof(its))
@@ -367,14 +339,22 @@ static void draw_player_info(uint8_t x)
 {
     draw_text(x + 30, 0, PSTR("Player Information"));
     set_hline(0, 63, 6);
-    draw_text(x,  6 + 3, PSTR("Score:"));
-    draw_text(x, 12 + 3, PSTR("Level:"));
-    draw_text(x, 18 + 3, PSTR("Max Health:"));
-    draw_text(x, 24 + 3, PSTR("Strength:"));
-    draw_text(x, 30 + 3, PSTR("Dexterity:"));
-    draw_text(x, 36 + 3, PSTR("Attack:"));
-    draw_text(x, 42 + 3, PSTR("Defense:"));
-    draw_text(x, 48 + 3, PSTR("Speed:"));
+
+    static const char T0[] PROGMEM = "Score:";
+    static const char T1[] PROGMEM = "Level:";
+    static const char T2[] PROGMEM = "Max Health:";
+    static const char T3[] PROGMEM = "Strength:";
+    static const char T4[] PROGMEM = "Dexterity:";
+    static const char T5[] PROGMEM = "Attack:";
+    static const char T6[] PROGMEM = "Defense:";
+    static const char T7[] PROGMEM = "Speed:";
+    static const char* const TS[] =
+    {
+        T0, T1, T2, T3, T4, T5, T6, T7,
+    };
+    for(uint8_t i = 0, y = 9; i < 8; ++i, y += 6)
+        draw_text(x, y, pgmptr(&TS[i]));
+
     draw_textf(x + 40, 6 + 3, PSTR("@u"), hs.score);
     draw_textf(x + 40, 12 + 3, PSTR("@u"), plevel + 1);
     draw_info_bonus(x + 40, 18 + 3, entity_max_health(0), pstats.max_health);

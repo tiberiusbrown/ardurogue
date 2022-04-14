@@ -519,6 +519,8 @@ uint8_t char_width(char c);
 uint8_t text_width(char const* s, bool prog = true);
 
 // draw.cpp
+extern int8_t const DDIRX[16] PROGMEM;
+inline constexpr int8_t const* DDIRY = &DDIRX[8];
 static constexpr uint8_t SPACE_WIDTH = 1;
 void set_img_prog(uint8_t const* p, uint8_t w, uint8_t x, uint8_t y);
 void set_pixel(uint8_t x, uint8_t y);

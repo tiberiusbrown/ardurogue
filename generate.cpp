@@ -399,55 +399,44 @@ void update_doors()
     }
 }
 
-static bool verify_room(
-    uint8_t x, uint8_t y, uint8_t type, bool& explored)
+static bool dig_room(
+    uint8_t type, uint8_t x, uint8_t y)
 {
     auto& r = rooms[num_rooms];
     r.x = x;
     r.y = y;
     r.type = type;
+
     if(x >= MAP_W) return false;
     if(y >= MAP_H) return false;
     uint8_t bx = x + r.w();
     uint8_t by = y + r.h();
     if(bx >= MAP_W) return false;
     if(by >= MAP_H) return false;
+
+    // ensure room can fit here
     for(uint8_t ty = y; ty < by; ++ty)
         for(uint8_t tx = x; tx < bx; ++tx)
         {
             if(!r.inside(tx, ty))
                 continue;
-            for(int8_t dy = -1; dy <= 1; ++dy)
-                for(int8_t dx = -1; dx <= 1; ++dx)
-                    if(!tile_is_solid(tx + dx, ty + dy))
-                        return false;
+            for(uint8_t i = 0; i < 8; ++i)
+            {
+                if(!tile_is_solid(
+                    tx + pgm_read_byte(&DDIRX[i]),
+                    ty + pgm_read_byte(&DDIRY[i])))
+                    return false;
+            }
         }
-    explored = maps[map_index].got_rooms.test(num_rooms);
-    return true;
-}
 
-static bool dig_room(
-    uint8_t type, uint8_t x, uint8_t y)
-{
-    bool explored;
-    if(!verify_room(x, y, type, explored))
-        return false;
-    auto const& r = rooms[num_rooms];
-    uint8_t bx = r.x + r.w();
-    uint8_t by = r.y + r.h();
-    for(uint8_t iy = r.y; iy < by; ++iy)
-        for(uint8_t ix = r.x; ix < bx; ++ix)
+    bool explored = maps[map_index].got_rooms.test(num_rooms);
+    for(uint8_t iy = y; iy < by; ++iy)
+        for(uint8_t ix = x; ix < bx; ++ix)
             if(r.inside(ix, iy))
             {
                 dig_tile(ix, iy);
                 if(explored)
-                {
                     set_tile_explored(ix, iy);
-                    set_tile_explored(ix - 1, iy);
-                    set_tile_explored(ix + 1, iy);
-                    set_tile_explored(ix, iy - 1);
-                    set_tile_explored(ix, iy + 1);
-                }
             }
     ++num_rooms;
     return true;

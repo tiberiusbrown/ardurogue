@@ -330,6 +330,7 @@ void step()
 
     reset_status();
     uint8_t b = wait_btn();
+    uint8_t px = ents[0].x, py = ents[0].y;
     switch(b)
     {
     case BTN_UP: a.type = action::MOVE; a.data = 0; break;
@@ -337,25 +338,24 @@ void step()
     case BTN_LEFT: a.type = action::MOVE; a.data = 2; break;
     case BTN_RIGHT: a.type = action::MOVE; a.data = 3; break;
     case BTN_A:
-        //if(++opt.wall_style == NUM_WALL_STYLES) opt.wall_style = 0;
         repeat_action(a);
         break;
     case BTN_B:
         if(!action_menu(a))
         {
             render();
-            return;
+            goto end;
         }
         break;
     default: break;
     }
-    uint8_t px = ents[0].x, py = ents[0].y;
     if(entity_perform_action(0, a))
     {
         update_doors();
         update_light();
         advance();
     }
+end:
     just_moved = (px != ents[0].x || py != ents[0].y);
 }
 
@@ -462,8 +462,6 @@ void run()
                 render();
                 if(saved) destroy_save();
                 uint8_t hsi = process_high_score();
-                // game is over!
-                // handle this here: high score list? TODO
                 while(wait_btn() != BTN_B)
                     (void)0;
                 show_high_scores(hsi);

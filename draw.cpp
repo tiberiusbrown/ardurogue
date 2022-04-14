@@ -243,12 +243,9 @@ void draw_info_without_status()
     draw_progress_bar(41, 7, pstats.xp, xp_for_level());
 }
 
-static int8_t const DDIRX[8] PROGMEM =
+int8_t const DDIRX[16] PROGMEM =
 {
     -1, +1, -1, +1, +1, -1, 0, 0,
-};
-static int8_t const DDIRY[8] PROGMEM =
-{
     -1, -1, +1, +1, 0, 0, +1, -1,
 };
 
@@ -454,8 +451,9 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             }
             else
             {
-                set_hline(px, px + 3, py - 2);
-                set_hline(px, px + 3, py + 5);
+                // TODO: fix this somehow
+                //set_hline(px + 1, px + 2, py - 2);
+                //set_hline(px + 1, px + 2, py + 5);
             }
         }
     }
