@@ -85,7 +85,7 @@ static char* item_name(char* dst, item it)
             if(it.identified)
             {
                 char const* s = PSTR("");
-                uint8_t q = it.quant_or_level + 1;
+                uint8_t q = n + 1;
                 switch(st)
                 {
                 case RNG_STRENGTH:
@@ -122,7 +122,7 @@ static char* item_name(char* dst, item it)
                 case AMU_SPEED:
                     dst += tsprintf(dst, PSTR(" [@c@u spd]"),
                         it.cursed ? '-' : '+',
-                        it.quant_or_level / 2 + 1);
+                        n / 2 + 1);
                     break;
                 default:
                     break;
@@ -177,7 +177,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
 {
     char c;
     uint8_t u;
-    uint16_t u16;
+    size_t u16;
     uint8_t dec[5];
     char const* s;
     char* b_orig = b;
@@ -191,34 +191,35 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             continue;
         }
         c = (char)pgm_read_byte(fmt++);
+        u16 = va_arg(ap, size_t);
         switch(c)
         {
         case 'c': // char
-            *b++ = (char)va_arg(ap, int);
+            *b++ = (char)u16;
             break;
         case 'x': // hex byte
-            u = (uint8_t)va_arg(ap, int);
+            u = (uint8_t)u16;
             *b++ = pgm_read_byte(&HEX_CHARS[u >> 4]);
             *b++ = pgm_read_byte(&HEX_CHARS[u & 15]);
             break;
         case 's': // ram string
-            s = va_arg(ap, char const*);
+            s = (char const*)u16;
             while((c = *s++) != '\0')
                 *b++ = c;
             break;
         case 'p': // progmem string
-            s = va_arg(ap, char const*);
+            s = (char const*)u16;
             b = tstrcpy_prog(b, s);
             break;
         case 'M': // monster type
-            u = (uint8_t)va_arg(ap, int);
+            u = (uint8_t)u16;
             b = tstrcpy_prog(b, pgmptr(&MONSTER_NAMES[u]));
             break;
         case 'S': // subject
         case 'O': // object
         case 'T': // subject possessive
         case 'P': // object possessive
-            dec[0] = (uint8_t)va_arg(ap, int); // index
+            dec[0] = (uint8_t)u16; // index
             u = ents[dec[0]].type;
             if(dec[0] == 0) // player
             {
@@ -231,10 +232,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             {
                 if(player_can_see_entity(dec[0]))
                 {
-                    *b++ = (c >= 'S' ? 'T' : 't');
-                    *b++ = 'h';
-                    *b++ = 'e';
-                    *b++ = ' ';
+                    b = tstrcpy_prog(b, c >= 'S' ? PSTR("The ") : PSTR("the "));
                     b = tstrcpy_prog(b, pgmptr(&MONSTER_NAMES[u]));
                 }
                 else
@@ -251,7 +249,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             break;
         case 'V': // verb
         case 'v': // verb whose plural needs +es
-            u = (uint8_t)va_arg(ap, int); // index
+            u = (uint8_t)u16; // index
             u = ents[u].type;
             s = va_arg(ap, char const*);
             b = tstrcpy_prog(b, s);
@@ -263,19 +261,18 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             break;
         case 'A': // is/are
             // TODO: combine this with S?
-            u = (uint8_t)va_arg(ap, int); // index
+            u = (uint8_t)u16; // index
             u = ents[u].type;
             b = tstrcpy_prog(b, u == entity::PLAYER ? PSTR("are") : PSTR("is"));
             break;
         case 'i': // item
         {
-            item it = va_arg(ap, item);
-            b = item_name(b, it);
+            union { uint16_t a; item b; } uit = { (uint16_t)u16 };
+            b = item_name(b, uit.b);
             break;
         }
         case 'd': // int8_t only (int16_t not supported)
         case 'u': // uint8_t or uint16_t
-            u16 = (uint16_t)va_arg(ap, int);
             if(c == 'd')
             {
                 *b++ = (u16 & 0x80 ? '-' : '+');

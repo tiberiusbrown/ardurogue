@@ -52,12 +52,12 @@ void monster_ai(uint8_t i, action& a)
     if((info.nomove && !e.aggro) || player_is_dead())
         return;
     uint8_t dp = dist_to_player(e.x, e.y);
-    bool mean = info.mean || e.aggro;
+    bool mean = info.mean | e.aggro;
     if(!mean || pstats.invis || dp >= 10)
     {
         a.data = u8rand() & 3;
-        uint8_t nx = e.x + (int8_t)pgm_read_byte(&DIRX[a.data]);
-        uint8_t ny = e.y + (int8_t)pgm_read_byte(&DIRY[a.data]);
+        uint8_t nx = e.x + pgm_read_byte(&DIRX[a.data]);
+        uint8_t ny = e.y + pgm_read_byte(&DIRY[a.data]);
         entity* e = get_entity(nx, ny);
         if(e && (!mean || e->type != entity::PLAYER))
             return;
@@ -66,8 +66,8 @@ void monster_ai(uint8_t i, action& a)
     }
     for(uint8_t i = 0; i < 4; ++i)
     {
-        uint8_t nx = e.x + (int8_t)pgm_read_byte(&DIRX[i]);
-        uint8_t ny = e.y + (int8_t)pgm_read_byte(&DIRY[i]);
+        uint8_t nx = e.x + pgm_read_byte(&DIRX[i]);
+        uint8_t ny = e.y + pgm_read_byte(&DIRY[i]);
         if(tile_is_solid(nx, ny)) continue;
         if(entity* e = get_entity(nx, ny))
             if(e->type != entity::PLAYER)
