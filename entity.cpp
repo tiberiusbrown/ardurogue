@@ -462,6 +462,44 @@ bool entity_perform_action(uint8_t i, action const& a)
             }
         }
         return true;
+    case action::DROP:
+    {
+        item it = inv[a.data];
+        if(it.type == item::AMULET && it.subtype == AMU_YENDOR)
+        {
+            status(PSTR("You are unable to drop the @i."), it);
+            return false;
+        }
+        status(PSTR("You drop the @i."), it);
+        put_item_on_ground(e.x, e.y, it);
+        inv[a.data].type = item::NONE;
+        return true;
+    }
+    case action::THROW:
+    {
+        if(!direction_menu(dir))
+            return false;
+        dx = (int8_t)pgm_read_byte(&DIRX[dir]);
+        dy = (int8_t)pgm_read_byte(&DIRY[dir]);
+        item it = inv[a.data];
+        player_remove_item(a.data);
+        it.quant_or_level = 0;
+        for(uint8_t i = 0, x = e.x, y = e.y; i < 8; ++i)
+        {
+            x += dx;
+            y += dy;
+            if(tile_is_solid(x, y)) break;
+            if(entity* te = get_entity(x, y))
+            {
+                te->aggro = 1;
+                uint8_t ti = index_of_entity(*te);
+                status(PSTR("The @i hits @O!"), it, ti);
+                entity_apply_potion(ti, it.subtype);
+            }
+        }
+        status(PSTR("The @i shatters."), it);
+        return true;
+    }
     default:
         break;
     }

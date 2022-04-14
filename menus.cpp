@@ -71,15 +71,10 @@ static void draw_inventory(
     }
 }
 
-uint8_t inventory_menu(char const* prompt)
+static uint8_t inventory_menu_ex(char const* prompt, uint8_t const* cats)
 {
     uint8_t its[INV_ITEMS + 7];
     uint8_t* itp = &its[0];
-
-    static uint8_t const ITEM_CATS[item::NUM_ITEM_TYPES] PROGMEM =
-    {
-        255, 5, 3, 4, 0, 0, 0, 2, 2, 1, 1, 1,
-    };
 
     for(uint8_t j = 0; j < 6; ++j)
     {
@@ -87,7 +82,7 @@ uint8_t inventory_menu(char const* prompt)
         uint8_t* tp = itp;
         for(uint8_t i = 0; i < INV_ITEMS; ++i)
         {
-            if(pgm_read_byte(&ITEM_CATS[inv[i].type]) == j)
+            if(pgm_read_byte(&cats[inv[i].type]) == j)
                 *itp++ = i;
         }
         if(itp == tp) --itp;
@@ -132,6 +127,16 @@ uint8_t inventory_menu(char const* prompt)
         while(seli < offi) offi -= 3;
     }
     return 255;
+}
+
+static uint8_t const DEFAULT_ITEM_CATS[item::NUM_ITEM_TYPES] PROGMEM =
+{
+    255, 5, 3, 4, 0, 0, 0, 2, 2, 1, 1, 1,
+};
+
+uint8_t inventory_menu(char const* prompt)
+{
+    return inventory_menu_ex(prompt, DEFAULT_ITEM_CATS);
 }
 
 bool yesno_menu(char const* fmt, ...)
@@ -227,7 +232,7 @@ static char const ACT_WAIT[] PROGMEM = "Wait / Search";
 static char const ACT_USE[] PROGMEM = "Use / [Un]equip";
 static char const ACT_SHOOT[] PROGMEM = "Shoot";
 static char const ACT_DROP[] PROGMEM = "Drop Item";
-static char const ACT_THROW[] PROGMEM = "Throw Item";
+static char const ACT_THROW[] PROGMEM = "Throw Potion";
 static char const ACT_CLOSE[] PROGMEM = "Close Door";
 
 static char const* const ACT_ITEMS[] PROGMEM =
@@ -289,23 +294,26 @@ static bool act_drop(action& a)
     uint8_t i = inventory_menu(PSTR("Drop which item?"));
     if(i < INV_ITEMS)
     {
-        item it = inv[i];
-        if(it.type == item::AMULET && it.subtype == AMU_YENDOR)
-        {
-            status(PSTR("You are unable to drop the @i."), it);
-            return false;
-        }
-        status(PSTR("You drop the @i."), it);
-        put_item_on_ground(ents[0].x, ents[0].y, it);
-        inv[i].type = item::NONE;
+        a.type = action::DROP;
+        a.data = i;
         return true;
     }
     return false;
 }
 
+static uint8_t const POTION_ITEM_CATS[item::NUM_ITEM_TYPES] PROGMEM =
+{
+    255, 255, 3, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+};
+
 static bool act_throw(action& a)
 {
-    return false;
+    uint8_t i = inventory_menu_ex(PSTR("Throw what?"), POTION_ITEM_CATS);
+    if(i >= INV_ITEMS) return false;
+    a.type = action::THROW;
+    a.data = i;
+    render();
+    return true;
 }
 
 static bool act_close(action& a)
