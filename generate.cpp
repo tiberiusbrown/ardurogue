@@ -625,9 +625,9 @@ static void generate_random_item(uint8_t i)
     case item::ARROW:
         it.quant_or_level = u8rand() % 4 + 3;
         [[fallthrough]];
-    case item::FOOD:
-        it.cursed = 0;
-        break;
+    //case item::FOOD:
+    //    it.cursed = 0;
+    //    break;
     case item::POTION:
         it.subtype = u8rand(NUM_POT);
         break;
@@ -658,8 +658,6 @@ static void generate_random_item(uint8_t i)
 
 void generate_dungeon()
 {
-    if(map_index & 0x80) return;
-
     rand_seed = game_seed;
     for(uint8_t i = 0; i < map_index; ++i)
         for(uint8_t j = 0; j < 217; ++j)
@@ -672,7 +670,6 @@ void generate_dungeon()
     memzero(&doors, sizeof(doors));
     num_rooms = 0;
     num_doors = 0;
-    xdn = ydn = xup = yup = 255;
 
     render(); // show "Loading..."
 
@@ -689,6 +686,8 @@ void generate_dungeon()
 
     if(map_index < NUM_MAPS - 1)
         find_unoccupied_guaranteed(xdn, ydn);
+    else
+        xdn = ydn = 255;
     find_unoccupied_guaranteed(xup, yup);
 }
 
@@ -705,7 +704,7 @@ void generate_items_and_ents()
         generate_item(i++, { item::POTION, POT_STRENGTH });
         generate_item(i++, { item::FOOD });
         for(; i < MAP_ITEMS - 4; ++i)
-            generate_random_item(i++);
+            generate_random_item(i);
     }
 
     //

@@ -313,15 +313,26 @@ void teleport_entity(uint8_t i)
     confuse_entity(i);
 }
 
+static bool is_uncursed_subtype(uint8_t subtype, uint8_t slot)
+{
+    uint8_t j = pinfo.equipped[slot];
+    return j < INV_ITEMS && inv[j].subtype == subtype && !inv[j].cursed;
+}
+
+bool wearing_uncursed_amulet(uint8_t subtype)
+{
+    return is_uncursed_subtype(subtype, SLOT_AMULET);
+}
+
+bool wearing_uncursed_ring(uint8_t subtype)
+{
+    return is_uncursed_subtype(subtype, SLOT_RING);
+}
+
 void confuse_entity(uint8_t i)
 {
-    if(i == 0)
-    {
-        // check for amulet of clarity
-        uint8_t j = pinfo.equipped[SLOT_AMULET];
-        if(j < INV_ITEMS && inv[j].subtype == AMU_CLARITY)
-            return;
-    }
+    if(i == 0 && wearing_uncursed_amulet(AMU_CLARITY))
+        return;
     auto& te = ents[i];
     if(player_can_see_entity(i))
         status(PSTR("@S @V confused!"), i, i, PSTR("become"));

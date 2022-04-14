@@ -2,10 +2,8 @@
 
 static bool consume_consumable()
 {
-    uint8_t i = pinfo.equipped[SLOT_AMULET];
-    if(i >= INV_ITEMS) return true;
-    if(inv[i].subtype != AMU_CONSERVATION) return true;
-    // wearing amulet of conservation: 50% chance not to consume
+    if(!wearing_uncursed_amulet(AMU_CONSERVATION)) return true;
+    // wearing uncursed amulet of conservation: 50% chance not to consume
     return u8rand() < 128;
 }
 

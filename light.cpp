@@ -13,13 +13,8 @@ bool player_can_see(uint8_t x, uint8_t y)
 
 bool player_can_see_entity(uint8_t i)
 {
-    if(ents[i].invis)
-    {
-        // can only see if wearing ring of see invisible
-        uint8_t j = pinfo.equipped[SLOT_RING];
-        if(!(inv[j].type == item::RING && inv[j].subtype == RNG_SEE_INVIS))
-            return false;
-    }
+    if(ents[i].invis && !wearing_uncursed_ring(RNG_SEE_INVIS))
+        return false;
     return player_can_see(ents[i].x, ents[i].y);
 }
 
