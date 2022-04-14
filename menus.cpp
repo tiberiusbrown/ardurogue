@@ -27,7 +27,7 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
         draw_textf(x, y, pgmptr(&HS_MSGS[h.type - 1]), h.data);
         char tn[6];
         uint8_t n = tsprintf(tn, PSTR("@u"), h.score);
-        draw_text(x + 127 - n * 4, y, tn, false);
+        draw_text_nonprog(x + 127 - n * 4, y, tn);
         if(ti == i)
             inv_rect(0, 63, y - 1, y + 5);
     }
@@ -156,7 +156,7 @@ bool yesno_menu(char const* fmt, ...)
                 x = 1;
                 y += 6;
             }
-            draw_text(x, y, &t[n], false);
+            draw_text_nonprog(x, y, &t[n]);
             x += w + SPACE_WIDTH + 1;
             while(t[n++] != '\0')
                 ;

@@ -512,7 +512,8 @@ uint8_t process_high_score();
 
 // font.cpp
 uint8_t draw_char(uint8_t x, uint8_t y, char c); // returns width of char
-void draw_text(uint8_t x, uint8_t y, const char* p, bool prog = true);
+void draw_text(uint8_t x, uint8_t y, const char* p);
+void draw_text_nonprog(uint8_t x, uint8_t y, const char* p);
 // fmt is PROGMEM
 void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...); // max 64
 uint8_t char_width(char c);

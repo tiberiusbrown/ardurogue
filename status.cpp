@@ -24,7 +24,7 @@ void draw_status()
         uint8_t w = text_width(&statusbuf[n], false);
         if(sx + w > 64)
             sx = 1, sy += 6;
-        draw_text(sx, sy, &statusbuf[n], false);
+        draw_text_nonprog(sx, sy, &statusbuf[n]);
         sx += w + SPACE_WIDTH + 1;
         while(statusbuf[n++] != '\0')
             ;
