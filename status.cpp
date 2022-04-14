@@ -63,12 +63,12 @@ void status(char const* fmt, ...)
 	{
         if(uint8_t(statusn + b - a) > sizeof(statusbuf))
             status_more();
-        for(uint8_t i = a; i < b; ++i)
-            statusbuf[statusn++] = buf[i];
 		uint8_t n = text_width(&buf[a], false);
 		if(statusy >= 59 && statusx + n > 64 - MORE_WIDTH)
             status_more();
-		else if(statusx + n > 64)
+        for(uint8_t i = a; i < b; ++i)
+            statusbuf[statusn++] = buf[i];
+		if(statusx + n > 64)
 			statusx = 1, statusy += 6;
 		statusx += n + SPACE_WIDTH + 1;
 		if(b >= len) break;

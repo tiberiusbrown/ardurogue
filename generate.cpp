@@ -411,8 +411,8 @@ static bool dig_room(
     if(y >= MAP_H) return false;
     uint8_t bx = x + r.w();
     uint8_t by = y + r.h();
-    if(bx >= MAP_W) return false;
-    if(by >= MAP_H) return false;
+    if(bx > MAP_W) return false;
+    if(by > MAP_H) return false;
 
     // ensure room can fit here
     for(uint8_t ty = y; ty < by; ++ty)
@@ -678,23 +678,6 @@ void generate_dungeon()
     else
         xdn = ydn = 255;
     find_unoccupied_guaranteed(xup, yup);
-}
-
-void generate_items_and_ents()
-{
-    //
-    // add items
-    //
-
-    {
-        uint8_t i = 0;
-        generate_item(i++, { item::SCROLL, SCR_ENCHANT });
-        generate_item(i++, { item::POTION, POT_HEALING });
-        generate_item(i++, { item::POTION, POT_STRENGTH });
-        generate_item(i++, { item::FOOD });
-        for(; i < MAP_ITEMS - 4; ++i)
-            generate_random_item(i);
-    }
 
     //
     // add monsters
@@ -719,6 +702,23 @@ void generate_items_and_ents()
                 break;
             }
         }
+    }
+}
+
+void generate_items()
+{
+    //
+    // add items
+    //
+
+    {
+        uint8_t i = 0;
+        generate_item(i++, { item::SCROLL, SCR_ENCHANT });
+        generate_item(i++, { item::POTION, POT_HEALING });
+        generate_item(i++, { item::POTION, POT_STRENGTH });
+        generate_item(i++, { item::FOOD });
+        for(; i < MAP_ITEMS - 4; ++i)
+            generate_random_item(i);
     }
 }
 

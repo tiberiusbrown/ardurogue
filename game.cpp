@@ -439,7 +439,7 @@ void run()
 
         if(!saved)
         {
-            generate_items_and_ents();
+            generate_items();
             // initialize player for new game
             for(auto& i : pinfo.equipped) i = 255;
             pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));

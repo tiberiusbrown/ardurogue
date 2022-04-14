@@ -53,7 +53,7 @@ static void use_scroll(uint8_t subtype)
         break;
     case SCR_REMOVE_CURSE:
         i = inventory_menu(PSTR("Uncurse which item?"));
-        if(i >= INV_ITEMS)
+        if(i < INV_ITEMS)
         {
             auto& it = inv[i];
             if(it.stackable() || !it.cursed)

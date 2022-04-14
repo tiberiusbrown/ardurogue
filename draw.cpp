@@ -264,7 +264,7 @@ static uint8_t ddir_mask(uint8_t tx, uint8_t ty)
 
 void draw_map_offset(uint8_t ox)
 {
-    for(uint8_t y = 1, t = 0; y < 64; y += 2, t ^= 1)
+    for(uint8_t y = 0, t = 0; y < 64; y += 2, t ^= 1)
         for(uint8_t x = t; x < 64; x += 2)
             set_pixel(x, y);
 
@@ -279,8 +279,8 @@ void draw_map_offset(uint8_t ox)
                 uint8_t m;
                 if(tile_is_solid(x, y) && (m = ddir_mask(x, y)) != 0xff)
                 {
-                    clear_rect(px, px + 2, py, py + 2);
-                    set_pixel(px + 1, py + 1);
+                    clear_rect(px, px + 2, py - 1, py + 1);
+                    set_pixel(px + 1, py);
 
                     static uint8_t const TESTS[] PROGMEM =
                     {
@@ -293,15 +293,15 @@ void draw_map_offset(uint8_t ox)
                     {
                         i -= 4;
                         if((m & pgm_read_byte(&TESTS[i])) == pgm_read_byte(&TESTS[i + 1]))
-                            set_pixel(px + 1, py);
+                            set_pixel(px + 1, py - 1);
                         if((m & pgm_read_byte(&TESTS[i + 2])) == pgm_read_byte(&TESTS[i + 3]))
-                            set_pixel(px, py + 1);
+                            set_pixel(px, py);
                     } while(i != 0);
                 }
             }
             else
             {
-                clear_hline(px, px + 1, py + 1);
+                clear_hline(px, px + 1, py);
             }
         }
     }
@@ -314,8 +314,8 @@ void draw_map_offset(uint8_t ox)
         uint8_t x = d.x, y = d.y;
         if(!tile_is_explored(x, y)) continue;
         uint8_t px = (x - ox) * 2, py = y * 2;
-        clear_rect(px, px + 2, py, py + 2);
-        set_pixel(px + 1, py + 1);
+        clear_rect(px, px + 2, py - 1, py + 1);
+        set_pixel(px + 1, py);
     }
 
 #if 0

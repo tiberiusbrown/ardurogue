@@ -546,7 +546,7 @@ void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y);
 void dig_nonsecret_door_tiles();
 void update_doors();   // set tile to solid for closed doors
 void generate_dungeon();
-void generate_items_and_ents();
+void generate_items();
 bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
 bool find_unoccupied(uint8_t& x, uint8_t& y); // returns true if found
 void find_unoccupied_guaranteed(uint8_t& x, uint8_t& y);
