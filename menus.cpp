@@ -193,14 +193,10 @@ bool yesno_menu(char const* fmt, ...)
     return false;
 }
 
-bool direction_menu(uint8_t& d, char const* s, bool cancel)
+static bool direction_menu_ex(uint8_t& d, char const* s, bool cancel)
 {
     draw_info_without_status();
-    if(s)
-    {
-        uint8_t w = text_width(s);
-        draw_text(32 - w / 2, STATUS_START_Y, s);
-    }
+    draw_text(5, STATUS_START_Y, s);
     draw_text(5, STATUS_START_Y + 6, PSTR("Which direction?"));
     constexpr uint8_t X = 24;
     constexpr uint8_t Y = STATUS_START_Y + 20;
@@ -226,6 +222,21 @@ bool direction_menu(uint8_t& d, char const* s, bool cancel)
         if(cancel) break;
     }
     return false;
+}
+
+bool direction_menu_nocancel(uint8_t& d, char const* s)
+{
+    return direction_menu_ex(d, s, false);
+}
+
+bool direction_menu(uint8_t& d, char const* s)
+{
+    return direction_menu_ex(d, s, true);
+}
+
+bool direction_menu(uint8_t& d)
+{
+    return direction_menu_ex(d, PSTR(""), true);
 }
 
 static char const ACT_WAIT[] PROGMEM = "Wait / Search";

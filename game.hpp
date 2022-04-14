@@ -609,7 +609,9 @@ void monster_ai(uint8_t i, action& a);
 uint8_t inventory_menu(char const* s);
 void show_high_scores(uint8_t i);
 bool yesno_menu(char const* fmt, ...);
-bool direction_menu(uint8_t& d, char const* s = nullptr, bool cancel = true);
+bool direction_menu_nocancel(uint8_t& d, char const* s);
+bool direction_menu(uint8_t& d, char const* s);
+bool direction_menu(uint8_t& d);
 bool repeat_action(action& a);
 bool action_menu(action& a);
 
