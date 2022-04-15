@@ -53,9 +53,9 @@ static char* item_name(char* dst, item it)
 {
     uint8_t n = it.quant_or_level;
     uint8_t st = it.subtype;
-    //char pm = it.cursed ? '-' : '+';
     if(it.cursed && it.identified)
         dst = tstrcpy_prog(dst, PSTR("cursed "));
+
     switch(it.type)
     {
     case item::FOOD:

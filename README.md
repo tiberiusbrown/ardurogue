@@ -5,8 +5,6 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
 ## TODO
 
 - Ranged combat
-- Drop item
-- Throw item
 - Hunger
 - Wands
   - Striking (simple single-target damage)
@@ -19,4 +17,11 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
 - Dragon breathes fire
 - Allow wearing up to two rings
 - Different map types (cave style?)
-- High Score List
+
+## Note: platform.local.txt
+
+```
+compiler.c.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop  -fno-move-loop-invariants
+compiler.cpp.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop  -fno-move-loop-invariants
+compiler.c.elf.extra_flags=-Wl,--relax
+```

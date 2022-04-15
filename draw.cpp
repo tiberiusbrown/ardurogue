@@ -495,7 +495,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
     }
 
     // draw generate message
-    if(xup == 255)
+    if(num_rooms == 0)
     {
         draw_box_pretty(10, 52, 24, 40);
         draw_text(17, 30, PSTR("Loading..."));

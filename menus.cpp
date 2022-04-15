@@ -387,7 +387,7 @@ static void draw_player_info(uint8_t x)
     static const char T5[] PROGMEM = "Attack:";
     static const char T6[] PROGMEM = "Defense:";
     static const char T7[] PROGMEM = "Speed:";
-    static const char* const TS[] =
+    static const char* const TS[] PROGMEM =
     {
         T0, T1, T2, T3, T4, T5, T6, T7,
     };
