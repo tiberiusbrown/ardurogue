@@ -512,13 +512,14 @@ void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n)
 {
     uint8_t dx = pgm_read_byte(&DIRX[d]);
     uint8_t dy = pgm_read_byte(&DIRY[d]);
+    draw_dungeon_at_player();
     do
     {
         x += dx;
         y += dy;
-        draw_dungeon_at_player();
         draw_sprite_nonprog(0x0eae, x, y);
-        paint_left();
+        paint_left(false);
         wait();
     } while(n-- != 0);
+    paint_left();
 }

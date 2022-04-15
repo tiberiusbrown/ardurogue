@@ -73,7 +73,7 @@ void monster_ai(uint8_t i, action& a)
         uint8_t px = ents[0].x, py = ents[0].y;
         uint8_t dir;
         uint8_t dx, dy, n;
-        for(dir = 0; dir < 4; ++dir)
+        for(dir = 0; dir < 5; ++dir)
         {
             dx = pgm_read_byte(&DIRX[dir]);
             dy = pgm_read_byte(&DIRY[dir]);
