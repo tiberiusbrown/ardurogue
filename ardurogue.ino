@@ -79,6 +79,11 @@ static uint8_t get_just_pressed()
     return r;
 }
 
+void wait()
+{
+    Arduboy2::delayShort(100);
+}
+
 uint8_t wait_btn()
 {
     for(;;)

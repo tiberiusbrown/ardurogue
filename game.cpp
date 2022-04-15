@@ -242,7 +242,7 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it)
 
 void render()
 {
-    draw_dungeon(ents[0].x, ents[0].y);
+    draw_dungeon_at_player();
     paint_left();
     draw_info();
     paint_right();
@@ -412,7 +412,7 @@ uint8_t process_high_score()
     uint8_t i;
     for(i = 0; i < NUM_HIGH_SCORES; ++i)
     {
-        if(hs.score > high_scores[i].score)
+        if(hs.score >= high_scores[i].score)
             break;
     }
     if(i < NUM_HIGH_SCORES)

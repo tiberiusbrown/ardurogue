@@ -89,6 +89,20 @@ static void screenshot()
 #endif
 }
 
+void wait()
+{
+    constexpr UINT_PTR timer_id = 0x1001;
+    MSG msg{};
+    SetTimer(hwnd, timer_id, 100, (TIMERPROC)NULL);
+    while(GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+        if(msg.hwnd == hwnd && msg.message == WM_TIMER && msg.wParam == timer_id)
+            return;
+    }
+}
+
 uint8_t wait_btn()
 {
     MSG msg{};

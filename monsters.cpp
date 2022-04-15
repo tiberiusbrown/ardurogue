@@ -46,6 +46,7 @@ static uint8_t dist_to_player(uint8_t x, uint8_t y)
 void monster_ai(uint8_t i, action& a)
 {
     auto& e = ents[i];
+    uint8_t ex = e.x, ey = e.y;
     entity_info info;
     entity_get_info(i, info);
     a.type = action::WAIT;
@@ -53,21 +54,55 @@ void monster_ai(uint8_t i, action& a)
         return;
     uint8_t dp = dist_to_player(e.x, e.y);
     bool mean = info.mean | e.aggro;
+
     if(!mean || pstats.invis || dp >= 10)
     {
         a.data = u8rand() & 3;
-        uint8_t nx = e.x + pgm_read_byte(&DIRX[a.data]);
-        uint8_t ny = e.y + pgm_read_byte(&DIRY[a.data]);
+        uint8_t nx = ex + pgm_read_byte(&DIRX[a.data]);
+        uint8_t ny = ey + pgm_read_byte(&DIRY[a.data]);
         entity* e = get_entity(nx, ny);
         if(e && (!mean || e->type != entity::PLAYER))
             return;
         a.type = action::MOVE;
         return;
     }
+
+    // fire breathing
+    if(info.fbreath)
+    {
+        uint8_t px = ents[0].x, py = ents[0].y;
+        uint8_t dir;
+        uint8_t dx, dy, n;
+        for(dir = 0; dir < 4; ++dir)
+        {
+            dx = pgm_read_byte(&DIRX[dir]);
+            dy = pgm_read_byte(&DIRY[dir]);
+            uint8_t x = ex, y = ey;
+            for(n = 0; n < 4; ++n)
+            {
+                x += dx;
+                y += dy;
+                if(x == px && y == py)
+                    goto found;
+                if(tile_is_solid(x, y) || get_entity(x, y))
+                    break;
+            }
+        }
+    found:
+        if(dir < 4 && u8rand() % 2)
+        {
+            status(PSTR("@S breathes fire!"), i);
+            render();
+            draw_ray_anim(ex - px + 6, ey - py + 6, dir, n);
+            entity_take_damage_from_entity(i, 0, u8rand(8) + 8);
+            return;
+        }
+    }
+
     for(uint8_t i = 0; i < 4; ++i)
     {
-        uint8_t nx = e.x + pgm_read_byte(&DIRX[i]);
-        uint8_t ny = e.y + pgm_read_byte(&DIRY[i]);
+        uint8_t nx = ex + pgm_read_byte(&DIRX[i]);
+        uint8_t ny = ey + pgm_read_byte(&DIRY[i]);
         if(tile_is_solid(nx, ny)) continue;
         if(entity* e = get_entity(nx, ny))
             if(e->type != entity::PLAYER)

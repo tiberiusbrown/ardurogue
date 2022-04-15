@@ -13,7 +13,7 @@ static uint16_t const ENTITY_IMGS[] PROGMEM =
     0x0f9f, // orc
     0x07a0, // tarantula
     0x0f2c, // hobgoblin
-    0xefbe, // mimic (looks like a closed door)
+    0x0606, // mimic (looks like an amulet)
     0x09f9, // incubus
     0x01f1, // troll
     0x069d, // griffin
@@ -490,7 +490,8 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         uint8_t ex = e.x - mx;
         uint8_t ey = e.y - my;
         if(ex >= 13 || ey >= 13) continue;
-        if(player_can_see(e.x, e.y))
+        if(!tile_is_explored(e.x, e.y)) continue;
+        if(player_can_see(e.x, e.y) || e.type == entity::MIMIC)
             draw_sprite(&ENTITY_IMGS[e.type], ex, ey);
     }
 
@@ -500,4 +501,24 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         draw_box_pretty(10, 52, 24, 40);
         draw_text(17, 30, PSTR("Loading..."));
     }
+}
+
+void draw_dungeon_at_player()
+{
+    draw_dungeon(ents[0].x, ents[0].y);
+}
+
+void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n)
+{
+    uint8_t dx = pgm_read_byte(&DIRX[d]);
+    uint8_t dy = pgm_read_byte(&DIRY[d]);
+    do
+    {
+        x += dx;
+        y += dy;
+        draw_dungeon_at_player();
+        draw_sprite_nonprog(0x0eae, x, y);
+        paint_left();
+        wait();
+    } while(n-- != 0);
 }

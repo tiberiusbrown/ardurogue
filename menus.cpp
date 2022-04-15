@@ -428,7 +428,7 @@ static void men_settings()
     for(;;)
     {
         wall_style &= 3;
-        draw_dungeon(ents[0].x, ents[0].y);
+        draw_dungeon_at_player();
         paint_left();
         draw_text(20, 1, MEN_SETTINGS);
         draw_textf(3, 9, PSTR("Wall Style: { @u }"), wall_style);

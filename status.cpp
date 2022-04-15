@@ -40,7 +40,7 @@ void reset_status()
 
 void status_more()
 {
-    draw_dungeon(ents[0].x, ents[0].y);
+    draw_dungeon_at_player();
     paint_left();
     draw_info();
     draw_text(65 - MORE_WIDTH, 59, PSTR("[more]"));

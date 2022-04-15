@@ -6,12 +6,13 @@
 #define ENABLE_DEBUG_MENU 1
 
 // platform functionality
+void wait();        // wait about 100 ms
 uint8_t wait_btn(); // wait for button press
-void seed(); // sets rand_seed
+void seed();        // sets rand_seed
 void paint_offset(uint8_t x, bool clear = true);
 uint8_t read_persistent(uint16_t addr);
 void update_persistent(uint16_t addr, uint8_t data);
-void flush_persistent();
+void flush_persistent(); // (does nothing for Arduino)
 
 // game logic
 void run();
@@ -544,6 +545,8 @@ void draw_info();
 void draw_info_without_status();
 void draw_map_offset(uint8_t ox);
 void draw_dungeon(uint8_t mx, uint8_t my);
+void draw_dungeon_at_player();
+void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n);
 
 // generate.cpp
 void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y);
