@@ -61,19 +61,14 @@ void update_light()
     uint8_t px = ents[0].x;
     uint8_t py = ents[0].y;
     uint8_t r = light_radius();
-    uint8_t r2 = light_radius2();
-    uint8_t ay = py < r ? 0 : py - r;
-    uint8_t ax = px < r ? 0 : px - r;
-    uint8_t by = py + r;
-    uint8_t bx = px + r;
-    for(uint8_t y = ay; y <= by; ++y)
-        for(uint8_t x = ax; x <= bx; ++x)
-        {
-            uint8_t dx = u8abs(x - px);
-            uint8_t dy = u8abs(y - py);
-            if(dx * dx + dy * dy < r2 && path_clear(px, py, x, y))
+    uint8_t ay = py - r;
+    uint8_t ax = px - r;
+    uint8_t by = py + r + 1;
+    uint8_t bx = px + r + 1;
+    for(uint8_t y = ay; y != by; ++y)
+        for(uint8_t x = ax; x != bx; ++x)
+            if(player_can_see(x, y))
                 set_tile_explored(x, y);
-        }
 
     // set rooms explored
     for(uint8_t i = 0; i < num_rooms; ++i)

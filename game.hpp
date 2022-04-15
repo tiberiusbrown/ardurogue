@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+#define ENABLE_DEBUG_MENU 1
+
 // platform functionality
 uint8_t wait_btn(); // wait for button press
 void seed(); // sets rand_seed

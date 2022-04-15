@@ -53,7 +53,7 @@ static char* item_name(char* dst, item it)
 {
     uint8_t n = it.quant_or_level;
     uint8_t st = it.subtype;
-    char pm = it.cursed ? '-' : '+';
+    //char pm = it.cursed ? '-' : '+';
     if(it.cursed && it.identified)
         dst = tstrcpy_prog(dst, PSTR("cursed "));
     switch(it.type)
@@ -86,21 +86,22 @@ static char* item_name(char* dst, item it)
             {
                 char const* s = PSTR("");
                 uint8_t q = n + 1;
+                if(it.cursed) q = -q;
                 switch(st)
                 {
                 case RNG_STRENGTH:
-                    s = PSTR(" [@c@u str]");
+                    s = PSTR(" [@d str]");
                     break;
                 case RNG_DEXTERITY:
-                    s = PSTR(" [@c@u dex]");
+                    s = PSTR(" [@d dex]");
                     break;
                 case RNG_PROTECTION:
-                    s = PSTR(" [@c@u]");
+                    s = PSTR(" [@d]");
                     break;
                 default:
                     break;
                 }
-                dst += tsprintf(dst, s, pm, q);
+                dst += tsprintf(dst, s, q);
             }
             return dst;
         }
@@ -273,10 +274,11 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         }
         case 'd': // int8_t only (int16_t not supported)
         case 'u': // uint8_t or uint16_t
+            u16 &= 0xffff; // no-op on avr
             if(c == 'd')
             {
                 *b++ = (u16 & 0x80 ? '-' : '+');
-                u16 &= 0x7f;
+                if(u16 & 0x80) u16 = uint8_t(-u16);
             }
             u = 0;
             do

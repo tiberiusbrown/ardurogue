@@ -274,7 +274,9 @@ static char const* const MEN_ITEMS[] PROGMEM =
     MEN_HS,
     MEN_SETTINGS,
     MEN_SAVE,
+#if ENABLE_DEBUG_MENU
     MEN_DEBUG,
+#endif
 };
 
 static bool act_wait(action& a)
@@ -361,12 +363,16 @@ static void men_inv()
 
 static void draw_info_bonus(uint8_t x, uint8_t y, uint8_t val, uint8_t base)
 {
-    if(val > base)
-        draw_textf(x, y, PSTR("@u (+@u)"), val, val - base);
-    else if(val < base)
-        draw_textf(x, y, PSTR("@u (-@u)"), val, base - val);
-    else
-        draw_textf(x, y, PSTR("@u"), val);
+    char const* s = PSTR("@u (@d)");
+    if(val == base) s = PSTR("@u");
+    draw_textf(x, y, s, val, val - base);
+
+    //if(val > base)
+    //    draw_textf(x, y, PSTR("@u (+@u)"), val, val - base);
+    //else if(val < base)
+    //    draw_textf(x, y, PSTR("@u (-@u)"), val, base - val);
+    //else
+    //    draw_textf(x, y, PSTR("@u"), val);
 }
 static void draw_player_info(uint8_t x)
 {
@@ -498,7 +504,9 @@ static men_method const MEN_METHODS[] PROGMEM =
     men_high_scores,
     men_settings,
     men_save,
+#if ENABLE_DEBUG_MENU
     men_debug,
+#endif
 };
 
 bool repeat_action(action& a)
@@ -530,7 +538,7 @@ bool action_menu(action& a)
             if(act)
             {
                 text = MEN_ITEMS;
-                n = 7;
+                n = 6 + ENABLE_DEBUG_MENU;
                 i = 0;
             }
             else
