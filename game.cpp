@@ -207,10 +207,7 @@ void player_remove_item(uint8_t i)
         --inv[i].quant_or_level;
         return;
     }
-    // shift all items down. nice to retain ordering
-    for(uint8_t j = i; j < INV_ITEMS - 1; ++j)
-        inv[j] = inv[j + 1];
-    inv[INV_ITEMS - 1].type = item::NONE;
+    inv[i].type = item::NONE;
 }
 
 void put_item_on_ground(uint8_t x, uint8_t y, item it)
