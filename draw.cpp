@@ -28,7 +28,7 @@ static uint16_t const ITEM_IMGS[] PROGMEM =
     0x9429, // food
     0x0bb0, // potion
     0x01b3, // scroll
-    0x44e4, // arrow
+    0x8421, // arrow
     0x0960, // bow
     0x04f4, // sword
     0x0aaa, // ring
@@ -513,13 +513,13 @@ void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n)
     uint8_t dx = pgm_read_byte(&DIRX[d]);
     uint8_t dy = pgm_read_byte(&DIRY[d]);
     draw_dungeon_at_player();
-    do
+    while(n-- > 0)
     {
         x += dx;
         y += dy;
         draw_sprite_nonprog(0x0eae, x, y);
         paint_left(false);
         wait();
-    } while(n-- != 0);
+    }
     paint_left();
 }

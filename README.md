@@ -2,10 +2,13 @@
 
 ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/).
 
-## TODO
+## TODO (in order of priority)
 
-- Ranged combat
 - Hunger
+- Guaranteed item spawn each level
+- Floor traps
+- Allow wearing up to two rings
+- Different map types (cave style?)
 - Wands
   - Striking (simple single-target damage)
   - Force (pushes monsters back)
@@ -13,10 +16,6 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
   - Lightning (arcs between monsters)
   - Teleportation (teleports target)
   - Frenzy (target attacks any nearest entity)
-- Floor traps
-- Dragon breathes fire
-- Allow wearing up to two rings
-- Different map types (cave style?)
 
 ## Note: platform.local.txt
 

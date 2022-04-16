@@ -217,6 +217,7 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it)
     {
         for(auto& t : items)
         {
+            if(!(t.x == x && t.y == y)) continue;
             if(t.it.type == it.type && t.it.subtype == it.subtype)
             {
                 uint8_t n = t.it.quant_or_level;
@@ -277,9 +278,28 @@ static void advance()
     }
 }
 
-void end_game()
+void scan_dir(uint8_t i, uint8_t d, uint8_t n, scan_result& r)
 {
-
+    uint8_t x = ents[i].x, y = ents[i].y;
+    uint8_t dx = pgm_read_byte(&DIRX[d]);
+    uint8_t dy = pgm_read_byte(&DIRY[d]);
+    uint8_t k = 0;
+    r.i = 255;
+    while(k < n)
+    {
+        if(tile_is_solid(x + dx, y + dy))
+            break;
+        x += dx, y += dy;
+        ++k;
+        if(entity* e = get_entity(x, y))
+        {
+            r.i = index_of_entity(*e);
+            break;
+        }
+    }
+    r.n = k;
+    r.x = x;
+    r.y = y;
 }
 
 void step()

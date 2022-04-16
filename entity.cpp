@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+static constexpr uint8_t ARROW_BREAK_CHANCE = 64;
+
 uint8_t entity_speed(uint8_t i)
 {
     uint8_t r;
@@ -214,6 +216,19 @@ uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi) // 0 for block
     return dam;
 }
 
+uint8_t calculate_arrow_damage(uint8_t defi)
+{
+    uint8_t ta = entity_dexterity(0);
+    uint8_t td = entity_dexterity(defi);
+    if(u8rand(ta * 3 + td) < td)
+        return 0;
+    uint8_t dam = u8rand(ta) + ta / 2 + entity_strength(0) / 4 + 1;
+    td = entity_defense(defi);
+    dam -= u8rand(td / 2 + 1);
+    if(dam == 0) dam = 1;
+    return dam;
+}
+
 void entity_restore_strength(uint8_t i)
 {
     if(ents[i].weakened)
@@ -242,13 +257,13 @@ void entity_heal(uint8_t i, uint8_t amount)
 void entity_take_damage(uint8_t i, uint8_t dam)
 {
     auto& te = ents[i];
-    bool cansee = player_can_see_entity(i);
+    //bool cansee = player_can_see_entity(i);
     if(dam >= te.health)
     {
-        if(cansee)
+        //if(cansee)
             status(PSTR("@S @V!"), i, i, PSTR("die"));
-        else
-            status(PSTR("You hear the sound of death."));
+        //else
+        //    status(PSTR("You hear the sound of death."));
         uint8_t tt = te.type;
         te.health = 0;
         te.type = entity::NONE;
@@ -470,7 +485,13 @@ bool entity_perform_action(uint8_t i, action const& a)
             status(PSTR("You are unable to drop the @i."), it);
             return false;
         }
+        else if(item_is_equipped(a.data))
+        {
+            if(!unequip_item(a.data))
+                return false;
+        }
         status(PSTR("You drop the @i."), it);
+        player_remove_item(a.data);
         put_item_on_ground(e.x, e.y, it);
         inv[a.data].type = item::NONE;
         return true;
@@ -498,6 +519,34 @@ bool entity_perform_action(uint8_t i, action const& a)
             }
         }
         status(PSTR("The @i shatters."), it);
+        return true;
+    }
+    case action::SHOOT:
+    {
+        uint8_t arrow = 0;
+        for(; arrow < INV_ITEMS; ++arrow)
+            if(inv[arrow].type == item::ARROW)
+                break;
+        uint8_t q = inv[arrow].quant_or_level;
+        if(q == 0)
+            inv[arrow].type = item::NONE;
+        else
+            inv[arrow].quant_or_level = q - 1;
+        scan_result sr;
+        scan_dir(0, a.data, 8, sr);
+        if(sr.i < MAP_ENTITIES)
+        {
+            uint8_t dam = calculate_arrow_damage(sr.i);
+            status(PSTR("Your arrow @ps @O."),
+                dam == 0 ? PSTR("misse") : PSTR("hit"), sr.i);
+            entity_take_damage_from_entity(0, sr.i, dam);
+        }
+        if(u8rand() >= ARROW_BREAK_CHANCE)
+        {
+            item t{};
+            t.type = item::ARROW;
+            put_item_on_ground(sr.x, sr.y, t);
+        }
         return true;
     }
     default:

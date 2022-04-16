@@ -514,6 +514,15 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it);
 void render();
 uint8_t process_high_score();
 
+struct scan_result
+{
+    uint8_t x, y; // landing spot
+    uint8_t i;    // entity
+    uint8_t n;    // length
+};
+// scan from entity in a direction up to n tiles
+void scan_dir(uint8_t i, uint8_t d, uint8_t n, scan_result& r);
+
 // font.cpp
 uint8_t draw_char(uint8_t x, uint8_t y, char c); // returns width of char
 void draw_text(uint8_t x, uint8_t y, const char* p);
@@ -592,7 +601,8 @@ uint8_t entity_dexterity(uint8_t i);
 uint8_t entity_attack(uint8_t i);
 uint8_t entity_defense(uint8_t i);
 bool test_attack_hit(uint8_t atti, uint8_t defi); // 0 for miss
-uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi); // 0 for block
+uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi);
+uint8_t calculate_arrow_damage(uint8_t defi); // 0 for miss
 void entity_restore_strength(uint8_t i);
 void entity_heal(uint8_t i, uint8_t amount);
 void entity_take_damage(uint8_t i, uint8_t dam);
@@ -625,6 +635,8 @@ void stack_canary_init();
 uint8_t unused_stack();
 
 // use.cpp
+bool equip_item(uint8_t i);
+bool unequip_item(uint8_t i);
 uint8_t slot_of_item(uint8_t type);
 bool item_is_equipped(uint8_t i);
 bool use_item(uint8_t i);

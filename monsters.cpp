@@ -73,27 +73,19 @@ void monster_ai(uint8_t i, action& a)
         uint8_t px = ents[0].x, py = ents[0].y;
         uint8_t dir;
         uint8_t dx, dy, n;
+        scan_result sr;
         for(dir = 0; dir < 5; ++dir)
         {
-            dx = pgm_read_byte(&DIRX[dir]);
-            dy = pgm_read_byte(&DIRY[dir]);
-            uint8_t x = ex, y = ey;
-            for(n = 0; n < 4; ++n)
-            {
-                x += dx;
-                y += dy;
-                if(x == px && y == py)
-                    goto found;
-                if(tile_is_solid(x, y) || get_entity(x, y))
-                    break;
-            }
+            scan_dir(i, dir, 5, sr);
+            if(sr.i == 0)
+                break;
         }
     found:
         if(dir < 4 && u8rand() % 2)
         {
             status(PSTR("@S breathes fire!"), i);
             render();
-            draw_ray_anim(ex - px + 6, ey - py + 6, dir, n);
+            draw_ray_anim(ex - px + 6, ey - py + 6, dir, sr.n);
             entity_take_damage_from_entity(i, 0, u8rand(8) + 8);
             return;
         }

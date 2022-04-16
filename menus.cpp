@@ -299,7 +299,24 @@ static bool act_use(action& a)
 
 static bool act_shoot(action& a)
 {
-    return false;
+    uint8_t i = pinfo.equipped[SLOT_WEAPON];
+    if(!(i < INV_ITEMS && inv[i].type == item::BOW))
+    {
+        status(PSTR("You're not holding a bow."));
+        return false;
+    }
+    bool have_arrow = false;
+    for(uint8_t j = 0; j < INV_ITEMS; ++j)
+        have_arrow |= (inv[j].type == item::ARROW);
+    if(!have_arrow)
+    {
+        status(PSTR("You have no arrows."));
+        return false;
+    }
+    if(!direction_menu(a.data))
+        return false;
+    a.type = action::SHOOT;
+    return true;
 }
 
 static bool act_drop(action& a)

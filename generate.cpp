@@ -546,6 +546,12 @@ static void try_add_random_door()
             if(!tile_is_solid(x, y - i) || !tile_is_solid(x, y + i))
                 return;
     }
+    // verify not adjacent to another door
+    for(uint8_t i = 0; i < 4; ++i)
+    {
+        if(get_door(x + pgm_read_byte(&DIRX[i]), y + pgm_read_byte(&DIRY[i])))
+            return;
+    }
     add_door(x, y);
 }
 
@@ -607,6 +613,7 @@ static void generate_random_item(uint8_t i)
     item it{};
     uint8_t type = u8rand(item::NUM_ITEM_TYPES);
     it.type = type;
+    it.subtype = 0;
     bool cursed = (u8rand() < 32);
     uint8_t enchant = (u8rand() < 64);
     switch(type)
