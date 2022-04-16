@@ -241,6 +241,7 @@ void draw_info_without_status()
     draw_textf(33, 6, PSTR("XP"));
     draw_progress_bar(9, 7, ents[0].health, entity_max_health(0));
     draw_progress_bar(41, 7, pstats.xp, xp_for_level());
+    draw_textf(1, 12, PSTR("Hunger: @u"), hunger);
 }
 
 int8_t const DDIRX[16] PROGMEM =

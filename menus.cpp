@@ -7,13 +7,15 @@ static char const HS_MSG_RETURNED[] PROGMEM = "Returned to the surface";
 static char const HS_MSG_ABANDONED[] PROGMEM = "Abandoned the game";
 static char const HS_MSG_ENTITY[] PROGMEM = "Death by @M";
 static char const HS_MSG_TRAP[] PROGMEM = "";
-static char const* const HS_MSGS[5] PROGMEM =
+static char const HS_MSG_STARVED[] PROGMEM = "Starved to death";
+static char const* const HS_MSGS[6] PROGMEM =
 {
     HS_MSG_ESCAPED,
     HS_MSG_RETURNED,
     HS_MSG_ABANDONED,
     HS_MSG_ENTITY,
     HS_MSG_TRAP,
+    HS_MSG_STARVED,
 };
 
 static void show_high_scores_offset(uint8_t x, uint8_t ti)
@@ -427,6 +429,7 @@ static void draw_player_info(uint8_t x)
     if(ents[0].paralyzed) draw_text(x + 75, y += 6, PSTR("paralyzed"));
     if(ents[0].weakened ) draw_text(x + 75, y += 6, PSTR("weakened"));
     if(ents[0].invis    ) draw_text(x + 75, y += 6, PSTR("invisible"));
+    if(hunger == 255    ) draw_text(x + 75, y += 6, PSTR("starving"));
     if(y == 9) draw_text(x + 75, 15, PSTR("none"));
 }
 static void men_info()

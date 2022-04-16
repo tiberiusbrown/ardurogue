@@ -323,6 +323,7 @@ enum
     HS_ABANDONED, // chose to end the game
     HS_ENTITY,    // killed by entity
     HS_TRAP,      // killed by trap
+    HS_STARVED,   // starved to death
 };
 struct high_score
 {
@@ -351,6 +352,7 @@ struct saved_data
     bitset<NUM_IDENT>           identified;
     uint8_t                     prev_action;
     uint8_t                     plevel;
+    uint8_t                     hunger;
 
     // options, high score table, etc
     uint8_t                     wall_style;
@@ -413,6 +415,7 @@ inline constexpr auto& plevel = globals_.saved.plevel;
 inline constexpr auto& just_moved = globals_.just_moved;
 inline constexpr auto& hs = globals_.saved.hs;
 inline constexpr auto& high_scores = globals_.saved.high_scores;
+inline constexpr auto& hunger = globals_.saved.hunger;
 
 static constexpr uint8_t NUM_HIGH_SCORES = (uint8_t)high_scores.size();
 
@@ -513,6 +516,7 @@ void player_remove_item(uint8_t i); // inv item
 void put_item_on_ground(uint8_t x, uint8_t y, item it);
 void render();
 uint8_t process_high_score();
+void advance_hunger();
 
 struct scan_result
 {

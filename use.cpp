@@ -30,7 +30,10 @@ static void use_scroll(uint8_t subtype)
     case SCR_IDENTIFY:
         i = inventory_menu(PSTR("Identify which item?"));
         if(i < INV_ITEMS)
+        {
             identify_item(i);
+            status(PSTR("You identified: @i."), inv[i]);
+        }
         else
             status(PSTR("Nothing happens."));
         break;
@@ -137,6 +140,13 @@ bool use_item(uint8_t i)
     uint8_t subtype = it.subtype;
     switch(it.type)
     {
+    case item::FOOD:
+    {
+        uint8_t nh = u8rand(32);
+        hunger = 0;
+        status(PSTR("You feel full."));
+        return true;
+    }
     case item::POTION:
         player_remove_item(i);
         entity_apply_potion(0, subtype);

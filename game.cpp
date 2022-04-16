@@ -254,6 +254,20 @@ static void init_perm(uint8_t* p, uint8_t n)
         swap(p[i], p[u8rand(n - i)]);
 }
 
+void advance_hunger()
+{
+    if(hunger < 255)
+    {
+        ++hunger;
+    }
+    else if(ents[0].health > 0)
+    {
+        status(PSTR("You are starving!"));
+        hs.type = HS_STARVED;
+        entity_take_damage(0, u8rand() % 2 + 1);
+    }
+}
+
 // advance all entities and effects
 static void advance()
 {
@@ -263,7 +277,10 @@ static void advance()
     {
         uint8_t i = tmax<uint8_t>(entity_max_health(0), 48);
         if(u8rand() < i)
+        {
             entity_heal(0, 1);
+            advance_hunger();
+        }
     }
     for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
     {
@@ -276,6 +293,9 @@ static void advance()
         if(u8rand(pspeed) < espeed)
             advance_entity(i);
     }
+
+    if(u8rand() < 128)
+        advance_hunger();
 }
 
 void scan_dir(uint8_t i, uint8_t d, uint8_t n, scan_result& r)
