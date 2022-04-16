@@ -640,7 +640,7 @@ static void generate_random_item(uint8_t i)
     {
     case item::ARROW:
         it.quant_or_level = u8rand() % 4 + 3;
-        [[fallthrough]];
+        break;
     //case item::FOOD:
     //    it.cursed = 0;
     //    break;

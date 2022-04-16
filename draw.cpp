@@ -237,11 +237,12 @@ void draw_info_without_status()
 {
     auto const& e = ents[0];
     draw_textf(1, 0, PSTR("Dungeon Level @u"), map_index + 1);
-    draw_textf(1, 6, PSTR("HP"));
-    draw_textf(33, 6, PSTR("XP"));
+    draw_text(1, 6, PSTR("HP"));
+    draw_text(33, 6, PSTR("XP"));
     draw_progress_bar(9, 7, ents[0].health, entity_max_health(0));
     draw_progress_bar(41, 7, pstats.xp, xp_for_level());
-    draw_textf(1, 12, PSTR("Hunger: @u"), hunger);
+    if(hunger > 200)
+        draw_text(1, 12, PSTR("Hungry"));
 }
 
 int8_t const DDIRX[16] PROGMEM =
