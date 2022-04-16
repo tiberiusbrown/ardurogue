@@ -190,7 +190,10 @@ void entity_apply_potion(uint8_t i, uint8_t subtype)
         break;
     case POT_INVIS:
         if(i == 0)
+        {
             pinfo.invis_rem = u8rand() % 16 + 12;
+            status(PSTR("You turn invisible."));
+        }
         ents[i].invis = 1;
         break;
     default:

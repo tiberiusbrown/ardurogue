@@ -71,17 +71,15 @@ void monster_ai(uint8_t i, action& a)
     if(info.fbreath)
     {
         uint8_t px = ents[0].x, py = ents[0].y;
-        uint8_t dir;
-        uint8_t dx, dy, n;
         scan_result sr;
+        uint8_t dir;
         for(dir = 0; dir < 5; ++dir)
         {
             scan_dir(i, dir, 5, sr);
             if(sr.i == 0)
                 break;
         }
-    found:
-        if(dir < 4 && u8rand() % 2)
+        if(sr.i == 0 && u8rand() % 2)
         {
             status(PSTR("@S breathes fire!"), i);
             render();

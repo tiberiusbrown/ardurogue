@@ -278,7 +278,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             if(c == 'd')
             {
                 *b++ = (u16 & 0x80 ? '-' : '+');
-                if(u16 & 0x80) u16 = uint8_t(-u16);
+                if(u16 & 0x80) u16 = uint8_t(-int8_t(u16));
             }
             u = 0;
             do
