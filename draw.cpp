@@ -13,13 +13,13 @@ static uint16_t const ENTITY_IMGS[] PROGMEM =
     0x0f9f, // orc
     0x07a0, // tarantula
     0x0f2c, // hobgoblin
-    0x0606, // mimic (looks like an amulet)
+    0x0f2f, // mimic
     0x09f9, // incubus
     0x01f1, // troll
     0x069d, // griffin
-    0x0e5e, // fallen angel
     0xf996, // dragon
-    0x0f88, // lord of darkness
+    0x0e5e, // fallen angel
+    0x0f88, // Lord of Darkness
 };
 
 static uint16_t const ITEM_IMGS[] PROGMEM =
@@ -492,8 +492,12 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         uint8_t ey = e.y - my;
         if(ex >= 13 || ey >= 13) continue;
         if(!tile_is_explored(e.x, e.y)) continue;
-        if(player_can_see(e.x, e.y) || e.type == entity::MIMIC)
-            draw_sprite(&ENTITY_IMGS[e.type], ex, ey);
+        uint16_t const* img = &ENTITY_IMGS[0];
+        if(e.type == entity::MIMIC && !e.aggro)
+            img = &ITEM_IMGS[e.health];
+        else if(player_can_see(e.x, e.y))
+            img = &ENTITY_IMGS[e.type];
+        draw_sprite(img, ex, ey);
     }
 
     // draw generate message

@@ -180,8 +180,8 @@ struct entity
         INCUBUS,
         TROLL,
         GRIFFIN,
-        ANGEL,
         DRAGON,
+        ANGEL,
         DARKNESS,
     };
     uint8_t x, y;
@@ -618,6 +618,7 @@ void advance_entity(uint8_t i);
 bool wearing_uncursed_amulet(uint8_t subtype);
 bool wearing_uncursed_ring(uint8_t subtype);
 bool entity_perform_action(uint8_t i, action const& a);
+void aggro_monster(uint8_t i);
 
 // monsters.cpp
 extern entity_info const MONSTER_INFO[] PROGMEM;

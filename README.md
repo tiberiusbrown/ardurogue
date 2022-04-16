@@ -4,9 +4,8 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
 
 ## TODO (in order of priority)
 
-- Hunger
-- Guaranteed item spawn each level
 - Floor traps
+- Spawn new monsters on occasion
 - Allow wearing up to two rings
 - Different map types (cave style?)
 - Wands
@@ -17,8 +16,9 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
   - Teleportation (teleports target)
   - Frenzy (target attacks any nearest entity)
 
-## Note: platform.local.txt
+## Build Notes
 
+Contents of `platform.local.txt`:
 ```
 compiler.c.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop  -fno-move-loop-invariants
 compiler.cpp.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop  -fno-move-loop-invariants

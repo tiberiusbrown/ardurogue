@@ -374,7 +374,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
     if(!hit && cansee)
         status(PSTR("@S @v @O."), atti, atti, PSTR("miss"), defi);
     if(atti == 0)
-        te.aggro = 1;
+        aggro_monster(defi);
     if(hit)
     {
         uint8_t dam = calculate_hit_damage(atti, defi);
@@ -512,8 +512,8 @@ bool entity_perform_action(uint8_t i, action const& a)
             if(tile_is_solid(x, y)) break;
             if(entity* te = get_entity(x, y))
             {
-                te->aggro = 1;
                 uint8_t ti = index_of_entity(*te);
+                aggro_monster(ti);
                 status(PSTR("The @i hits @O!"), it, ti);
                 entity_apply_potion(ti, it.subtype);
             }
@@ -553,4 +553,13 @@ bool entity_perform_action(uint8_t i, action const& a)
         break;
     }
     return false;
+}
+
+void aggro_monster(uint8_t i)
+{
+    if(!ents[i].aggro)
+    {
+        ents[i].health = entity_max_health(i);
+        ents[i].aggro = 1;
+    }
 }

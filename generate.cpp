@@ -14,58 +14,75 @@ static constexpr uint8_t RANDOM_DOOR_SPACE = 4;
 
 struct map_gen_info
 {
-    uint8_t monster_types[8];
+    uint8_t monster_types[6];
+    item guaranteed_item;
 };
 
 static map_gen_info const MAP_GEN_INFOS[NUM_MAPS] PROGMEM =
 {
 { // level 1
     { entity::BAT, entity::SNAKE, entity::SNAKE, },
+    { 0, 0, 0, item::FOOD }, // extra food
 },
 { // level 2
-    { entity::SNAKE, entity::RATTLESNAKE, },
+    { entity::SNAKE, entity::SNAKE, entity::SNAKE, entity::SNAKE, entity::RATTLESNAKE, entity::RATTLESNAKE, },
+    { 0, 0, 0, item::SCROLL, SCR_REMOVE_CURSE },
 },
 { // level 3
-    { entity::BAT, entity::SNAKE, },
+    { entity::ZOMBIE, entity::ZOMBIE, entity::ZOMBIE, entity::GOBLIN, entity::GOBLIN, entity::PHANTOM },
+    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
 },
 { // level 4
-    { entity::BAT, entity::SNAKE, },
+    { entity::ZOMBIE, entity::GOBLIN, entity::GOBLIN, entity::PHANTOM, entity::ORC, },
+    { 0, 0, 0, item::SCROLL, SCR_REMOVE_CURSE },
 },
 { // level 5
-    { entity::BAT, entity::SNAKE, },
+    { entity::PHANTOM, entity::PHANTOM, entity::PHANTOM, entity::PHANTOM, entity::PHANTOM, entity::PHANTOM, },
+    { 0, 0, 0, item::POTION, POT_STRENGTH }
 },
 { // level 6
-    { entity::BAT, entity::SNAKE, },
+    { entity::GOBLIN, entity::GOBLIN, entity::GOBLIN, entity::ORC, entity::HOBGOBLIN, },
+    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
 },
 { // level 7
-    { entity::BAT, entity::SNAKE, },
+    { entity::ORC, entity::ORC, entity::HOBGOBLIN, entity::TARANTULA, entity::MIMIC },
+    { 0, 0, 0, item::POTION, POT_POISON },
 },
 { // level 8
-    { entity::BAT, entity::SNAKE, },
+    { entity::ORC, entity::HOBGOBLIN, entity::TARANTULA, entity::TARANTULA, entity::TARANTULA, entity::MIMIC },
+    { 0, 0, 0, item::SCROLL, SCR_REMOVE_CURSE },
 },
 { // level 9
-    { entity::BAT, entity::SNAKE, },
+    { entity::HOBGOBLIN, entity::HOBGOBLIN, entity::HOBGOBLIN, entity::TARANTULA, entity::MIMIC, entity::INCUBUS },
+    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
 },
 { // level 10
-    { entity::BAT, entity::SNAKE, },
+    { entity::MIMIC, entity::MIMIC, entity::MIMIC, entity::MIMIC, entity::TARANTULA, entity::HOBGOBLIN, },
+    { 0, 0, 0, item::POTION, POT_STRENGTH }
 },
 { // level 11
-    { entity::BAT, entity::SNAKE, },
+    { entity::TARANTULA, entity::HOBGOBLIN, entity::MIMIC, entity::INCUBUS, entity::INCUBUS, entity::TROLL, },
+    { 0, 0, 0, item::POTION, POT_CONFUSION },
 },
 { // level 12
-    { entity::BAT, entity::SNAKE, },
+    { entity::HOBGOBLIN, entity::MIMIC, entity::INCUBUS, entity::TROLL, entity::TROLL, entity::GRIFFIN, },
+    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
 },
 { // level 13
-    { entity::BAT, entity::SNAKE, },
+    { entity::MIMIC, entity::INCUBUS, entity::TROLL, entity::GRIFFIN, entity::GRIFFIN, entity::DRAGON, },
+    { 0, 0, 0, item::POTION, POT_CONFUSION },
 },
 { // level 14
-    { entity::BAT, entity::SNAKE, },
+    { entity::INCUBUS, entity::TROLL, entity::GRIFFIN, entity::DRAGON, entity::DRAGON, entity::DRAGON, },
+    { 0, 0, 0, item::POTION, POT_INVIS },
 },
 { // level 15
-    { entity::BAT, entity::SNAKE, },
+    { entity::INCUBUS, entity::ANGEL, entity::ANGEL, entity::DRAGON, entity::DRAGON, entity::DRAGON, },
+    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
 },
 { // level 16
-    { entity::BAT, entity::SNAKE, },
+    { entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, },
+    { 0, 0, 0, item::POTION, POT_CONFUSION },
 },
 };
 
@@ -99,23 +116,23 @@ static constexpr uint8_t cbm(uint32_t x)
 static constexpr big_room_info const BIG_ROOM_TYPES[] PROGMEM =
 {
 {
-    16, 16, {
-    cbm(0x11111000), cbm(0x00011111),
-    cbm(0x11100000), cbm(0x00000111),
-    cbm(0x11000000), cbm(0x00000011),
-    cbm(0x10000000), cbm(0x00000001),
-    cbm(0x10000000), cbm(0x00000001),
-    cbm(0x00000111), cbm(0x11100000),
-    cbm(0x00000100), cbm(0x00100000),
-    cbm(0x00000100), cbm(0x00100000),
-    cbm(0x00000100), cbm(0x00100000),
-    cbm(0x00000100), cbm(0x00100000),
-    cbm(0x00000110), cbm(0x01100000),
-    cbm(0x10000000), cbm(0x00000001),
-    cbm(0x10000000), cbm(0x00000001),
-    cbm(0x11000000), cbm(0x00000011),
-    cbm(0x11100000), cbm(0x00000111),
-    cbm(0x11111000), cbm(0x00011111), }
+    15, 15, {
+    cbm(0x11111000), cbm(0x00111111),
+    cbm(0x11100000), cbm(0x00001111),
+    cbm(0x11000000), cbm(0x00000111),
+    cbm(0x10000000), cbm(0x00000011),
+    cbm(0x10000000), cbm(0x00000011),
+    cbm(0x00000111), cbm(0x11000001),
+    cbm(0x00000111), cbm(0x11000001),
+    cbm(0x00000110), cbm(0x11000001),
+    cbm(0x00000110), cbm(0x11000001),
+    cbm(0x00000110), cbm(0x11000001),
+    cbm(0x10000000), cbm(0x00000011),
+    cbm(0x10000000), cbm(0x00000011),
+    cbm(0x11000000), cbm(0x00000111),
+    cbm(0x11100000), cbm(0x00001111),
+    cbm(0x11111000), cbm(0x00111111),
+    cbm(0x11111111), cbm(0x11111111), }
 },
 {
     16, 16, {
@@ -444,7 +461,10 @@ static bool dig_room(
 
 static void dig_initial_room()
 {
-    dig_room(random_room_type(), MAP_W / 2 - 3, MAP_H / 2 - 3);
+    uint8_t t = random_room_type();
+    if(map_index == NUM_MAPS - 1)
+        t = 0x80;
+    dig_room(t, MAP_W / 2 - 3, MAP_H / 2 - 3);
 }
 
 static void add_door(uint8_t x, uint8_t y)
@@ -672,6 +692,7 @@ void generate_dungeon()
     dig_initial_room();
     for(uint16_t i = 0; i < 4096; ++i)
         try_generate_room();
+
     for(uint16_t i = 0; i < 1024; ++i)
         try_add_random_door();
 
@@ -686,10 +707,38 @@ void generate_dungeon()
         xdn = ydn = 255;
     find_unoccupied_guaranteed(xup, yup);
 
+    if(map_index == NUM_MAPS - 1)
+    {
+        uint8_t x = rooms[0].x + 7;
+        uint8_t y = rooms[0].y + 7;
+        {
+            auto& it = items[MAP_ITEMS - 1];
+            it.it = { 0, 1, 0, item::AMULET, AMU_YENDOR };
+            it.x = x;
+            it.y = y;
+        }
+        {
+            auto& e = ents[1];
+            e.type = entity::DARKNESS;
+            e.x = x;
+            e.y = y + 1;
+        }
+        {
+            uint8_t i = num_doors;
+            if(i == MAP_DOORS) --i;
+            else ++num_doors;
+            auto& d = doors[i];
+            d.secret = 0;
+            d.x = x;
+            d.y = y + 2;
+        }
+    }
+
     //
     // add monsters
     //
 
+    if(map_index < 15)
     for(uint8_t i = 1; i < MAP_ENTITIES; ++i)
     {
         auto& e = ents[i];
@@ -698,12 +747,13 @@ void generate_dungeon()
             continue;
         for(;;)
         {
-            uint8_t j = u8rand() % 8;
+            uint8_t j = u8rand(6);
             j = pgm_read_byte(&MAP_GEN_INFOS[map_index].monster_types[j]);
             if(j != 0)
             {
                 e.type = j;
-                e.health = entity_max_health(i);
+                if(j == entity::MIMIC)
+                    e.health = u8rand(item::NUM_ITEM_TYPES - 1) + 1;
                 if(maps[map_index].got_ents.test(i))
                     e.type = entity::NONE;
                 break;
@@ -720,10 +770,16 @@ void generate_items()
 
     {
         uint8_t i = 0;
-        generate_item(i++, { item::SCROLL, SCR_ENCHANT });
         generate_item(i++, { item::POTION, POT_HEALING });
-        generate_item(i++, { item::POTION, POT_STRENGTH });
         generate_item(i++, { item::FOOD });
+        {
+            union { uint16_t a; item b; } u = {
+                pgm_read_word(&MAP_GEN_INFOS[map_index].guaranteed_item)
+            };
+            if(u.b.type != item::NONE)
+                generate_item(i++, u.b);
+        }
+        
         for(; i < MAP_ITEMS - 4; ++i)
             generate_random_item(i);
     }

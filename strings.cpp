@@ -13,8 +13,8 @@ static char const MON_MIMIC      [] PROGMEM = "mimic";
 static char const MON_INCUBUS    [] PROGMEM = "incubus";
 static char const MON_TROLL      [] PROGMEM = "troll";
 static char const MON_GRIFFIN    [] PROGMEM = "griffin";
-static char const MON_ANGEL      [] PROGMEM = "fallen angel";
 static char const MON_DRAGON     [] PROGMEM = "dragon";
+static char const MON_ANGEL      [] PROGMEM = "fallen angel";
 static char const MON_DARKNESS   [] PROGMEM = "Lord of Darkness";
 
 char const* const MONSTER_NAMES[] PROGMEM =
@@ -34,8 +34,8 @@ char const* const MONSTER_NAMES[] PROGMEM =
     MON_INCUBUS,
     MON_TROLL,
     MON_GRIFFIN,
-    MON_ANGEL,
     MON_DRAGON,
+    MON_ANGEL,
     MON_DARKNESS,
 };
 

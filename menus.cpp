@@ -385,13 +385,6 @@ static void draw_info_bonus(uint8_t x, uint8_t y, uint8_t val, uint8_t base)
     char const* s = PSTR("@u (@d)");
     if(val == base) s = PSTR("@u");
     draw_textf(x, y, s, val, val - base);
-
-    //if(val > base)
-    //    draw_textf(x, y, PSTR("@u (+@u)"), val, val - base);
-    //else if(val < base)
-    //    draw_textf(x, y, PSTR("@u (-@u)"), val, base - val);
-    //else
-    //    draw_textf(x, y, PSTR("@u"), val);
 }
 static void draw_player_info(uint8_t x)
 {
