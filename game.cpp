@@ -457,7 +457,6 @@ uint8_t process_high_score()
         for(uint8_t j = NUM_HIGH_SCORES - 1; j > i; --j)
             high_scores[j] = high_scores[j - 1];
         high_scores[i] = hs;
-        save();
     }
     return i;
 }

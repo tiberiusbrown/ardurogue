@@ -626,6 +626,7 @@ void entity_get_info(uint8_t i, entity_info& info);
 void monster_ai(uint8_t i, action& a);
 
 // menus.cpp
+void draw_yesno(uint8_t x, uint8_t y);
 uint8_t inventory_menu(char const* s);
 void show_high_scores(uint8_t i);
 bool yesno_menu(char const* fmt, ...);

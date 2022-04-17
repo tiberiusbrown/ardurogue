@@ -33,6 +33,11 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
         if(ti == i)
             inv_rect(0, 63, y - 1, y + 5);
     }
+    if(ti < NUM_HIGH_SCORES)
+    {
+        draw_text(x + 37, 48, PSTR("Save high score?"));
+        draw_yesno(x + 39, 56);
+    }
 }
 
 void show_high_scores(uint8_t i)
@@ -41,8 +46,14 @@ void show_high_scores(uint8_t i)
     paint_left();
     show_high_scores_offset(uint8_t(-63), i);
     paint_right();
-    while(wait_btn() != BTN_B)
-        (void)0;
+    for(;;)
+    {
+        uint8_t b = wait_btn();
+        if(i < NUM_HIGH_SCORES && b == BTN_A)
+            save();
+        if(b & (BTN_A | BTN_B))
+            break;
+    }
 }
 
 static void draw_inventory(
@@ -141,6 +152,20 @@ uint8_t inventory_menu(char const* prompt)
     return inventory_menu_ex(prompt, DEFAULT_ITEM_CATS);
 }
 
+void draw_yesno(uint8_t x, uint8_t y)
+{
+    static uint8_t const CIRCLE[7] PROGMEM =
+    {
+        0x1c, 0x3e, 0x7f, 0x7f, 0x7f, 0x3e, 0x1c,
+    };
+    set_img_prog(CIRCLE, 7, x, y);
+    set_img_prog(CIRCLE, 7, x + 32, y);
+    draw_char(x + 2, y + 1, 'A');
+    draw_char(x + 34, y + 1, 'B');
+    draw_text(x + 11, y + 1, PSTR("Yes"));
+    draw_text(x + 43, y + 1, PSTR("No"));
+}
+
 bool yesno_menu(char const* fmt, ...)
 {
     draw_info_without_status();
@@ -172,16 +197,7 @@ bool yesno_menu(char const* fmt, ...)
     constexpr uint8_t Y = 55;
     constexpr int8_t OX = -4;
 
-    static uint8_t const CIRCLE[7] PROGMEM =
-    {
-        0x1c, 0x3e, 0x7f, 0x7f, 0x7f, 0x3e, 0x1c,
-    };
-    set_img_prog(CIRCLE, 7,  0 + 11 + OX, Y + 1);
-    set_img_prog(CIRCLE, 7, 32 + 11 + OX, Y + 1);
-    draw_char( 0 + 13 + OX, Y + 2, 'A');
-    draw_char(32 + 13 + OX, Y + 2, 'B');
-    draw_text(22 + OX, Y + 2, PSTR("Yes"));
-    draw_text(54 + OX, Y + 2, PSTR("No"));
+    draw_yesno(7, 56);
     paint_right();
     for(;;)
     {
