@@ -69,49 +69,57 @@ void inv_pixel(uint8_t x, uint8_t y)
 
 void set_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
-    for(; x0 <= x1; ++x0)
+    ++x1;
+    for(; x0 != x1; ++x0)
         set_pixel(x0, y);
 }
 
 void clear_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
-    for(; x0 <= x1; ++x0)
+    ++x1;
+    for(; x0 != x1; ++x0)
         clear_pixel(x0, y);
 }
 
 void inv_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
-    for(; x0 <= x1; ++x0)
+    ++x1;
+    for(; x0 != x1; ++x0)
         inv_pixel(x0, y);
 }
 
 void set_vline(uint8_t x, uint8_t y0, uint8_t y1)
 {
-    for(; y0 <= y1; ++y0)
+    ++y1;
+    for(; y0 != y1; ++y0)
         set_pixel(x, y0);
 }
 
 void clear_vline(uint8_t x, uint8_t y0, uint8_t y1)
 {
-    for(; y0 <= y1; ++y0)
+    ++y1;
+    for(; y0 != y1; ++y0)
         clear_pixel(x, y0);
 }
 
 void set_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
-    for(; y0 <= y1; ++y0)
+    ++y1;
+    for(; y0 != y1; ++y0)
         set_hline(x0, x1, y0);
 }
 
 void clear_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
-    for(; y0 <= y1; ++y0)
+    ++y1;
+    for(; y0 != y1; ++y0)
         clear_hline(x0, x1, y0);
 }
 
 void inv_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
-    for(; y0 <= y1; ++y0)
+    ++y1;
+    for(; y0 != y1; ++y0)
         inv_hline(x0, x1, y0);
 }
 

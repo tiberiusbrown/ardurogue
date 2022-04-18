@@ -402,7 +402,11 @@ void step()
     case BTN_LEFT: a.type = action::MOVE; a.data = 2; break;
     case BTN_RIGHT: a.type = action::MOVE; a.data = 3; break;
     case BTN_A:
-        repeat_action(a);
+        if(!repeat_action(a))
+        {
+            render();
+            goto end;
+        }
         break;
     case BTN_B:
         if(!action_menu(a))
