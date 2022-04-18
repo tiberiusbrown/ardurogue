@@ -370,7 +370,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
     bool hit = test_attack_hit(atti, defi);
     auto const& e = ents[atti];
     auto& te = ents[defi];
-    bool cansee = player_can_see_entity(defi);
+    bool cansee = player_can_see_entity(atti) || player_can_see_entity(defi);
     if(!hit && cansee)
         status(PSTR("@S @v @O."), atti, atti, PSTR("miss"), defi);
     if(atti == 0)
