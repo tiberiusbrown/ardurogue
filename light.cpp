@@ -13,6 +13,7 @@ bool player_can_see(uint8_t x, uint8_t y)
 
 bool player_can_see_entity(uint8_t i)
 {
+    if(i == 0) return true;
     if(ents[i].invis && !wearing_uncursed_ring(RNG_SEE_INVIS))
         return false;
     return player_can_see(ents[i].x, ents[i].y);

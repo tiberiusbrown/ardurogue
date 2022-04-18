@@ -756,6 +756,9 @@ void generate_dungeon()
                     e.health = u8rand(item::NUM_ITEM_TYPES - 1) + 1;
                 if(maps[map_index].got_ents.test(i))
                     e.type = entity::NONE;
+                entity_info info;
+                entity_get_info(i, info);
+                e.invis = info.invis;
                 break;
             }
         }
