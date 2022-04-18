@@ -488,7 +488,6 @@ void draw_dungeon(uint8_t mx, uint8_t my)
     for(auto const& e : ents)
     {
         if(e.type == entity::NONE) continue;
-        if(e.type != entity::PLAYER && e.invis) continue;
         uint8_t ex = e.x - mx;
         uint8_t ey = e.y - my;
         if(ex >= 13 || ey >= 13) continue;
@@ -496,7 +495,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         uint16_t const* img = &ENTITY_IMGS[0];
         if(e.type == entity::MIMIC && !e.aggro)
             img = &ITEM_IMGS[e.health];
-        else if(player_can_see(e.x, e.y))
+        else if(player_can_see_entity(index_of_entity(e)))
             img = &ENTITY_IMGS[e.type];
         draw_sprite(img, ex, ey);
     }
