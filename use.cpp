@@ -142,17 +142,21 @@ bool use_item(uint8_t i)
     {
     case item::FOOD:
     {
+        if(consume_consumable())
+            player_remove_item(i);
         uint8_t nh = u8rand(32);
         hunger = 0;
         status(PSTR("You feel full."));
         return true;
     }
     case item::POTION:
-        player_remove_item(i);
+        if(consume_consumable())
+            player_remove_item(i);
         entity_apply_potion(0, subtype);
         return true;
     case item::SCROLL:
-        player_remove_item(i);
+        if(consume_consumable())
+            player_remove_item(i);
         use_scroll(subtype);
         return true;
     case item::BOW:
