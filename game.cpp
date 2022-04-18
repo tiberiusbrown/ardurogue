@@ -500,7 +500,9 @@ void run()
         init_all_perms();
         generate_dungeon();
 
-        if(!saved)
+        if(saved)
+            load(); // need another load to overwrite current map entities
+        else
         {
             generate_items();
             // initialize player for new game
