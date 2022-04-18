@@ -192,6 +192,8 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             continue;
         }
         c = (char)pgm_read_byte(fmt++);
+        va_list ap_old;
+        va_copy(ap_old, ap);
         u16 = va_arg(ap, size_t);
         switch(c)
         {
@@ -268,8 +270,10 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             break;
         case 'i': // item
         {
-            union { uint16_t a; item b; } uit = { (uint16_t)u16 };
-            b = item_name(b, uit.b);
+            //union { uint16_t a; item b; } uit = { (uint16_t)u16 };
+            item it = va_arg(ap_old, item);
+            va_copy(ap, ap_old);
+            b = item_name(b, it);
             break;
         }
         case 'd': // int8_t only (int16_t not supported)

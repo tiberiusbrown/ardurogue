@@ -5,6 +5,26 @@ cmake_policy(SET CMP0117 NEW)
 
 project(ArduRogue)
 
+if(EMSCRIPTEN)
+    option(EMSCRIPTEN_OPTIMIZED "" ON)
+    if(EMSCRIPTEN_OPTIMIZED)
+        set(EXTRA_FLAGS "${EXTRA_FLAGS} -Oz")
+        set(EXTRA_FLAGS "${EXTRA_FLAGS} -flto")
+        set(EXTRA_FLAGS "${EXTRA_FLAGS} --closure 1")
+        set(EXTRA_FLAGS "${EXTRA_FLAGS} -fno-rtti -fno-exceptions")
+        add_link_options("-s MODULARIZE=1")
+        add_link_options("-s ALLOW_UNIMPLEMENTED_SYSCALLS=0")
+        add_link_options("-flto")
+    endif()
+    set(EXTRA_FLAGS "${EXTRA_FLAGS} -Wno-unused-command-line-argument")
+    set(EXTRA_FLAGS "${EXTRA_FLAGS} -s ASYNCIFY")
+    set(EXTRA_FLAGS "${EXTRA_FLAGS} -sEXPORTED_FUNCTIONS=_main,_initpers")
+    set(EXTRA_FLAGS "${EXTRA_FLAGS} -s EXPORTED_RUNTIME_METHODS=ccall")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${EXTRA_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
+    add_link_options("-lidbfs.js")
+endif()
+
 set(PRE_CONFIGURE_FILE "git.hpp.in")
 # write to source folder cause arduino ide :(
 set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/git.hpp")
@@ -22,8 +42,9 @@ add_executable(
     ${PROJECT_NAME} ${WINFLAG}
     README.md
     .editorconfig
-    game.hpp
+    main_emscripten.cpp
     main_win32.cpp
+    game.hpp
     draw.cpp
     entity.cpp
     font.cpp

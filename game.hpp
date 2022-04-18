@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdarg.h>
 
 #define ENABLE_DEBUG_MENU 1
@@ -281,6 +282,8 @@ struct item
     uint8_t subtype        : 4;
     bool stackable() { return type <= ARROW; }
 };
+
+static_assert(sizeof(item) == 2);
 
 struct map_item
 {
