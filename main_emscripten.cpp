@@ -60,8 +60,8 @@ static void update_canvas()
     EM_ASM_({
         let data = HEAPU8.subarray($0, $0 + $1 * $2 * 4);
         let canvas = Module['canvas'];
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
         let context = canvas.getContext('2d');
         context.imageSmoothingEnabled = false;
         
@@ -165,7 +165,7 @@ int main()
     EM_ASM(
         FS.mkdir('/offline');
         FS.mount(IDBFS, {}, '/offline');
-        FS.syncfs(true, function (err) { Module.ccall('initpers', 'v'); });
+        FS.syncfs(true, function (err) { ccall('initpers', 'v'); });
     );
     
     while(!pers_done)
