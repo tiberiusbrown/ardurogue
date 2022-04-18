@@ -144,7 +144,6 @@ bool use_item(uint8_t i)
     {
     case item::FOOD:
     {
-        uint8_t nh = u8rand(32);
         hunger = 0;
         status(PSTR("You feel full."));
         return true;
