@@ -88,6 +88,7 @@ static void use_scroll(uint8_t subtype)
             auto& e = ents[i];
             if(e.type == entity::NONE) continue;
             if(!player_can_see_entity(i)) continue;
+            aggro_monster(i);
             if(subtype == SCR_FEAR)
             {
                 e.scared = 1;

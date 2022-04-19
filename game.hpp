@@ -7,6 +7,7 @@
 #define ENABLE_DEBUG_MENU 0
 #define ENABLE_MINIMAP 1
 #define ENABLE_DUNGEON_SCROLL 1
+#define ENABLE_GOT_ENTS 1
 
 // platform functionality
 void wait();        // wait about 100 ms
@@ -158,11 +159,8 @@ enum
 // info specific to player
 struct player_info
 {
-    uint8_t invis_rem;    // invis cycles remaining
-    uint8_t confuse_rem;  // confuse cycles remaining
-    uint8_t paralyze_rem; // paralysis cycles remaining
-    uint8_t slow_rem;     // slow cycles remaining
     uint8_t vamp_drain;   // amount of max health drained by vampire
+    uint8_t invis_rem;
     array<uint8_t, NUM_SLOTS> equipped;
 };
 
@@ -315,7 +313,9 @@ struct map_item
 struct map_info
 {
     bitset<MAP_ITEMS>    got_items; // picked-up items
+#if ENABLE_GOT_ENTS
     bitset<MAP_ENTITIES> got_ents;  // defeated monsters
+#endif
     bitset<MAP_ROOMS>    got_rooms; // explored rooms
     bitset<MAP_DOORS>    got_doors; // opened doors
 };

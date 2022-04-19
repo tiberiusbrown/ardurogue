@@ -833,8 +833,10 @@ void generate_dungeon()
                 e.type = j;
                 if(j == entity::MIMIC)
                     e.health = u8rand(item::NUM_ITEM_TYPES - 1) + 1;
+#if ENABLE_GOT_ENTS
                 if(maps[map_index].got_ents.test(i))
                     e.type = entity::NONE;
+#endif
                 entity_info info;
                 entity_get_info(i, info);
                 e.invis = info.invis;

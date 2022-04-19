@@ -256,7 +256,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
                 }
             }
             if(c == 'U')
-                b = tstrcpy_prog(b, u == entity::PLAYER ? PSTR("are") : PSTR("is"));
+                b = tstrcpy_prog(b, u == entity::PLAYER ? PSTR(" are") : PSTR(" is"));
             break;
         case 'V': // verb
         case 'v': // verb whose plural needs +es

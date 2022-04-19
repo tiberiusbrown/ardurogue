@@ -131,45 +131,29 @@ void advance_entity(uint8_t i)
         entity_perform_action(i, a);
     }
 
-    // advance confusion/paralysis/invis
-    if(e.confused)
+    // advance temporary effects
+    if(e.confused && u8rand() % 8 == 0)
     {
-        bool end;
-        if(i == 0) end = (--pinfo.confuse_rem == 0);
-        else end = ((u8rand() & 7) == 0);
-        if(end)
-        {
-            e.confused = 0;
-            if(i == 0) status(PSTR("You are no longer confused."));
-        }
+        e.confused = 0;
+        if(i == 0) status(PSTR("You are no longer confused."));
     }
-    if(e.paralyzed)
+    if(e.paralyzed && u8rand() % 8 == 0)
     {
-        bool end;
-        if(i == 0) end = (--pinfo.paralyze_rem == 0);
-        else end = ((u8rand() & 7) == 0);
-        if(end)
-        {
-            e.paralyzed = 0;
-            if(i == 0) status(PSTR("You are no longer paralyzed."));
-        }
+        e.paralyzed = 0;
+        if(i == 0) status(PSTR("You are no longer paralyzed."));
     }
-    if(e.slowed)
+    if(e.slowed && u8rand() % 16 == 0)
     {
-        bool end;
-        if(i == 0) end = (--pinfo.slow_rem == 0);
-        else end = ((u8rand() & 7) == 0);
-        if(end)
-        {
-            e.slowed = 0;
-            if(i == 0) status(PSTR("You are no longer slowed."));
-        }
+        e.slowed = 0;
+        if(i == 0) status(PSTR("You are no longer slowed."));
     }
+    if(u8rand() % 16 == 0)
+        e.scared = 0;
     if(e.invis && !info.invis) // temporary invis
     {
         bool end;
         if(i == 0) end = (--pinfo.invis_rem == 0);
-        else end = ((u8rand() & 15) == 0);
+        else end = (u8rand() % 16 == 0);
         if(end)
         {
             e.invis = 0;
@@ -254,7 +238,9 @@ void entity_take_damage(uint8_t i, uint8_t dam)
         uint8_t tt = te.type;
         te.health = 0;
         te.type = entity::NONE;
-        maps[map_index].got_ents.set(i);            
+#if ENABLE_GOT_ENTS
+        maps[map_index].got_ents.set(i);   
+#endif
     }
     else
     {
@@ -364,8 +350,6 @@ void confuse_entity(uint8_t i)
     auto& te = ents[i];
     if(player_can_see_entity(i))
         status(PSTR("@U confused!"), i);
-    if(i == 0)
-        pinfo.confuse_rem = u8rand() % 4 + 4;
     te.confused = 1;
 }
 
@@ -386,8 +370,6 @@ void paralyze_entity(uint8_t i)
     if(te.paralyzed) return;
     if(player_can_see_entity(i))
         status(PSTR("@U paralyzed!"), i);
-    if(i == 0)
-        pinfo.paralyze_rem = u8rand() % 4 + 4;
     te.paralyzed = 1;
 }
 
@@ -397,8 +379,6 @@ void slow_entity(uint8_t i)
     if(te.slowed) return;
     if(player_can_see_entity(i))
         status(PSTR("@U slowed!"), i);
-    if(i == 0)
-        pinfo.slow_rem = u8rand() % 4 + 4;
     te.slowed = 1;
 }
 
