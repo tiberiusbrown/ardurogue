@@ -65,8 +65,10 @@ static char* item_name(char* dst, item it)
         dst = quantify_item(dst, n, PSTR("arrow"));
         return dst;
     case item::BOW:
+        dst = tstrcpy_prog(dst, PSTR("bow"));
+        return dst;
     case item::SWORD:
-        dst = tstrcpy_prog(dst, it.type == item::SWORD ? PSTR("sword") : PSTR("bow"));
+        dst = tstrcpy_prog(dst, PSTR("sword"));
         if(it.identified)
             dst += tsprintf(dst, PSTR(" [@d atk]"), weapon_item_attack(it));
         return dst;
@@ -96,7 +98,10 @@ static char* item_name(char* dst, item it)
                     s = PSTR(" [@d dex]");
                     break;
                 case RNG_PROTECTION:
-                    s = PSTR(" [@d]");
+                    s = PSTR(" [@d def]");
+                    break;
+                case RNG_ATTACK:
+                    s = PSTR(" [@d atk]");
                     break;
                 default:
                     break;
@@ -222,6 +227,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         case 'O': // object
         case 'T': // subject possessive
         case 'P': // object possessive
+        case 'U': // subject is/are
             dec[0] = (uint8_t)u16; // index
             u = ents[dec[0]].type;
             if(dec[0] == 0) // player
@@ -249,6 +255,8 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
                     *b++ = 's';
                 }
             }
+            if(c == 'U')
+                b = tstrcpy_prog(b, u == entity::PLAYER ? PSTR("are") : PSTR("is"));
             break;
         case 'V': // verb
         case 'v': // verb whose plural needs +es
@@ -262,15 +270,8 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
                 *b++ = 's';
             }
             break;
-        case 'A': // is/are
-            // TODO: combine this with S?
-            u = (uint8_t)u16; // index
-            u = ents[u].type;
-            b = tstrcpy_prog(b, u == entity::PLAYER ? PSTR("are") : PSTR("is"));
-            break;
         case 'i': // item
         {
-            //union { uint16_t a; item b; } uit = { (uint16_t)u16 };
             item it = va_arg(ap_old, item);
             va_copy(ap, ap_old);
             b = item_name(b, it);

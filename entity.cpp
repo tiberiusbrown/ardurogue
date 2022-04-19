@@ -22,7 +22,8 @@ uint8_t entity_speed(uint8_t i)
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].speed);
-    // TODO: factor in slow/speed effect
+    if(ents[i].slowed)
+        r = r / 2;
     if((r & 0x80) || r == 0) r = 1;
     return r;
 }
@@ -35,6 +36,8 @@ uint8_t entity_max_health(uint8_t i)
         r = pstats.max_health;
         if(pinfo.vamp_drain >= r)
             return 0;
+        if(wearing_uncursed_amulet(AMU_VITALITY))
+            r += 15;
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].max_health);
@@ -81,6 +84,7 @@ uint8_t entity_attack(uint8_t i)
         uint8_t j = pinfo.equipped[SLOT_WEAPON];
         if(j < INV_ITEMS)
             r += weapon_item_attack(inv[j]);
+        r += ring_bonus(RNG_ATTACK);
     }
     if((int8_t)r < 0) r = 0;
     return r;
@@ -136,7 +140,7 @@ void advance_entity(uint8_t i)
         if(end)
         {
             e.confused = 0;
-            status(PSTR("@S @A no longer confused."), i, i);
+            if(i == 0) status(PSTR("You are no longer confused."));
         }
     }
     if(e.paralyzed)
@@ -147,7 +151,18 @@ void advance_entity(uint8_t i)
         if(end)
         {
             e.paralyzed = 0;
-            status(PSTR("@S @A no longer paralyzed."), i, i);
+            if(i == 0) status(PSTR("You are no longer paralyzed."));
+        }
+    }
+    if(e.slowed)
+    {
+        bool end;
+        if(i == 0) end = (--pinfo.slow_rem == 0);
+        else end = ((u8rand() & 7) == 0);
+        if(end)
+        {
+            e.slowed = 0;
+            if(i == 0) status(PSTR("You are no longer slowed."));
         }
     }
     if(e.invis && !info.invis) // temporary invis
@@ -249,7 +264,7 @@ void entity_take_damage(uint8_t i, uint8_t dam)
 
 void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
 {
-    auto const& e = ents[atti];
+    auto e = ents[atti];
     entity_info info;
     entity_get_info(atti, info);
     auto& te = ents[defi];
@@ -272,16 +287,19 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
     }
     else // entity was damaged but not killed: on hit effects
     {
-        if(defi == 0 && info.vampire && u8rand() < 40)
+        bool vampire = info.vampire || (atti == 0 && wearing_uncursed_amulet(AMU_VAMPIRE));
+        if(vampire && u8rand() < 40)
         {
-            status(PSTR("@S drains your health!"), atti);
-            pinfo.vamp_drain += 3;
-            ents[0].health = tmin(ents[0].health, entity_max_health(0));
-            if(ents[0].health == 0)
+            status(PSTR("@S drains @P health!"), atti, defi);
+            if(defi == 0)
             {
-                status(PSTR("@S @V!"), defi, defi, PSTR("die"));
-                return;
+                uint8_t mhp = entity_max_health(0);
+                pinfo.vamp_drain += 3;
+                if(pinfo.vamp_drain >= mhp)
+                    pinfo.vamp_drain = mhp - 1;
+                ents[0].health = tmin(ents[0].health, entity_max_health(0));
             }
+            entity_heal(atti, 3);
         }
 
         if(info.confuse && u8rand() < 40)
@@ -289,6 +307,9 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
 
         if(info.poison && u8rand() < 40)
             poison_entity(defi);
+
+        if(info.paralyze && u8rand() < 40)
+            paralyze_entity(defi);
     }
 }
 
@@ -342,7 +363,7 @@ void confuse_entity(uint8_t i)
         return;
     auto& te = ents[i];
     if(player_can_see_entity(i))
-        status(PSTR("@S @V confused!"), i, i, PSTR("become"));
+        status(PSTR("@U confused!"), i);
     if(i == 0)
         pinfo.confuse_rem = u8rand() % 4 + 4;
     te.confused = 1;
@@ -350,11 +371,35 @@ void confuse_entity(uint8_t i)
 
 void poison_entity(uint8_t i)
 {
+    if(i == 0 && wearing_uncursed_amulet(AMU_IRONBLOOD))
+        return;
     auto& te = ents[i];
     if(te.weakened) return;
     if(player_can_see_entity(i))
-        status(PSTR("@S @A weakened!"), i, i);
+        status(PSTR("@U weakened!"), i);
     te.weakened = 1;
+}
+
+void paralyze_entity(uint8_t i)
+{
+    auto& te = ents[i];
+    if(te.paralyzed) return;
+    if(player_can_see_entity(i))
+        status(PSTR("@U paralyzed!"), i);
+    if(i == 0)
+        pinfo.paralyze_rem = u8rand() % 4 + 4;
+    te.paralyzed = 1;
+}
+
+void slow_entity(uint8_t i)
+{
+    auto& te = ents[i];
+    if(te.slowed) return;
+    if(player_can_see_entity(i))
+        status(PSTR("@U slowed!"), i);
+    if(i == 0)
+        pinfo.slow_rem = u8rand() % 4 + 4;
+    te.slowed = 1;
 }
 
 static void entity_attack_entity(uint8_t atti, uint8_t defi)
@@ -381,7 +426,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
     }
 }
 
-bool entity_perform_action(uint8_t i, action const& a)
+bool entity_perform_action(uint8_t i, action a)
 {
     auto& e = ents[i];
     uint8_t dir = a.data & 3;

@@ -75,6 +75,9 @@ static char const NPOT_CONFUSION[] PROGMEM = "confusion";
 static char const NPOT_POISON[] PROGMEM = "poison";
 static char const NPOT_STRENGTH[] PROGMEM = "strength";
 static char const NPOT_INVIS[] PROGMEM = "invisibility";
+static char const NPOT_PARALYSIS[] PROGMEM = "paralysis";
+static char const NPOT_SLOWING[] PROGMEM = "slowing";
+static char const NPOT_EXPERIENCE[] PROGMEM = "experience";
 
 char const* const POT_NAMES[NUM_POT] PROGMEM =
 {
@@ -83,6 +86,9 @@ char const* const POT_NAMES[NUM_POT] PROGMEM =
     NPOT_POISON,
     NPOT_STRENGTH,
     NPOT_INVIS,
+    NPOT_PARALYSIS,
+    NPOT_SLOWING,
+    NPOT_EXPERIENCE,
 };
 
 static char const UNID_POT_0[] PROGMEM = "red";
@@ -90,6 +96,9 @@ static char const UNID_POT_1[] PROGMEM = "clear";
 static char const UNID_POT_2[] PROGMEM = "orange";
 static char const UNID_POT_3[] PROGMEM = "green";
 static char const UNID_POT_4[] PROGMEM = "blue";
+static char const UNID_POT_5[] PROGMEM = "white";
+static char const UNID_POT_6[] PROGMEM = "yellow";
+static char const UNID_POT_7[] PROGMEM = "violet";
 
 char const* const UNID_POT_NAMES[NUM_POT] PROGMEM =
 {
@@ -98,6 +107,9 @@ char const* const UNID_POT_NAMES[NUM_POT] PROGMEM =
     UNID_POT_2,
     UNID_POT_3,
     UNID_POT_4,
+    UNID_POT_5,
+    UNID_POT_6,
+    UNID_POT_7,
 };
 
 static char const NSCR_IDENTIFY[] PROGMEM = "identify";
@@ -105,6 +117,10 @@ static char const NSCR_ENCHANT[] PROGMEM = "enchanting";
 static char const NSCR_REMOVE_CURSE[] PROGMEM = "remove curse";
 static char const NSCR_TELEPORT[] PROGMEM = "teleportation";
 static char const NSCR_MAPPING[] PROGMEM = "magic mapping";
+static char const NSCR_FEAR[] PROGMEM = "fear";
+static char const NSCR_TORMENT[] PROGMEM = "torment";
+static char const NSCR_MASS_CONFUSE[] PROGMEM = "mass confusion";
+static char const NSCR_MASS_POISON[] PROGMEM = "mass poison";
 
 char const* const SCR_NAMES[NUM_SCR] PROGMEM =
 {
@@ -113,6 +129,10 @@ char const* const SCR_NAMES[NUM_SCR] PROGMEM =
     NSCR_REMOVE_CURSE,
     NSCR_TELEPORT,
     NSCR_MAPPING,
+    NSCR_FEAR,
+    NSCR_TORMENT,
+    NSCR_MASS_CONFUSE,
+    NSCR_MASS_POISON,
 };
 
 static char const UNID_SCR_0[] PROGMEM = "faded";
@@ -120,6 +140,10 @@ static char const UNID_SCR_1[] PROGMEM = "yellowed";
 static char const UNID_SCR_2[] PROGMEM = "tattered";
 static char const UNID_SCR_3[] PROGMEM = "glowing";
 static char const UNID_SCR_4[] PROGMEM = "shimmering";
+static char const UNID_SCR_5[] PROGMEM = "humming";
+static char const UNID_SCR_6[] PROGMEM = "dark";
+static char const UNID_SCR_7[] PROGMEM = "bright";
+static char const UNID_SCR_8[] PROGMEM = "brilliant";
 
 char const* const UNID_SCR_NAMES[NUM_SCR] PROGMEM =
 {
@@ -128,12 +152,20 @@ char const* const UNID_SCR_NAMES[NUM_SCR] PROGMEM =
     UNID_SCR_2,
     UNID_SCR_3,
     UNID_SCR_4,
+    UNID_SCR_5,
+    UNID_SCR_6,
+    UNID_SCR_7,
+    UNID_SCR_8,
 };
 
 static char const NRNG_SEE_INVIS[] PROGMEM = "see invisible";
 static char const NRNG_STRENGTH[] PROGMEM = "strength";
 static char const NRNG_DEXTERITY[] PROGMEM = "dexterity";
 static char const NRNG_PROTECTION[] PROGMEM = "protection";
+static char const NRNG_INVIS[] PROGMEM = "invisibility";
+static char const NRNG_FIRE_PROTECT[] PROGMEM = "fire protection";
+static char const NRNG_ATTACK[] PROGMEM = "attack";
+static char const NRNG_SUSTENANCE[] PROGMEM = "sustenance";
 
 char const* const RNG_NAMES[NUM_RNG] PROGMEM =
 {
@@ -141,12 +173,20 @@ char const* const RNG_NAMES[NUM_RNG] PROGMEM =
     NRNG_STRENGTH,
     NRNG_DEXTERITY,
     NRNG_PROTECTION,
+    NRNG_INVIS,
+    NRNG_FIRE_PROTECT,
+    NRNG_ATTACK,
+    NRNG_SUSTENANCE,
 };
 
 static char const NAMU_SPEED[] PROGMEM = "speed";
 static char const NAMU_CLARITY[] PROGMEM = "clarity";
 static char const NAMU_CONSERVATION[] PROGMEM = "conservation";
 static char const NAMU_REGENERATION[] PROGMEM = "regeneration";
+static char const NAMU_VAMPIRE[] PROGMEM = "the vampire";
+static char const NAMU_IRONBLOOD[] PROGMEM = "ironblood";
+static char const NAMU_VITALITY[] PROGMEM = "vitality";
+static char const NAMU_WISDOM[] PROGMEM = "wisdom";
 static char const NAMU_YENDOR[] PROGMEM = "Yendor";
 
 char const* const AMU_NAMES[NUM_AMU + 1] PROGMEM =
@@ -155,6 +195,10 @@ char const* const AMU_NAMES[NUM_AMU + 1] PROGMEM =
     NAMU_CLARITY,
     NAMU_CONSERVATION,
     NAMU_REGENERATION,
+    NAMU_VAMPIRE,
+    NAMU_IRONBLOOD,
+    NAMU_VITALITY,
+    NAMU_WISDOM,
     NAMU_YENDOR,
 };
 
@@ -165,6 +209,7 @@ static char const UNID_RNG_AMU_3[] PROGMEM = "topaz";
 static char const UNID_RNG_AMU_4[] PROGMEM = "gold";
 static char const UNID_RNG_AMU_5[] PROGMEM = "silver";
 static char const UNID_RNG_AMU_6[] PROGMEM = "platinum";
+static char const UNID_RNG_AMU_7[] PROGMEM = "iron";
 
 char const* const UNID_RNG_AMU_NAMES[NUM_RNG < NUM_AMU ? NUM_AMU : NUM_RNG] PROGMEM =
 {
@@ -172,9 +217,10 @@ char const* const UNID_RNG_AMU_NAMES[NUM_RNG < NUM_AMU ? NUM_AMU : NUM_RNG] PROG
     UNID_RNG_AMU_1,
     UNID_RNG_AMU_2,
     UNID_RNG_AMU_3,
-    //UNID_RNG_AMU_4,
-    //UNID_RNG_AMU_5,
-    //UNID_RNG_AMU_6,
+    UNID_RNG_AMU_4,
+    UNID_RNG_AMU_5,
+    UNID_RNG_AMU_6,
+    UNID_RNG_AMU_7,
 };
 
 static char const INV_CAT_WEAPON[] PROGMEM = "Weapons";

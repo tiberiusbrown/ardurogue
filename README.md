@@ -6,7 +6,6 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
 
 - Floor traps
 - Spawn new monsters on occasion
-- Allow wearing up to two rings
 - Different map types (cave style?)
 - Wands
   - Striking (simple single-target damage)

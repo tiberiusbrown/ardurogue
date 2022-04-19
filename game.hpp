@@ -4,7 +4,9 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-#define ENABLE_DEBUG_MENU 1
+#define ENABLE_DEBUG_MENU 0
+#define ENABLE_MINIMAP 1
+#define ENABLE_DUNGEON_SCROLL 1
 
 // platform functionality
 void wait();        // wait about 100 ms
@@ -159,6 +161,7 @@ struct player_info
     uint8_t invis_rem;    // invis cycles remaining
     uint8_t confuse_rem;  // confuse cycles remaining
     uint8_t paralyze_rem; // paralysis cycles remaining
+    uint8_t slow_rem;     // slow cycles remaining
     uint8_t vamp_drain;   // amount of max health drained by vampire
     array<uint8_t, NUM_SLOTS> equipped;
 };
@@ -192,6 +195,8 @@ struct entity
     uint8_t weakened  : 1;
     uint8_t aggro     : 1; // when a non-mean monster is attacked by player
     uint8_t invis     : 1;
+    uint8_t scared    : 1; // monster is fleeing
+    uint8_t slowed    : 1;
     uint8_t health;
     uint8_t type;
 };
@@ -220,6 +225,9 @@ enum
     POT_POISON,
     POT_STRENGTH,
     POT_INVIS,
+    POT_PARALYSIS,
+    POT_SLOWING,
+    POT_EXPERIENCE,
     NUM_POT,
 };
 
@@ -231,26 +239,38 @@ enum
     SCR_REMOVE_CURSE,
     SCR_TELEPORT,
     SCR_MAPPING,
+    SCR_FEAR,
+    SCR_TORMENT,
+    SCR_MASS_CONFUSE,
+    SCR_MASS_POISON,
     NUM_SCR,
 };
 
 // ring types
 enum
 {
-    RNG_SEE_INVIS,
-    RNG_STRENGTH,
-    RNG_DEXTERITY,
-    RNG_PROTECTION,
+    RNG_SEE_INVIS,    // see invis
+    RNG_STRENGTH,     // bonus to strength
+    RNG_DEXTERITY,    // bonus to dexterity
+    RNG_PROTECTION,   // bonus to armor
+    RNG_INVIS,        // permanent invis
+    RNG_FIRE_PROTECT, // immunity to fire breath
+    RNG_ATTACK,       // bonus to attack
+    RNG_SUSTENANCE,   // slows down hunger
     NUM_RNG,
 };
 
 // amulet types
 enum
 {
-    AMU_SPEED,
+    AMU_SPEED,        // bonus to speed
     AMU_CLARITY,      // prevents becoming confused
     AMU_CONSERVATION, // chance to prevent consuming potions/scrolls
     AMU_REGENERATION, // (chance to) heal each turn
+    AMU_VAMPIRE,      // chance to drain health on hit
+    AMU_IRONBLOOD,    // poison immunity
+    AMU_VITALITY,     // bonus to max health
+    AMU_WISDOM,       // buff to experience gain
     AMU_YENDOR,
     NUM_AMU = AMU_YENDOR,
 };
@@ -326,7 +346,7 @@ enum
     HS_RETURNED,  // returned to the surface without the amulet
     HS_ABANDONED, // chose to end the game
     HS_ENTITY,    // killed by entity
-    HS_TRAP,      // killed by trap
+    //HS_TRAP,      // killed by trap
     HS_STARVED,   // starved to death
 };
 struct high_score
@@ -618,11 +638,13 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam);
 void teleport_entity(uint8_t i);
 void confuse_entity(uint8_t i);
 void poison_entity(uint8_t i);
+void paralyze_entity(uint8_t i);
+void slow_entity(uint8_t i);
 void advance_entity(uint8_t i);
 bool wearing_uncursed_amulet(uint8_t subtype);
 int8_t ring_bonus(uint8_t subtype);
 bool wearing_uncursed_ring(uint8_t subtype);
-bool entity_perform_action(uint8_t i, action const& a);
+bool entity_perform_action(uint8_t i, action a);
 void aggro_monster(uint8_t i);
 
 // monsters.cpp

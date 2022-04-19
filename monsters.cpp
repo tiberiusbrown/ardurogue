@@ -55,7 +55,7 @@ void monster_ai(uint8_t i, action& a)
     uint8_t dp = dist_to_player(e.x, e.y);
     bool mean = info.mean | e.aggro;
 
-    if(!mean || pstats.invis || dp >= 10)
+    if(!mean || pstats.invis || wearing_uncursed_ring(RNG_INVIS) || dp >= 10)
     {
         a.data = u8rand() & 3;
         uint8_t nx = ex + pgm_read_byte(&DIRX[a.data]);
@@ -73,7 +73,7 @@ void monster_ai(uint8_t i, action& a)
         uint8_t px = ents[0].x, py = ents[0].y;
         scan_result sr;
         uint8_t dir;
-        for(dir = 0; dir < 5; ++dir)
+        for(dir = 0; dir < 4; ++dir)
         {
             scan_dir(i, dir, 5, sr);
             if(sr.i == 0)
@@ -84,7 +84,8 @@ void monster_ai(uint8_t i, action& a)
             status(PSTR("@S breathes fire!"), i);
             render();
             draw_ray_anim(ex - px + 6, ey - py + 6, dir, sr.n);
-            entity_take_damage_from_entity(i, 0, u8rand(8) + 8);
+            if(!wearing_uncursed_ring(RNG_FIRE_PROTECT))
+                entity_take_damage_from_entity(i, 0, u8rand(8) + 8);
             return;
         }
     }
@@ -94,11 +95,19 @@ void monster_ai(uint8_t i, action& a)
         uint8_t nx = ex + pgm_read_byte(&DIRX[i]);
         uint8_t ny = ey + pgm_read_byte(&DIRY[i]);
         if(tile_is_solid(nx, ny)) continue;
-        if(entity* e = get_entity(nx, ny))
-            if(e->type != entity::PLAYER)
+        if(entity* te = get_entity(nx, ny))
+            if(te->type != entity::PLAYER)
                 continue;
         uint8_t td = dist_to_player(nx, ny);
-        if(td < dp || (td == dp && (u8rand() & 1)))
+        if(e.scared)
+        {
+            if(td > dp)
+            {
+                a.type = action::MOVE;
+                dp = td, a.data = i;
+            }
+        }
+        else if(td < dp || (td == dp && (u8rand() & 1)))
         {
             a.type = action::MOVE;
             dp = td, a.data = i;

@@ -109,17 +109,18 @@ uint8_t armor_item_defense(item it)
 
 uint8_t weapon_item_attack(item it)
 {
-    // assumes item is sword or bow
+    // assumes item is sword
     uint8_t level = it.quant_or_level;
     if(it.cursed) level = -(level + 2);
     uint8_t m = 3;
-    if(it.type == item::BOW) m = 1;
     return level + m;
 }
 
 void player_gain_xp(uint8_t xp)
 {
     uint8_t txp = xp_for_level();
+    if(wearing_uncursed_amulet(AMU_WISDOM))
+        xp += (xp + 1) / 2;
     if(txp - xp < pstats.xp)
     {
         ++plevel;
@@ -139,7 +140,7 @@ void player_gain_xp(uint8_t xp)
             }
         }
         ents[0].health = entity_max_health(0);
-        pstats.xp += (xp - txp);
+        pstats.xp = 0;
     }
     else
         pstats.xp += xp;
@@ -256,6 +257,8 @@ static void init_perm(uint8_t* p, uint8_t n)
 
 void advance_hunger()
 {
+    if(wearing_uncursed_ring(RNG_SUSTENANCE) && u8rand() % 2 == 0)
+        return;
     if(hunger < 255)
     {
         ++hunger;

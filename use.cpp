@@ -79,6 +79,31 @@ static void use_scroll(uint8_t subtype)
             t = 0xff;
         status(PSTR("You become aware of your surroundings."));
         break;
+    case SCR_FEAR:
+    case SCR_TORMENT:
+    case SCR_MASS_CONFUSE:
+    case SCR_MASS_POISON:
+        for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
+        {
+            auto& e = ents[i];
+            if(e.type == entity::NONE) continue;
+            if(!player_can_see_entity(i)) continue;
+            if(subtype == SCR_FEAR)
+            {
+                e.scared = 1;
+                if(i != 0)
+                    status(PSTR("@S flees!"), i);
+            }
+            else if(subtype == SCR_TORMENT)
+            {
+                e.health /= 2;
+                status(PSTR("@U stricken!"), i);
+            }
+            else if(subtype == SCR_MASS_CONFUSE)
+                confuse_entity(i);
+            else if(subtype == SCR_MASS_POISON)
+                poison_entity(i);
+        }
     default:
         break;
     }
@@ -214,6 +239,16 @@ void entity_apply_potion(uint8_t i, uint8_t subtype)
             status(PSTR("You turn invisible."));
         }
         ents[i].invis = 1;
+        break;
+    case POT_PARALYSIS:
+        paralyze_entity(i);
+        break;
+    case POT_SLOWING:
+        slow_entity(i);
+        break;
+    case POT_EXPERIENCE:
+        if(i == 0)
+            player_gain_xp(50);
         break;
     default:
         // TODO

@@ -6,15 +6,15 @@ static char const HS_MSG_ESCAPED[] PROGMEM = "Escaped with the amulet";
 static char const HS_MSG_RETURNED[] PROGMEM = "Returned to the surface";
 static char const HS_MSG_ABANDONED[] PROGMEM = "Abandoned the game";
 static char const HS_MSG_ENTITY[] PROGMEM = "Death by @M";
-static char const HS_MSG_TRAP[] PROGMEM = "";
+//static char const HS_MSG_TRAP[] PROGMEM = "";
 static char const HS_MSG_STARVED[] PROGMEM = "Starved to death";
-static char const* const HS_MSGS[6] PROGMEM =
+static char const* const HS_MSGS[5] PROGMEM =
 {
     HS_MSG_ESCAPED,
     HS_MSG_RETURNED,
     HS_MSG_ABANDONED,
     HS_MSG_ENTITY,
-    HS_MSG_TRAP,
+    //HS_MSG_TRAP,
     HS_MSG_STARVED,
 };
 
@@ -24,7 +24,7 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
     set_hline(0, 63, 6);
     for(uint8_t i = 0, y = 11; i < NUM_HIGH_SCORES; ++i, y += 7)
     {
-        auto const& h = high_scores[i];
+        auto h = high_scores[i];
         if(h.type == HS_NONE) continue;
         draw_textf(x, y, pgmptr(&HS_MSGS[h.type - 1]), h.data);
         char tn[6];
@@ -285,8 +285,12 @@ static char const MEN_DEBUG[] PROGMEM = "Debug Info";
 
 static char const* const MEN_ITEMS[] PROGMEM =
 {
+#if ENABLE_MINIMAP
     MEN_MAP,
+#endif
+#if ENABLE_DUNGEON_SCROLL
     MEN_SCROLL,
+#endif
     MEN_INV,
     MEN_STATS,
     MEN_HS,
@@ -526,8 +530,12 @@ static void men_high_scores()
 using men_method = void(*)(void);
 static men_method const MEN_METHODS[] PROGMEM =
 {
+#if ENABLE_MINIMAP
     men_map,
+#endif
+#if ENABLE_DUNGEON_SCROLL
     men_scroll,
+#endif
     men_inv,
     men_info,
     men_high_scores,
@@ -567,7 +575,7 @@ bool action_menu(action& a)
             if(act)
             {
                 text = MEN_ITEMS;
-                n = 6 + ENABLE_DEBUG_MENU;
+                n = 4 + ENABLE_MINIMAP + ENABLE_DUNGEON_SCROLL + ENABLE_DEBUG_MENU;
                 i = 0;
             }
             else
