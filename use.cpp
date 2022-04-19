@@ -93,7 +93,17 @@ uint8_t slot_of_item(uint8_t type)
     case item::HELM:   return SLOT_HELM;
     case item::ARMOR:  return SLOT_ARMOR;
     case item::BOOTS:  return SLOT_BOOTS;
-    case item::RING:   return SLOT_RING1;
+    case item::RING:
+    {
+        uint8_t j = pinfo.equipped[SLOT_RING1];
+        // if slot 1 empty, return slot 1
+        if(j >= INV_ITEMS) return SLOT_RING1;
+        // if slot 2 cursed, return slot 1
+        j = pinfo.equipped[SLOT_RING2];
+        if(j < INV_ITEMS && inv[j].cursed) return SLOT_RING1;
+        // otherwise return slot 2
+        return SLOT_RING2;
+    }
     case item::AMULET: return SLOT_AMULET;
     default: break;
     }
