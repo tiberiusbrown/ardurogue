@@ -93,7 +93,7 @@ uint8_t slot_of_item(uint8_t type)
     case item::HELM:   return SLOT_HELM;
     case item::ARMOR:  return SLOT_ARMOR;
     case item::BOOTS:  return SLOT_BOOTS;
-    case item::RING:   return SLOT_RING;
+    case item::RING:   return SLOT_RING1;
     case item::AMULET: return SLOT_AMULET;
     default: break;
     }

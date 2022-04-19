@@ -52,17 +52,8 @@ uint8_t entity_strength(uint8_t i)
         r = (r + 1) / 2;
     if(i == 0)
     {
-        // ring of strength
-        uint8_t j = pinfo.equipped[SLOT_RING];
-        if(j < INV_ITEMS && inv[j].subtype == RNG_STRENGTH)
-        {
-            item const& it = inv[j];
-            uint8_t n = it.quant_or_level + 1;
-            if(it.cursed)
-                r -= n;
-            else
-                r += n;
-        }
+        // ring bonus is after weaken
+        r += ring_bonus(RNG_STRENGTH);
     }
     if((int8_t)r < 0) r = 0;
     return r;
@@ -74,17 +65,7 @@ uint8_t entity_dexterity(uint8_t i)
     if(i == 0)
     {
         r = pstats.dexterity;
-        // ring of dexterity
-        uint8_t j = pinfo.equipped[SLOT_RING];
-        if(j < INV_ITEMS && inv[j].subtype == RNG_DEXTERITY)
-        {
-            item const& it = inv[j];
-            uint8_t n = it.quant_or_level + 1;
-            if(it.cursed)
-                r -= n;
-            else
-                r += n;
-        }
+        r += ring_bonus(RNG_DEXTERITY);
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].dexterity);
@@ -112,16 +93,7 @@ uint8_t entity_defense(uint8_t i)
     {
         r = pstats.defense;
         // ring of protection
-        uint8_t j = pinfo.equipped[SLOT_RING];
-        if(j < INV_ITEMS && inv[j].subtype == RNG_PROTECTION)
-        {
-            item const& it = inv[j];
-            uint8_t n = it.quant_or_level + 1;
-            if(it.cursed)
-                r -= n;
-            else
-                r += n;
-        }
+        r += ring_bonus(RNG_PROTECTION);
         // armor
         for(uint8_t i = SLOT_ARMOR; i <= SLOT_BOOTS; ++i)
         {
@@ -339,9 +311,29 @@ bool wearing_uncursed_amulet(uint8_t subtype)
     return is_uncursed_subtype(subtype, SLOT_AMULET);
 }
 
+static uint8_t ring_bonus_slot(uint8_t slot, uint8_t subtype)
+{
+    uint8_t j = pinfo.equipped[slot];
+    if(j >= INV_ITEMS) return 0;
+    item it = inv[j];
+    if(it.subtype != subtype) return 0;
+    int8_t r = it.quant_or_level + 1;
+    if(it.cursed) r = -r;
+    return uint8_t(r);
+}
+
+int8_t ring_bonus(uint8_t subtype)
+{
+    return
+        ring_bonus_slot(SLOT_RING1, subtype) +
+        ring_bonus_slot(SLOT_RING2, subtype);
+}
+
 bool wearing_uncursed_ring(uint8_t subtype)
 {
-    return is_uncursed_subtype(subtype, SLOT_RING);
+    return
+        is_uncursed_subtype(subtype, SLOT_RING1) ||
+        is_uncursed_subtype(subtype, SLOT_RING2);;
 }
 
 void confuse_entity(uint8_t i)

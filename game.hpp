@@ -147,7 +147,8 @@ enum
     SLOT_ARMOR,
     SLOT_HELM,
     SLOT_BOOTS,
-    SLOT_RING,
+    SLOT_RING1,
+    SLOT_RING2,
     SLOT_AMULET,
     NUM_SLOTS
 };
@@ -619,6 +620,7 @@ void confuse_entity(uint8_t i);
 void poison_entity(uint8_t i);
 void advance_entity(uint8_t i);
 bool wearing_uncursed_amulet(uint8_t subtype);
+int8_t ring_bonus(uint8_t subtype);
 bool wearing_uncursed_ring(uint8_t subtype);
 bool entity_perform_action(uint8_t i, action const& a);
 void aggro_monster(uint8_t i);
