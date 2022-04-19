@@ -19,7 +19,7 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
 
 Contents of `platform.local.txt`:
 ```
-compiler.c.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop  -fno-move-loop-invariants
-compiler.cpp.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop  -fno-move-loop-invariants
+compiler.c.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop -fno-move-loop-invariants -fweb -frename-registers 
+compiler.cpp.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop -fno-move-loop-invariants -fweb -frename-registers 
 compiler.c.elf.extra_flags=-Wl,--relax
 ```

@@ -147,7 +147,7 @@ void advance_entity(uint8_t i)
         e.slowed = 0;
         if(i == 0) status(PSTR("You are no longer slowed."));
     }
-    if(u8rand() % 16 == 0)
+    if(u8rand() % 32 == 0)
         e.scared = 0;
     if(e.invis && !info.invis) // temporary invis
     {
