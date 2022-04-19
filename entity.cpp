@@ -315,7 +315,7 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
         if(info.confuse && u8rand() < 40)
             confuse_entity(defi);
 
-        if(info.poison && u8rand() < 20)
+        if(info.poison && u8rand() < 40)
             poison_entity(defi);
     }
 }

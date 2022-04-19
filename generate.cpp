@@ -630,45 +630,124 @@ static void generate_item(uint8_t i, item it)
 
 static void generate_random_item(uint8_t i)
 {
-    item it{};
-    uint8_t type = u8rand(item::NUM_ITEM_TYPES);
-    it.type = type;
-    it.subtype = 0;
+    item it;
+    uint8_t type = 0;
+    uint8_t subtype = 0;
+    uint8_t r = u8rand();
+
     bool cursed = (u8rand() < 32);
     uint8_t enchant = (u8rand() < 64);
-    switch(type)
+    uint8_t quant = 0;
+
+#if 1
+
+    static uint8_t const TYPES[] PROGMEM =
     {
-    case item::ARROW:
-        it.quant_or_level = u8rand() % 4 + 3;
-        break;
-    //case item::FOOD:
-    //    it.cursed = 0;
-    //    break;
-    case item::POTION:
-        it.subtype = u8rand(NUM_POT);
-        break;
-    case item::SCROLL:
-        it.subtype = u8rand(NUM_SCR);
-        break;
-    case item::RING:
-        it.cursed = cursed;
-        it.quant_or_level = enchant;
-        it.subtype = u8rand(NUM_RNG);
-        break;
-    case item::AMULET:
-        it.subtype = u8rand(NUM_AMU);
-        [[fallthrough]];
-    case item::SWORD:
-    case item::BOW:
-    case item::HELM:
-    case item::ARMOR:
-    case item::BOOTS:
-        it.cursed = cursed;
-        it.quant_or_level = enchant;
-        break;
-    default:
-        break;
+        item::POTION, item::POTION, item::POTION, item::POTION, item::POTION,
+        item::POTION, item::POTION, item::POTION, item::POTION, item::POTION,
+        item::SCROLL, item::SCROLL, item::SCROLL, item::SCROLL, item::SCROLL,
+        item::SCROLL, item::SCROLL,
+        item::ARROW, item::ARROW, item::ARROW, item::ARROW,
+        item::FOOD, item::FOOD,
+        item::BOW, item::BOW,
+        item::SWORD, item::SWORD,
+        item::ARMOR, item::HELM, item::BOOTS,
+        item::RING, item::AMULET,
+    };
+
+    type = pgm_read_byte(&TYPES[u8rand() % 32]);
+    if(type == item::POTION)
+        subtype = u8rand(NUM_POT);
+    else if(type == item::SCROLL)
+        subtype = u8rand(NUM_SCR);
+    else if(type == item::RING)
+        subtype = u8rand(NUM_RNG);
+    else if(type == item::AMULET)
+        subtype = u8rand(NUM_AMU);
+    else if(type == item::ARROW)
+        quant = u8rand() % 4 + 3;
+    if(type >= item::SWORD)
+        quant = enchant;
+
+#else
+
+    constexpr double P_FOOD   = 6;
+    constexpr double P_POTION = 25;
+    constexpr double P_SCROLL = 15;
+    constexpr double P_ARROW  = 10;
+    constexpr double P_BOW    = 4;
+    constexpr double P_SWORD  = 4;
+    constexpr double P_RING   = 2;
+    constexpr double P_AMULET = 1;
+    constexpr double P_ARMOR  = 3;
+    constexpr double P_HELM   = 3;
+    constexpr double P_BOOTS  = 3;
+
+    constexpr double P_TOTAL =
+        P_FOOD + P_POTION + P_SCROLL + P_ARROW + P_BOW + P_SWORD +
+        P_RING + P_AMULET + P_ARMOR + P_HELM + P_BOOTS;
+
+    constexpr double N_FOOD   = (P_FOOD   * 256.5 / P_TOTAL + 0       );
+    constexpr double N_POTION = (P_POTION * 256.5 / P_TOTAL + N_FOOD  );
+    constexpr double N_SCROLL = (P_SCROLL * 256.5 / P_TOTAL + N_POTION);
+    constexpr double N_ARROW  = (P_ARROW  * 256.5 / P_TOTAL + N_SCROLL);
+    constexpr double N_BOW    = (P_BOW    * 256.5 / P_TOTAL + N_ARROW );
+    constexpr double N_SWORD  = (P_SWORD  * 256.5 / P_TOTAL + N_BOW   );
+    constexpr double N_RING   = (P_RING   * 256.5 / P_TOTAL + N_SWORD );
+    constexpr double N_AMULET = (P_AMULET * 256.5 / P_TOTAL + N_RING  );
+    constexpr double N_ARMOR  = (P_ARMOR  * 256.5 / P_TOTAL + N_AMULET);
+    constexpr double N_HELM   = (P_HELM   * 256.5 / P_TOTAL + N_ARMOR );
+    constexpr double N_BOOTS  = (P_BOOTS  * 256.5 / P_TOTAL + N_HELM  );
+
+    if(r < (uint8_t)N_FOOD)
+        type = item::FOOD;
+    else if(r < (uint8_t)N_POTION)
+    {
+        type = item::POTION;
+        subtype = u8rand(NUM_POT);
     }
+    else if(r < (uint8_t)N_SCROLL)
+    {
+        type = item::SCROLL;
+        subtype = u8rand(NUM_SCR);
+    }
+    else if(r < (uint8_t)N_ARROW)
+    {
+        type = item::ARROW;
+        quant = u8rand() % 4 + 3;
+    }
+    else if(r < (uint8_t)N_BOW)
+        type = item::BOW;
+    else if(r < (uint8_t)N_SWORD)
+        type = item::SWORD;
+    else if(r < (uint8_t)N_RING)
+    {
+        type = item::RING;
+        subtype = u8rand(NUM_RNG);
+    }
+    else if(r < (uint8_t)N_AMULET)
+    {
+        type = item::AMULET;
+        subtype = u8rand(NUM_AMU);
+    }
+    else if(r < (uint8_t)N_ARMOR)
+        type = item::ARMOR;
+    else if(r < (uint8_t)N_HELM)
+        type = item::HELM;
+    else if(r < (uint8_t)N_BOOTS)
+        type = item::BOOTS;
+
+    if(type >= item::SWORD)
+        quant = enchant;
+
+#endif
+
+    it.type = type;
+    it.subtype = subtype;
+    it.identified = 0;
+    it.cursed = cursed;
+    it.quant_or_level = quant;
+
     generate_item(i, it);
 }
 
