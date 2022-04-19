@@ -402,8 +402,9 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             uint8_t i = ddir_mask(tx, ty);
             if(!tile_is_solid_or_unknown(tx, ty))
             {
+                uint8_t ws = wall_style;
                 if(player_can_see(tx, ty))
-                    set_pixel(px + 2, py + 2 + (wall_style == 3));
+                    set_pixel(px + 2, py + 2 + (ws == 3));
                 if(tile_is_solid(tx, ty - 1))
                 {
                     uint8_t a = px - 1;
@@ -411,9 +412,9 @@ void draw_dungeon(uint8_t mx, uint8_t my)
                     if(!(i & 0x80)) ++a;
                     if(!(i & 0x40)) --b;
                     a += (a >> 7);
-                    for(uint8_t j = 0; j < wall_style; ++j)
+                    for(uint8_t j = 0; j < ws; ++j)
                         set_hline(a, b, py - 1 + j);
-                    clear_hline(a, b, py - 1 + wall_style);
+                    clear_hline(a, b, py - 1 + ws);
                 }
                 continue;
             }

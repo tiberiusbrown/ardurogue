@@ -27,7 +27,6 @@ static EM_BOOL keydown_callback(int type, EmscriptenKeyboardEvent const* e, void
             default: break;
         }
     }
-        
     return EM_TRUE;
 }
 
