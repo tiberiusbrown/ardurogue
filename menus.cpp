@@ -563,9 +563,9 @@ bool action_menu(action& a)
     {
         draw_text(10, 0, act ? PSTR("{ Actions }") : PSTR("{ Game Menu }"));
         set_hline(1, 63, 6);
-        for(uint8_t j = 0, y = START_Y; j <= n; ++j, y += 6)
+        for(uint8_t j = 0, y = START_Y; j <= n; ++j, y += 7)
             draw_text(8, y, (char const*)pgm_read_ptr(&text[j]));
-        inv_rect(1, 63, i * 6 + START_Y - 1, i * 6 + START_Y + 5);
+        inv_rect(1, 63, i * 7 + START_Y - 1, i * 7 + START_Y + 5);
         paint_right();
         uint8_t b = wait_btn();
         switch(b)
