@@ -156,7 +156,8 @@ bool unequip_item(uint8_t i)
 
 bool equip_item(uint8_t i)
 {
-    uint8_t type = inv[i].type;
+    item it = inv[i];
+    uint8_t type = it.type;
     uint8_t slot = slot_of_item(type);
     uint8_t& j = pinfo.equipped[slot];
     if(j < INV_ITEMS && !unequip_item(j))
@@ -165,7 +166,14 @@ bool equip_item(uint8_t i)
     identify_item(i);
     status(PSTR("You @p the @i."),
         weap ? PSTR("ready") : PSTR("put on"),
-        inv[i]);
+        it);
+    if(it.type == item::AMULET && it.subtype == AMU_IRONBLOOD)
+    {
+        entity_restore_strength(0);
+        end_paralysis(0);
+    }
+    if(it.type == item::AMULET && it.subtype == AMU_CLARITY)
+        end_confusion(0);
     j = i;
     return true;
 }

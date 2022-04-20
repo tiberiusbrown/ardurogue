@@ -113,6 +113,36 @@ uint8_t entity_defense(uint8_t i)
     return r;
 }
 
+void end_paralysis(uint8_t i)
+{
+    auto& e = ents[i];
+    if(e.paralyzed)
+    {
+        e.paralyzed = 0;
+        if(i == 0) status(PSTR("You are no longer paralyzed."));
+    }
+}
+
+void end_confusion(uint8_t i)
+{
+    auto& e = ents[i];
+    if(e.paralyzed)
+    {
+        e.paralyzed = 0;
+        if(i == 0) status(PSTR("You are no longer confused."));
+    }
+}
+
+void end_slow(uint8_t i)
+{
+    auto& e = ents[i];
+    if(e.paralyzed)
+    {
+        e.paralyzed = 0;
+        if(i == 0) status(PSTR("You are no longer slowed."));
+    }
+}
+
 void advance_entity(uint8_t i)
 {
     auto& e = ents[i];
@@ -132,21 +162,9 @@ void advance_entity(uint8_t i)
     }
 
     // advance temporary effects
-    if(e.confused && u8rand() % 8 == 0)
-    {
-        e.confused = 0;
-        if(i == 0) status(PSTR("You are no longer confused."));
-    }
-    if(e.paralyzed && u8rand() % 8 == 0)
-    {
-        e.paralyzed = 0;
-        if(i == 0) status(PSTR("You are no longer paralyzed."));
-    }
-    if(e.slowed && u8rand() % 16 == 0)
-    {
-        e.slowed = 0;
-        if(i == 0) status(PSTR("You are no longer slowed."));
-    }
+    if(u8rand() % 8 == 0) end_paralysis(i);
+    if(u8rand() % 8 == 0) end_confusion(i);
+    if(u8rand() % 16 == 0) end_slow(i);
     if(u8rand() % 32 == 0)
         e.scared = 0;
     if(e.invis && !info.invis) // temporary invis
