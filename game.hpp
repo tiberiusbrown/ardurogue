@@ -119,10 +119,6 @@ template<size_t B, size_t N = 1> struct u8bitfield
     {
         return raw_ = (raw_ & INV_MASK) | ((uint8_t(t) << B) & MASK), *this;
     }
-    constexpr u8bitfield& operator=(u8bitfield const& t)
-    {
-        return *this = uint8_t(t);
-    }
     template<class T>
     constexpr u8bitfield& operator+=(T const& t)
     {
@@ -202,19 +198,6 @@ struct entity_info
     uint8_t max_health;
 
     uint8_t xp;          // xp granted for killing / current xp (player)
-
-    constexpr entity_info& operator=(entity_info const& t)
-    {
-        mean.raw_ = t.mean.raw_;
-        fbreath.raw_ = t.fbreath.raw_;
-        strength = t.strength;
-        dexterity = t.dexterity;
-        speed = t.speed;
-        defense = t.defense;
-        max_health = t.max_health;
-        xp = t.xp;
-        return *this;
-    };
 };
 
 // item slots
@@ -284,15 +267,6 @@ struct entity
 #endif
     uint8_t health;
     uint8_t type;
-
-    constexpr entity& operator=(entity const& t)
-    {
-        x = t.x, y = t.y;
-        aggro.raw_ = t.aggro.raw_;
-        health = t.health;
-        type = t.type;
-        return *this;
-    }
 };
 
 struct action
@@ -410,12 +384,6 @@ struct item
     uint8_t subtype        : 4;
 #endif
     bool stackable() { return type <= ARROW; }
-    constexpr item& operator=(item const& t)
-    {
-        type.raw_ = t.type.raw_;
-        cursed.raw_ = t.cursed.raw_;
-        return *this;
-    }
 };
 
 static_assert(sizeof(item) == 2);
@@ -466,12 +434,6 @@ struct door
     uint8_t y : 7;
     uint8_t open : 1;
 #endif
-    constexpr door& operator=(door const& t)
-    {
-        x.raw_ = t.x.raw_;
-        y.raw_ = t.y.raw_;
-        return *this;
-    }
 };
 
 enum

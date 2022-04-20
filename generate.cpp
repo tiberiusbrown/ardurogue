@@ -853,7 +853,7 @@ void generate_dungeon()
 #endif
                 entity_info info;
                 entity_get_info(i, info);
-                e.invis = info.invis;
+                e.invis = (uint8_t)info.invis;
                 break;
             }
         }
