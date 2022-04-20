@@ -18,13 +18,13 @@ static EM_BOOL keydown_callback(int type, EmscriptenKeyboardEvent const* e, void
     {
         switch(e->keyCode)
         {
-            case 38: last_pressed = BTN_UP; break;
-            case 40: last_pressed = BTN_DOWN; break;
-            case 37: last_pressed = BTN_LEFT; break;
-            case 39: last_pressed = BTN_RIGHT; break;
-            case 65: last_pressed = BTN_A; break;
-            case 66: last_pressed = BTN_B; break;
-            default: break;
+        case 'K': case 38: last_pressed = BTN_UP; break;
+        case 'J': case 40: last_pressed = BTN_DOWN; break;
+        case 'H': case 37: last_pressed = BTN_LEFT; break;
+        case 'L': case 39: last_pressed = BTN_RIGHT; break;
+        case 'A': last_pressed = BTN_A; break;
+        case 'B': last_pressed = BTN_B; break;
+        default: break;
         }
     }
     return EM_TRUE;
