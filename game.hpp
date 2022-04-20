@@ -4,13 +4,20 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+// stack canary, git info: costs about 300 bytes
 #define ENABLE_DEBUG_MENU 0
+
+// costs about 600 bytes
 #define ENABLE_MINIMAP 1
+
+// costs about 200 bytes
 #define ENABLE_DUNGEON_SCROLL 1
-#define ENABLE_GOT_ENTS 1
+
+// costs about 100 bytes prog, 64 bytes ram
+#define ENABLE_GOT_ENTS 0
 
 // this saves like 230 bytes (!!!)
-// gcc must have poor codegen for bitfields
+// gcc must have poor codegen for standard bitfields
 #define USE_CUSTOM_BITFIELDS 1
 
 // platform functionality
@@ -143,11 +150,11 @@ static constexpr uint8_t BTN_B     = 0x04;
 
 static constexpr uint8_t MAP_W = 64;
 static constexpr uint8_t MAP_H = 32;
-static constexpr uint8_t MAP_ITEMS = 32;
+static constexpr uint8_t MAP_ITEMS = 48;
 static constexpr uint8_t MAP_ENTITIES = 32;
 static constexpr uint8_t MAP_ROOMS = 32;
 static constexpr uint8_t MAP_DOORS = 32;
-static constexpr uint8_t INV_ITEMS = 32;
+static constexpr uint8_t INV_ITEMS = 16;
 static constexpr uint8_t NUM_MAPS = 16;
 
 struct coord { uint8_t x, y; };
@@ -244,8 +251,8 @@ struct entity
         u8bitfield<0> confused;
         u8bitfield<1> paralyzed;
         u8bitfield<2> weakened;
-        u8bitfield<3> aggro;
-        u8bitfield<4> invis;
+        u8bitfield<4> aggro;
+        u8bitfield<3> invis;
         u8bitfield<5> scared;
         u8bitfield<6> slowed;
     };
@@ -361,13 +368,13 @@ struct item
     union
     {
         u8bitfield<0, 6> quant_or_level;
-        u8bitfield<6, 1> identified;
-        u8bitfield<7, 1> cursed;
+        u8bitfield<7, 1> identified;
+        u8bitfield<6, 1> cursed;
     };
     union
     {
-        u8bitfield<0, 4> type;
-        u8bitfield<4, 4> subtype;
+        u8bitfield<4, 4> type;
+        u8bitfield<0, 4> subtype;
     };
 #else
     uint8_t quant_or_level : 6;

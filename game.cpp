@@ -275,16 +275,6 @@ void advance_hunger()
 static void advance()
 {
     uint8_t pspeed = entity_speed(0);
-    // apply amulet of regeneration
-    if(wearing_uncursed_amulet(AMU_REGENERATION))
-    {
-        uint8_t i = tmax<uint8_t>(entity_max_health(0), 48);
-        if(u8rand() < i)
-        {
-            entity_heal(0, 1);
-            advance_hunger();
-        }
-    }
     for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
     {
         uint8_t espeed = entity_speed(i);

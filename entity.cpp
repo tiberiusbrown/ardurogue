@@ -126,9 +126,9 @@ void end_paralysis(uint8_t i)
 void end_confusion(uint8_t i)
 {
     auto& e = ents[i];
-    if(e.paralyzed)
+    if(e.confused)
     {
-        e.paralyzed = 0;
+        e.confused = 0;
         if(i == 0) status(PSTR("You are no longer confused."));
     }
 }
@@ -136,9 +136,9 @@ void end_confusion(uint8_t i)
 void end_slow(uint8_t i)
 {
     auto& e = ents[i];
-    if(e.paralyzed)
+    if(e.slowed)
     {
-        e.paralyzed = 0;
+        e.slowed = 0;
         if(i == 0) status(PSTR("You are no longer slowed."));
     }
 }
@@ -159,6 +159,17 @@ void advance_entity(uint8_t i)
         else
             monster_ai(i, a);
         entity_perform_action(i, a);
+    }
+
+    // regeneration
+    if(info.regens || (i == 0 && wearing_uncursed_amulet(AMU_REGENERATION)))
+    {
+        uint8_t t = tmax<uint8_t>(entity_max_health(0), 48);
+        if(u8rand() < t)
+        {
+            entity_heal(0, 1);
+            if(i == 0) advance_hunger();
+        }
     }
 
     // advance temporary effects

@@ -645,7 +645,11 @@ static void generate_random_item(uint8_t i)
     uint8_t r = u8rand();
 
     bool cursed = (u8rand() < 32);
-    uint8_t enchant = (u8rand() < 64);
+    
+    uint8_t enchant = 0;
+    while(enchant < 5 && u8rand() < 96)
+        ++enchant;
+
     uint8_t quant = 0;
 
 #if 1
@@ -654,9 +658,10 @@ static void generate_random_item(uint8_t i)
     {
         item::POTION, item::POTION, item::POTION, item::POTION, item::POTION,
         item::POTION, item::POTION, item::POTION, item::POTION, item::POTION,
+        item::POTION,
         item::SCROLL, item::SCROLL, item::SCROLL, item::SCROLL, item::SCROLL,
-        item::SCROLL, item::SCROLL, item::SCROLL,
-        item::ARROW, item::ARROW, item::ARROW, item::ARROW,
+        item::SCROLL, item::SCROLL, item::SCROLL, item::SCROLL,
+        item::ARROW, item::ARROW,
         item::FOOD, item::FOOD,
         item::BOW,
         item::SWORD, item::SWORD,
