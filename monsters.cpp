@@ -1,31 +1,70 @@
 #include "game.hpp"
 
+static constexpr entity_info decl_ent(
+    uint8_t mean       = 0,
+    uint8_t nomove     = 0,
+    uint8_t regens     = 0,
+    uint8_t invis      = 0,
+    uint8_t poison     = 0,
+    uint8_t vampire    = 0,
+    uint8_t confuse    = 0,
+    uint8_t paralyze   = 0,
+    uint8_t fbreath    = 0,
+    uint8_t opener     = 0,
+    uint8_t strength   = 0,
+    uint8_t dexterity  = 0,
+    uint8_t speed      = 0,
+    uint8_t defense    = 0,
+    uint8_t max_health = 0,
+    uint8_t xp         = 0
+)
+{
+    entity_info r{};
+    r.mean       = mean      ;
+    r.nomove     = nomove    ;
+    r.regens     = regens    ;
+    r.invis      = invis     ;
+    r.poison     = poison    ;
+    r.vampire    = vampire   ;
+    r.confuse    = confuse   ;
+    r.paralyze   = paralyze  ;
+    r.fbreath    = fbreath   ;
+    r.opener     = opener    ;
+    r.strength   = strength  ;
+    r.dexterity  = dexterity ;
+    r.speed      = speed     ;
+    r.defense    = defense   ;
+    r.max_health = max_health;
+    r.xp         = xp        ;
+    return r;
+}
+
 entity_info const MONSTER_INFO[] PROGMEM =
 {
     /*
-    * mean        poison      fbreath       speed
-    *    nomove      vampire     opener        defense
-    *       regens      confuse     strength        max_health
-    *          invis       paralyze     dexterity        xp
+    *        mean        poison      fbreath       speed
+    *           nomove      vampire     opener        defense
+    *              regens      confuse     strength        max_health
+    *                 invis       paralyze     dexterity        xp
     */
-    { },                                                        // none
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  4,  4,  4,  0,  10,  0 }, // player
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1,  6,  8,  0,   1,  1 }, // bat
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  2,  3,  3,  0,   3,  2 }, // snake
-    { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,  3,  3,  3,  0,   4,  3 }, // rattlesnake
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  4,  2,  2,  0,   6,  5 }, // zombie
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  5,  4,  4,  1,  10,  6 }, // goblin
-    { 1, 0, 0, 1, 0, 0, 0, 0, 0, 1,  6,  4,  4,  1,  12,  7 }, // phantom
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  7,  4,  4,  3,  16,  8 }, // orc
-    { 1, 0, 0, 0, 0, 0, 0, 1, 0, 0,  5,  4,  4,  0,  12,  9 }, // tarantula
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  8,  4,  4,  2,  20, 11 }, // hobgoblin
-    { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,  7,  4,  4,  3,  20, 11 }, // mimic
-    { 1, 0, 0, 0, 0, 0, 1, 0, 0, 1,  9,  4,  4,  3,  24, 14 }, // incubus
-    { 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 10,  3,  3,  5,  32, 18 }, // troll
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  7,  6,  6,  1,  24, 18 }, // griffin
-    { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 12,  4,  4,  8,  48, 25 }, // dragon
-    { 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 10,  6,  6,  3,  24, 35 }, // fallen angel
-    { 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 16,  6,  8,  8,  64, 90 }, // lord of darkness
+    decl_ent(),                                                      // none
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  4,  4,  4,  0,  10,  0), // player
+    decl_ent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1,  6,  8,  0,   1,  1), // bat
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  2,  3,  3,  0,   3,  2), // snake
+    decl_ent(1, 0, 0, 0, 1, 0, 0, 0, 0, 0,  3,  3,  3,  0,   4,  3), // rattlesnake
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  4,  2,  2,  0,   6,  5), // zombie
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  5,  4,  4,  1,  10,  6), // goblin
+    decl_ent(1, 0, 0, 1, 0, 0, 0, 0, 0, 1,  6,  4,  4,  1,  12,  7), // phantom
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  7,  4,  4,  3,  16,  8), // orc
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 1, 0, 0,  5,  4,  4,  0,  12,  9), // tarantula
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  8,  4,  4,  2,  20, 11), // hobgoblin
+    decl_ent(1, 1, 0, 0, 0, 0, 0, 0, 0, 0,  7,  4,  4,  3,  20, 11), // mimic
+    decl_ent(1, 0, 0, 0, 0, 0, 1, 0, 0, 1,  9,  4,  4,  3,  24, 14), // incubus
+    decl_ent(1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 10,  3,  3,  5,  32, 18), // troll
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  7,  6,  6,  1,  24, 18), // griffin
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 12,  4,  4,  8,  48, 25), // dragon
+    decl_ent(1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 10,  6,  6,  3,  24, 35), // fallen angel
+    decl_ent(1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 16,  6,  8,  8,  64, 90), // lord of darkness
 };
 
 void entity_get_info(uint8_t i, entity_info& info)

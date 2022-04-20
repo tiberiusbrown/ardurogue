@@ -166,7 +166,7 @@ bool equip_item(uint8_t i)
     identify_item(i);
     status(PSTR("You @p the @i."),
         weap ? PSTR("ready") : PSTR("put on"),
-        it);
+        inv[i]);
     if(it.type == item::AMULET && it.subtype == AMU_IRONBLOOD)
     {
         entity_restore_strength(0);

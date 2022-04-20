@@ -165,8 +165,7 @@ void advance_entity(uint8_t i)
     if(u8rand() % 8 == 0) end_paralysis(i);
     if(u8rand() % 8 == 0) end_confusion(i);
     if(u8rand() % 16 == 0) end_slow(i);
-    if(u8rand() % 32 == 0)
-        e.scared = 0;
+    if(u8rand() % 32 == 0) e.scared = 0;
     if(e.invis && !info.invis) // temporary invis
     {
         bool end;
@@ -291,8 +290,7 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
     }
     else // entity was damaged but not killed: on hit effects
     {
-        bool vampire = info.vampire || (atti == 0 && wearing_uncursed_amulet(AMU_VAMPIRE));
-        if(vampire && u8rand() < 40)
+        if(info.vampire || (atti == 0 && wearing_uncursed_amulet(AMU_VAMPIRE)))
         {
             status(PSTR("@S drains @P health!"), atti, defi);
             if(defi == 0)

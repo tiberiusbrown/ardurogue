@@ -205,7 +205,7 @@ void player_remove_item(uint8_t i)
 {
     if(inv[i].stackable() && inv[i].quant_or_level > 0)
     {
-        --inv[i].quant_or_level;
+        inv[i].quant_or_level -= 1;
         return;
     }
     inv[i].type = item::NONE;

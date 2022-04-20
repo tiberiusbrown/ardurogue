@@ -18,71 +18,80 @@ struct map_gen_info
     item guaranteed_item;
 };
 
+static constexpr item decl_item(uint8_t type, uint8_t subtype = 0, bool identified = false)
+{
+    item it{};
+    it.type = type;
+    it.subtype = subtype;
+    it.identified = identified;
+    return it;
+}
+
 static map_gen_info const MAP_GEN_INFOS[NUM_MAPS] PROGMEM =
 {
 { // level 1
     { entity::BAT, entity::SNAKE, entity::SNAKE, },
-    { 0, 0, 0, item::FOOD }, // extra food
+    decl_item(item::FOOD), // extra food
 },
 { // level 2
     { entity::SNAKE, entity::SNAKE, entity::SNAKE, entity::SNAKE, entity::RATTLESNAKE, entity::RATTLESNAKE, },
-    { 0, 0, 0, item::SCROLL, SCR_REMOVE_CURSE },
+    decl_item(item::SCROLL, SCR_REMOVE_CURSE),
 },
 { // level 3
     { entity::ZOMBIE, entity::ZOMBIE, entity::ZOMBIE, entity::GOBLIN, entity::GOBLIN, entity::PHANTOM },
-    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
+    decl_item(item::SCROLL, SCR_ENCHANT),
 },
 { // level 4
     { entity::ZOMBIE, entity::GOBLIN, entity::GOBLIN, entity::PHANTOM, entity::ORC, },
-    { 0, 0, 0, item::SCROLL, SCR_REMOVE_CURSE },
+    decl_item(item::SCROLL, SCR_REMOVE_CURSE),
 },
 { // level 5
     { entity::PHANTOM, entity::PHANTOM, entity::PHANTOM, entity::PHANTOM, entity::PHANTOM, entity::PHANTOM, },
-    { 0, 0, 0, item::POTION, POT_STRENGTH }
+    decl_item(item::POTION, POT_STRENGTH),
 },
 { // level 6
     { entity::GOBLIN, entity::GOBLIN, entity::GOBLIN, entity::ORC, entity::HOBGOBLIN, },
-    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
+    decl_item(item::SCROLL, SCR_ENCHANT),
 },
 { // level 7
     { entity::ORC, entity::ORC, entity::HOBGOBLIN, entity::TARANTULA, entity::MIMIC },
-    { 0, 0, 0, item::POTION, POT_POISON },
+    decl_item(item::POTION, POT_POISON),
 },
 { // level 8
     { entity::ORC, entity::HOBGOBLIN, entity::TARANTULA, entity::TARANTULA, entity::TARANTULA, entity::MIMIC },
-    { 0, 0, 0, item::SCROLL, SCR_REMOVE_CURSE },
+    decl_item(item::SCROLL, SCR_REMOVE_CURSE),
 },
 { // level 9
     { entity::HOBGOBLIN, entity::HOBGOBLIN, entity::HOBGOBLIN, entity::TARANTULA, entity::MIMIC, entity::INCUBUS },
-    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
+    decl_item(item::SCROLL, SCR_ENCHANT),
 },
 { // level 10
     { entity::MIMIC, entity::MIMIC, entity::MIMIC, entity::MIMIC, entity::TARANTULA, entity::HOBGOBLIN, },
-    { 0, 0, 0, item::POTION, POT_STRENGTH }
+    decl_item(item::POTION, POT_STRENGTH),
 },
 { // level 11
     { entity::TARANTULA, entity::HOBGOBLIN, entity::MIMIC, entity::INCUBUS, entity::INCUBUS, entity::TROLL, },
-    { 0, 0, 0, item::POTION, POT_CONFUSION },
+    decl_item(item::POTION, POT_CONFUSION),
 },
 { // level 12
     { entity::HOBGOBLIN, entity::MIMIC, entity::INCUBUS, entity::TROLL, entity::TROLL, entity::GRIFFIN, },
-    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
+    decl_item(item::SCROLL, SCR_ENCHANT),
 },
 { // level 13
     { entity::MIMIC, entity::INCUBUS, entity::TROLL, entity::GRIFFIN, entity::GRIFFIN, entity::DRAGON, },
-    { 0, 0, 0, item::POTION, POT_CONFUSION },
+    decl_item(item::POTION, POT_CONFUSION),
 },
 { // level 14
     { entity::INCUBUS, entity::TROLL, entity::GRIFFIN, entity::DRAGON, entity::DRAGON, entity::DRAGON, },
-    { 0, 0, 0, item::POTION, POT_INVIS },
+    decl_item(item::POTION, POT_INVIS),
 },
 { // level 15
     { entity::INCUBUS, entity::ANGEL, entity::ANGEL, entity::DRAGON, entity::DRAGON, entity::DRAGON, },
-    { 0, 0, 0, item::SCROLL, SCR_ENCHANT },
+    decl_item(item::SCROLL, SCR_ENCHANT),
 },
 { // level 16
     { entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, },
-    { 0, 0, 0, item::POTION, POT_CONFUSION },
+    decl_item(item::POTION, POT_CONFUSION),
 },
 };
 
@@ -792,7 +801,7 @@ void generate_dungeon()
         uint8_t y = rooms[0].y + 7;
         {
             auto& it = items[MAP_ITEMS - 1];
-            it.it = { 0, 1, 0, item::AMULET, AMU_YENDOR };
+            it.it = decl_item(item::AMULET, AMU_YENDOR, true);
             it.x = x;
             it.y = y;
         }

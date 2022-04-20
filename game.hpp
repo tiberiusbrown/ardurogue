@@ -9,6 +9,10 @@
 #define ENABLE_DUNGEON_SCROLL 1
 #define ENABLE_GOT_ENTS 1
 
+// this saves like 230 bytes (!!!)
+// gcc must have poor codegen for bitfields
+#define USE_CUSTOM_BITFIELDS 1
+
 // platform functionality
 void wait();        // wait about 100 ms
 uint8_t wait_btn(); // wait for button press
@@ -93,6 +97,33 @@ template<size_t N> struct bitset
     void clear(size_t i) { d_[i / 8] &= ~(1 << (i % 8)); }
 };
 
+template<size_t B, size_t N = 1> struct u8bitfield
+{
+    uint8_t raw_;
+    static constexpr uint8_t MASK = ((1 << N) - 1) << B;
+    static constexpr uint8_t INV_MASK = ~MASK;
+
+    constexpr operator uint8_t() const
+    {
+        return (raw_ & MASK) >> B;
+    }
+    template<class T>
+    constexpr u8bitfield& operator=(T const& t)
+    {
+        return raw_ = (raw_ & INV_MASK) | ((uint8_t(t) << B) & MASK), *this;
+    }
+    template<class T>
+    constexpr u8bitfield& operator+=(T const& t)
+    {
+        return *this = uint8_t(*this) + uint8_t(t);
+    }
+    template<class T>
+    constexpr u8bitfield& operator-=(T const& t)
+    {
+        return *this = uint8_t(*this) - uint8_t(t);
+    }
+};
+
 template<class T> void swap(T& a, T& b)
 {
     T c = a;
@@ -123,6 +154,24 @@ struct coord { uint8_t x, y; };
 
 struct entity_info
 {
+#if USE_CUSTOM_BITFIELDS
+    union
+    {
+        u8bitfield<0> mean;
+        u8bitfield<1> nomove;
+        u8bitfield<2> regens;
+        u8bitfield<3> invis;
+        u8bitfield<4> poison;
+        u8bitfield<5> vampire;
+        u8bitfield<6> confuse;
+        u8bitfield<7> paralyze;
+    };
+    union
+    {
+        u8bitfield<0> fbreath;
+        u8bitfield<1> opener;
+    };
+#else
     uint8_t mean     : 1; // whether it can attack
     uint8_t nomove   : 1; // stays put (mon only)
     uint8_t regens   : 1; // regenerates health
@@ -133,6 +182,7 @@ struct entity_info
     uint8_t paralyze : 1; // chance to paralyze on hit
     uint8_t fbreath  : 1; // ranged attack: breathe fire
     uint8_t opener   : 1; // whether it can open doors
+#endif
 
     uint8_t strength;    // higher is better
     uint8_t dexterity;   // higher is better
@@ -188,6 +238,18 @@ struct entity
         DARKNESS,
     };
     uint8_t x, y;
+#if USE_CUSTOM_BITFIELDS
+    union
+    {
+        u8bitfield<0> confused;
+        u8bitfield<1> paralyzed;
+        u8bitfield<2> weakened;
+        u8bitfield<3> aggro;
+        u8bitfield<4> invis;
+        u8bitfield<5> scared;
+        u8bitfield<6> slowed;
+    };
+#else
     uint8_t confused  : 1;
     uint8_t paralyzed : 1;
     uint8_t weakened  : 1;
@@ -195,6 +257,7 @@ struct entity
     uint8_t invis     : 1;
     uint8_t scared    : 1; // monster is fleeing
     uint8_t slowed    : 1;
+#endif
     uint8_t health;
     uint8_t type;
 };
@@ -294,11 +357,25 @@ struct item
         BOOTS,  // level
         NUM_ITEM_TYPES,
     };
+#if USE_CUSTOM_BITFIELDS
+    union
+    {
+        u8bitfield<0, 6> quant_or_level;
+        u8bitfield<6, 1> identified;
+        u8bitfield<7, 1> cursed;
+    };
+    union
+    {
+        u8bitfield<0, 4> type;
+        u8bitfield<4, 4> subtype;
+    };
+#else
     uint8_t quant_or_level : 6;
     uint8_t identified     : 1;
     uint8_t cursed         : 1;
     uint8_t type           : 4;
     uint8_t subtype        : 4;
+#endif
     bool stackable() { return type <= ARROW; }
 };
 
@@ -333,10 +410,23 @@ struct room
 
 struct door
 {
+#if USE_CUSTOM_BITFIELDS
+    union
+    {
+        u8bitfield<0, 7> x;
+        u8bitfield<7, 1> secret;
+    };
+    union
+    {
+        u8bitfield<0, 7> y;
+        u8bitfield<7, 1> open;
+    };
+#else
     uint8_t x : 7;
     uint8_t secret : 1; // must be zero if open
     uint8_t y : 7;
     uint8_t open : 1;
+#endif
 };
 
 enum
