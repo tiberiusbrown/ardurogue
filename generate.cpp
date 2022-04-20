@@ -7,8 +7,6 @@ static constexpr uint8_t ROOM_BIG_CHANCE = 64;
 static constexpr uint8_t DOOR_CHANCE = 196;
 // chance for any door to be secret
 static constexpr uint8_t DOOR_SECRET_CHANCE = 48;
-// chance for isolated door (only door leading to a room) to be secret
-static constexpr uint8_t DOOR_ISOLATED_SECRET_CHANCE = 0;
 
 static constexpr uint8_t RANDOM_DOOR_SPACE = 4;
 
@@ -642,7 +640,6 @@ static void generate_random_item(uint8_t i)
     item it;
     uint8_t type = 0;
     uint8_t subtype = 0;
-    uint8_t r = u8rand();
 
     bool cursed = (u8rand() < 32);
     
@@ -712,6 +709,8 @@ static void generate_random_item(uint8_t i)
     constexpr double N_ARMOR  = (P_ARMOR  * 256.5 / P_TOTAL + N_AMULET);
     constexpr double N_HELM   = (P_HELM   * 256.5 / P_TOTAL + N_ARMOR );
     constexpr double N_BOOTS  = (P_BOOTS  * 256.5 / P_TOTAL + N_HELM  );
+
+    uint8_t r = u8rand();
 
     if(r < (uint8_t)N_FOOD)
         type = item::FOOD;
@@ -865,8 +864,8 @@ void generate_dungeon()
 
     {
         uint8_t i = 0;
-        generate_item(i++, { item::POTION, POT_HEALING });
-        generate_item(i++, { item::FOOD });
+        generate_item(i++, decl_item(item::POTION, POT_HEALING));
+        generate_item(i++, decl_item(item::FOOD));
         {
             union { uint16_t a; item b; } u = {
                 pgm_read_word(&MAP_GEN_INFOS[map_index].guaranteed_item)

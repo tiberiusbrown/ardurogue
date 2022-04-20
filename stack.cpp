@@ -5,7 +5,9 @@ extern char* __bss_end;
 extern uint8_t __stack;
 #endif
 
+#if defined(ARDUINO) && ENABLE_DEBUG_MENU
 static constexpr uint8_t CANARY_VAL = 0xa5;
+#endif
 
 void stack_canary_init()
 {

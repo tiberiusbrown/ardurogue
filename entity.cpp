@@ -259,11 +259,7 @@ void entity_take_damage(uint8_t i, uint8_t dam)
     //bool cansee = player_can_see_entity(i);
     if(dam >= te.health)
     {
-        //if(cansee)
-            status(PSTR("@S @V!"), i, i, PSTR("die"));
-        //else
-        //    status(PSTR("You hear the sound of death."));
-        uint8_t tt = te.type;
+        status(PSTR("@S @V!"), i, i, PSTR("die"));
         te.health = 0;
         te.type = entity::NONE;
 #if ENABLE_GOT_ENTS
@@ -412,8 +408,6 @@ void slow_entity(uint8_t i)
 static void entity_attack_entity(uint8_t atti, uint8_t defi)
 {
     bool hit = test_attack_hit(atti, defi);
-    auto const& e = ents[atti];
-    auto& te = ents[defi];
     bool cansee = player_can_see_entity(atti) || player_can_see_entity(defi);
     if(!hit && cansee)
         status(PSTR("@S @v @O."), atti, atti, PSTR("miss"), defi);
@@ -507,10 +501,10 @@ bool entity_perform_action(uint8_t i, action a)
         if(i == 0)
         {
             // search
-            for(uint8_t j = 0; j < 4; ++j)
+            for(uint8_t j = 0; j < 8; ++j)
             {
-                uint8_t tx = e.x + (int8_t)pgm_read_byte(&DIRX[j]);
-                uint8_t ty = e.y + (int8_t)pgm_read_byte(&DIRY[j]);
+                uint8_t tx = e.x + (int8_t)pgm_read_byte(&DDIRX[j]);
+                uint8_t ty = e.y + (int8_t)pgm_read_byte(&DDIRY[j]);
                 door* d = get_door(tx, ty);
                 if(!d) continue;
                 if(d->secret)

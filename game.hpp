@@ -385,8 +385,7 @@ struct item
 #endif
     bool stackable() { return type <= ARROW; }
 };
-
-static_assert(sizeof(item) == 2);
+static_assert(sizeof(item) == 2, "");
 
 struct map_item
 {

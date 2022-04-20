@@ -247,7 +247,7 @@ void draw_info_without_status()
     draw_textf(1, 0, PSTR("Dungeon Level @u"), map_index + 1);
     draw_text(1, 6, PSTR("HP"));
     draw_text(33, 6, PSTR("XP"));
-    draw_progress_bar(9, 7, ents[0].health, entity_max_health(0));
+    draw_progress_bar(9, 7, e.health, entity_max_health(0));
     draw_progress_bar(41, 7, pstats.xp, xp_for_level());
     if(hunger > 200)
         draw_text(1, 12, PSTR("Hungry"));
@@ -272,6 +272,7 @@ static uint8_t ddir_mask(uint8_t tx, uint8_t ty)
     return i;
 }
 
+#if ENABLE_MINIMAP
 void draw_map_offset(uint8_t ox)
 {
     for(uint8_t y = 0, t = 0; y < 64; y += 2, t ^= 1)
@@ -353,6 +354,7 @@ void draw_map_offset(uint8_t ox)
         set_pixel(tx + 1, ty);
     }
 }
+#endif
 
 void draw_dungeon(uint8_t mx, uint8_t my)
 {

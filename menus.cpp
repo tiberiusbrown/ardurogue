@@ -194,8 +194,6 @@ bool yesno_menu(char const* fmt, ...)
                 ;
         }
     }
-    constexpr uint8_t Y = 55;
-    constexpr int8_t OX = -4;
 
     draw_yesno(7, 56);
     paint_right();
@@ -274,14 +272,20 @@ static char const* const ACT_ITEMS[] PROGMEM =
     ACT_CLOSE,
 };
 
+#if ENABLE_MINIMAP
 static char const MEN_MAP[] PROGMEM = "View Minimap";
+#endif
+#if ENABLE_DUNGEON_SCROLL
 static char const MEN_SCROLL[] PROGMEM = "Scroll Dungeon";
+#endif
 static char const MEN_INV[] PROGMEM = "Inventory";
 static char const MEN_STATS[] PROGMEM = "Player Info";
 static char const MEN_HS[] PROGMEM = "High Scores";
 static char const MEN_SETTINGS[] PROGMEM = "Settings";
 static char const MEN_SAVE[] PROGMEM = "Save Progress";
+#if ENABLE_DEBUG_MENU
 static char const MEN_DEBUG[] PROGMEM = "Debug Info";
+#endif
 
 static char const* const MEN_ITEMS[] PROGMEM =
 {
@@ -385,6 +389,7 @@ static act_method const ACT_METHODS[] PROGMEM =
     act_close,
 };
 
+#if ENABLE_MINIMAP
 static void men_map()
 {
     draw_map_offset(0);
@@ -394,6 +399,7 @@ static void men_map()
     while(wait_btn() != BTN_B)
         (void)0;
 }
+#endif
 
 static void men_inv()
 {
@@ -482,6 +488,7 @@ static void men_save()
     save();
 }
 
+#if ENABLE_DEBUG_MENU
 static void men_debug_offset(uint8_t x)
 {
     static char const GIT_STUFF[] PROGMEM =
@@ -492,7 +499,6 @@ static void men_debug_offset(uint8_t x)
         rand_seed >> 8, rand_seed & 0xff);
     draw_textf(x, 12, PSTR("Stack: @u"), unused_stack());
 }
-
 static void men_debug()
 {
     men_debug_offset(0);
@@ -502,7 +508,9 @@ static void men_debug()
     while(wait_btn() != BTN_B)
         (void)0;
 }
+#endif
 
+#if ENABLE_DUNGEON_SCROLL
 static void men_scroll()
 {
     uint8_t x = ents[0].x, y = ents[0].y;
@@ -521,6 +529,7 @@ static void men_scroll()
         if(y >= MAP_H) y = MAP_H - 1;
     }
 }
+#endif
 
 static void men_high_scores()
 {
