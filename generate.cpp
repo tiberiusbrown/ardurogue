@@ -858,10 +858,7 @@ void generate_dungeon()
             }
         }
     }
-}
 
-void generate_items()
-{
     //
     // add items
     //
@@ -877,10 +874,11 @@ void generate_items()
             if(u.b.type != item::NONE)
                 generate_item(i++, u.b);
         }
-        
+
         for(; i < MAP_ITEMS - 4; ++i)
             generate_random_item(i);
     }
+
 }
 
 void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y)

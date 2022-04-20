@@ -501,7 +501,6 @@ void run()
             load(); // need another load to overwrite current map entities
         else
         {
-            generate_items();
             // initialize player for new game
             for(auto& i : pinfo.equipped) i = 255;
             pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));

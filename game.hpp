@@ -454,6 +454,7 @@ struct high_score
 };
 
 static constexpr uint8_t NUM_WALL_STYLES = 4;
+static constexpr uint8_t NUM_HIGH_SCORES = 4;
 
 struct saved_data
 {
@@ -477,7 +478,7 @@ struct saved_data
 
     // options, high score table, etc
     uint8_t                     wall_style;
-    array<high_score, 4>        high_scores;
+    array<high_score, NUM_HIGH_SCORES> high_scores;
 };
 
 struct globals
@@ -501,44 +502,42 @@ struct globals
 extern globals globals_;
 
 // breakout stuff from struct for ease of coding
-inline constexpr auto& buf = globals_.buf;
-inline constexpr auto& tmap = globals_.tmap;
-inline constexpr auto& tfog = globals_.tfog;
-inline constexpr auto& xdn = globals_.xdn;
-inline constexpr auto& ydn = globals_.ydn;
-inline constexpr auto& xup = globals_.xup;
-inline constexpr auto& yup = globals_.yup;
-inline constexpr auto& num_rooms = globals_.saved.num_rooms;
-inline constexpr auto& num_doors = globals_.saved.num_doors;
-inline constexpr auto& ents = globals_.saved.ents;
-inline constexpr auto& items = globals_.saved.items;
-inline constexpr auto& maps = globals_.saved.maps;
-inline constexpr auto& rooms = globals_.saved.rooms;
-inline constexpr auto& doors = globals_.saved.doors;
-inline constexpr auto& map_index = globals_.saved.map_index;
-inline constexpr auto& inv = globals_.saved.inv;
-inline constexpr auto& game_seed = globals_.saved.game_seed;
-inline constexpr auto& pstats = globals_.saved.pstats;
-inline constexpr auto& pinfo = globals_.saved.pinfo;
-inline constexpr auto& rand_seed = globals_.rand_seed;
-inline constexpr auto& wall_style = globals_.saved.wall_style;
-inline constexpr auto& statusbuf = globals_.statusbuf;
-inline constexpr auto& statusn = globals_.statusn;
-inline constexpr auto& statusx = globals_.statusx;
-inline constexpr auto& statusy = globals_.statusy;
-inline constexpr auto& perm_pot = globals_.perm_pot;
-inline constexpr auto& perm_scr = globals_.perm_scr;
-inline constexpr auto& perm_rng = globals_.perm_rng;
-inline constexpr auto& perm_amu = globals_.perm_amu;
-inline constexpr auto& identified = globals_.saved.identified;
-inline constexpr auto& prev_action = globals_.saved.prev_action;
-inline constexpr auto& plevel = globals_.saved.plevel;
-inline constexpr auto& just_moved = globals_.just_moved;
-inline constexpr auto& hs = globals_.saved.hs;
-inline constexpr auto& high_scores = globals_.saved.high_scores;
-inline constexpr auto& hunger = globals_.saved.hunger;
-
-static constexpr uint8_t NUM_HIGH_SCORES = (uint8_t)high_scores.size();
+static auto& buf = globals_.buf;
+static auto& tmap = globals_.tmap;
+static auto& tfog = globals_.tfog;
+static auto& xdn = globals_.xdn;
+static auto& ydn = globals_.ydn;
+static auto& xup = globals_.xup;
+static auto& yup = globals_.yup;
+static auto& num_rooms = globals_.saved.num_rooms;
+static auto& num_doors = globals_.saved.num_doors;
+static auto& ents = globals_.saved.ents;
+static auto& items = globals_.saved.items;
+static auto& maps = globals_.saved.maps;
+static auto& rooms = globals_.saved.rooms;
+static auto& doors = globals_.saved.doors;
+static auto& map_index = globals_.saved.map_index;
+static auto& inv = globals_.saved.inv;
+static auto& game_seed = globals_.saved.game_seed;
+static auto& pstats = globals_.saved.pstats;
+static auto& pinfo = globals_.saved.pinfo;
+static auto& rand_seed = globals_.rand_seed;
+static auto& wall_style = globals_.saved.wall_style;
+static auto& statusbuf = globals_.statusbuf;
+static auto& statusn = globals_.statusn;
+static auto& statusx = globals_.statusx;
+static auto& statusy = globals_.statusy;
+static auto& perm_pot = globals_.perm_pot;
+static auto& perm_scr = globals_.perm_scr;
+static auto& perm_rng = globals_.perm_rng;
+static auto& perm_amu = globals_.perm_amu;
+static auto& identified = globals_.saved.identified;
+static auto& prev_action = globals_.saved.prev_action;
+static auto& plevel = globals_.saved.plevel;
+static auto& just_moved = globals_.just_moved;
+static auto& hs = globals_.saved.hs;
+static auto& high_scores = globals_.saved.high_scores;
+static auto& hunger = globals_.saved.hunger;
 
 inline bool potion_is_identified(uint8_t subtype)
 {
@@ -659,7 +658,7 @@ uint8_t text_width(char const* s, bool prog = true);
 
 // draw.cpp
 extern int8_t const DDIRX[16] PROGMEM;
-inline constexpr int8_t const* DDIRY = &DDIRX[8];
+static int8_t const* DDIRY = &DDIRX[8];
 static constexpr uint8_t SPACE_WIDTH = 1;
 void set_img_prog(uint8_t const* p, uint8_t w, uint8_t x, uint8_t y);
 void set_pixel(uint8_t x, uint8_t y);
@@ -687,13 +686,12 @@ void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y);
 void dig_nonsecret_door_tiles();
 void update_doors();   // set tile to solid for closed doors
 void generate_dungeon();
-void generate_items();
 bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
 bool find_unoccupied(uint8_t& x, uint8_t& y); // returns true if found
 void find_unoccupied_guaranteed(uint8_t& x, uint8_t& y);
 coord find_unoccupied_guaranteed();
 extern int8_t const DIRX[8] PROGMEM;
-inline constexpr int8_t const* DIRY = &DIRX[4];
+static int8_t const* DIRY = &DIRX[4];
 
 // light.cpp
 bool player_can_see(uint8_t x, uint8_t y);
