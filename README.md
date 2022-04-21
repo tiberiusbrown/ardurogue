@@ -37,7 +37,7 @@ If enough prog bytes could be freed up...
 
 Contents of `platform.local.txt`:
 ```
-compiler.c.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop -fno-move-loop-invariants -fweb -frename-registers -std=c++17
+compiler.c.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop -fno-move-loop-invariants -fweb -frename-registers -std=c++11
 compiler.cpp.extra_flags={compiler.c.extra_flags} 
 compiler.c.elf.extra_flags=-Wl,--relax
 ```

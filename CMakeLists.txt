@@ -5,8 +5,6 @@ cmake_policy(SET CMP0117 NEW)
 
 project(ardurogue)
 
-option(LIMIT_TO_CXX11 "Disable C++14 constructs (may increase build size)" OFF)
-
 if(EMSCRIPTEN)
     option(EMSCRIPTEN_OPTIMIZED "Produce size-optimized emscripten build" ON)
     if(EMSCRIPTEN_OPTIMIZED)
@@ -64,13 +62,8 @@ add_executable(
     use.cpp
     )
 
-if(LIMIT_TO_CXX11)
-    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
-	target_compile_definitions(${PROJECT_NAME} PUBLIC -DLIMIT_TO_CXX11)
-else()
-    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
-endif()
 target_link_libraries(${PROJECT_NAME} PUBLIC git)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 11)
 
 if(MSVC)
     set_property(TARGET ${PROJECT_NAME} PROPERTY

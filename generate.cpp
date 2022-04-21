@@ -19,11 +19,18 @@ struct map_gen_info
 static constexpr item decl_item(uint8_t type, uint8_t subtype = 0, bool identified = false)
 {
 #if USE_CUSTOM_BITFIELDS
-    item it{};
-    it.type = type;
-    it.subtype = subtype;
-    it.identified = identified;
-    return it;
+    return
+    {
+        { uint8_t(
+            item{}.quant_or_level.make(0)          |
+            item{}.identified    .make(identified) |
+            item{}.cursed        .make(0)          |
+        0) },
+        { uint8_t(
+            item{}.type          .make(type)       |
+            item{}.subtype       .make(subtype)    |
+        0) },
+    };
 #else
     return { 0, (uint8_t)identified, 0, type, subtype };
 #endif
@@ -648,8 +655,11 @@ static void generate_random_item(uint8_t i)
     bool cursed = (u8rand() < 32);
     
     uint8_t enchant = 0;
-    while(enchant < 5 && u8rand() < 96)
-        ++enchant;
+    {
+        uint8_t chance = 96 + map_index * 8;
+        while(enchant < 16 && u8rand() < chance)
+            ++enchant;
+    }
 
     uint8_t quant = 0;
 

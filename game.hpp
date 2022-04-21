@@ -32,27 +32,8 @@ void flush_persistent(); // (does nothing for Arduino)
 // game logic
 void run();
 
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
-#define HAS_CXX11 1
-#else
-#define HAS_CXX11 0
-#endif
-
-#if __cplusplus >= 201402L || (defined(_MSC_VER) && _MSC_VER >= 1910)
-#define HAS_CXX14 1
-#else
-#define HAS_CXX14 0
-#endif
-
-// detect C++11
-#if !HAS_CXX11
+#if !(__cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900))
 #error "At least C++11 is required to build ArduRogue"
-#endif
-
-#if defined(LIMIT_TO_CXX11) || !HAS_CXX14
-// disable constructs that require C++14
-#undef USE_CUSTOM_BITFIELDS
-#define USE_CUSTOM_BITFIELDS 0
 #endif
 
 #ifdef ARDUINO
@@ -134,22 +115,29 @@ template<size_t B, size_t N = 1> struct u8bitfield
     static constexpr uint8_t MASK = ((1 << N) - 1) << B;
     static constexpr uint8_t INV_MASK = ~MASK;
 
+    // helper for constexpr constructors
+    template<class T>
+    static constexpr uint8_t make(T const& t)
+    {
+        return (uint8_t(t) << B) & MASK;
+    }
+
     constexpr operator uint8_t() const
     {
         return (raw_ & MASK) >> B;
     }
     template<class T>
-    constexpr u8bitfield& operator=(T const& t)
+    u8bitfield& operator=(T const& t)
     {
         return raw_ = (raw_ & INV_MASK) | ((uint8_t(t) << B) & MASK), *this;
     }
     template<class T>
-    constexpr u8bitfield& operator+=(T const& t)
+    u8bitfield& operator+=(T const& t)
     {
         return *this = uint8_t(*this) + uint8_t(t);
     }
     template<class T>
-    constexpr u8bitfield& operator-=(T const& t)
+    u8bitfield& operator-=(T const& t)
     {
         return *this = uint8_t(*this) - uint8_t(t);
     }
@@ -189,6 +177,7 @@ struct entity_info
 #if USE_CUSTOM_BITFIELDS
     union
     {
+        uint8_t raw0_;
         u8bitfield<0> mean;
         u8bitfield<1> nomove;
         u8bitfield<2> regens;
@@ -200,6 +189,7 @@ struct entity_info
     };
     union
     {
+        uint8_t raw1_;
         u8bitfield<0> fbreath;
         u8bitfield<1> opener;
     };
@@ -273,6 +263,7 @@ struct entity
 #if USE_CUSTOM_BITFIELDS
     union
     {
+        uint8_t raw0_;
         u8bitfield<0> confused;
         u8bitfield<1> paralyzed;
         u8bitfield<2> weakened;
@@ -392,12 +383,14 @@ struct item
 #if USE_CUSTOM_BITFIELDS
     union
     {
+        uint8_t raw0_;
         u8bitfield<0, 6> quant_or_level;
         u8bitfield<7, 1> identified;
         u8bitfield<6, 1> cursed;
     };
     union
     {
+        uint8_t raw1_;
         u8bitfield<4, 4> type;
         u8bitfield<0, 4> subtype;
     };
@@ -444,11 +437,13 @@ struct door
 #if USE_CUSTOM_BITFIELDS
     union
     {
+        uint8_t raw0_;
         u8bitfield<0, 7> x;
         u8bitfield<7, 1> secret;
     };
     union
     {
+        uint8_t raw1_;
         u8bitfield<0, 7> y;
         u8bitfield<7, 1> open;
     };

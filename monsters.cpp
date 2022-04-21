@@ -20,24 +20,29 @@ static constexpr entity_info decl_ent(
 )
 {
 #if USE_CUSTOM_BITFIELDS
-    entity_info r{};
-    r.mean       = mean      ;
-    r.nomove     = nomove    ;
-    r.regens     = regens    ;
-    r.invis      = invis     ;
-    r.poison     = poison    ;
-    r.vampire    = vampire   ;
-    r.confuse    = confuse   ;
-    r.paralyze   = paralyze  ;
-    r.fbreath    = fbreath   ;
-    r.opener     = opener    ;
-    r.strength   = strength  ;
-    r.dexterity  = dexterity ;
-    r.speed      = speed     ;
-    r.defense    = defense   ;
-    r.max_health = max_health;
-    r.xp         = xp        ;
-    return r;
+    return
+    {
+        { uint8_t(
+            entity_info{}.mean    .make(mean    ) |
+            entity_info{}.nomove  .make(nomove  ) |
+            entity_info{}.regens  .make(regens  ) |
+            entity_info{}.invis   .make(invis   ) |
+            entity_info{}.poison  .make(poison  ) |
+            entity_info{}.vampire .make(vampire ) |
+            entity_info{}.confuse .make(confuse ) |
+            entity_info{}.paralyze.make(paralyze) |
+        0) },
+        { uint8_t(
+            entity_info{}.fbreath .make(fbreath ) |
+            entity_info{}.opener  .make(opener  ) |
+        0) },
+        strength,
+        dexterity,
+        speed,
+        defense,
+        max_health,
+        xp,
+    };
 #else
     return
     {
