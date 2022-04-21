@@ -65,9 +65,9 @@ add_executable(
     )
 
 if(LIMIT_TO_CXX11)
-	target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 else()
-	target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
+    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 endif()
 target_link_libraries(${PROJECT_NAME} PUBLIC git)
 

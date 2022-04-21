@@ -39,25 +39,25 @@ static constexpr entity_info decl_ent(
     r.xp         = xp        ;
     return r;
 #else
-	return
-	{
-		mean,
-		nomove,
-		regens,
-		invis,
-		poison,
-		vampire,
-		confuse,
-		paralyze,
-		fbreath,
-		opener,
-		strength,
-		dexterity,
-		speed,
-		defense,
-		max_health,
-		xp,
-	};
+    return
+    {
+        mean,
+        nomove,
+        regens,
+        invis,
+        poison,
+        vampire,
+        confuse,
+        paralyze,
+        fbreath,
+        opener,
+        strength,
+        dexterity,
+        speed,
+        defense,
+        max_health,
+        xp,
+    };
 #endif
 }
 
@@ -116,7 +116,7 @@ void monster_ai(uint8_t i, action& a)
     uint8_t dp = dist_to_player(e.x, e.y);
     bool mean = info.mean | e.aggro;
 
-    if(!mean || pstats.invis || wearing_uncursed_ring(RNG_INVIS) || dp >= 10)
+    if(!mean || player_is_invisible() || dp >= 10)
     {
         a.data = u8rand() & 3;
         uint8_t nx = ex + pgm_read_byte(&DIRX[a.data]);

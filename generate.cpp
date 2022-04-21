@@ -25,7 +25,7 @@ static constexpr item decl_item(uint8_t type, uint8_t subtype = 0, bool identifi
     it.identified = identified;
     return it;
 #else
-	return { 0, (uint8_t)identified, 0, type, subtype };
+    return { 0, (uint8_t)identified, 0, type, subtype };
 #endif
 }
 

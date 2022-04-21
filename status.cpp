@@ -1,18 +1,18 @@
 #include "game.hpp"
 
 static constexpr uint8_t MORE_WIDTH =
-	2 + 3 + 4 + 4 + 3 + 4 + 2;
+    2 + 3 + 4 + 4 + 3 + 4 + 2;
 
 static inline bool is_white(char c)
 {
-	return c <= ' ';
+    return c <= ' ';
 }
 
 uint8_t advance_white(char* b, uint8_t i)
 {
-	while(!is_white(b[i])) ++i;
-	b[i] = '\0';
-	return i + 1;
+    while(!is_white(b[i])) ++i;
+    b[i] = '\0';
+    return i + 1;
 }
 
 void draw_status()
@@ -52,27 +52,27 @@ void status_more()
 
 void status(char const* fmt, ...)
 {
-	char buf[128];
-	va_list ap;
-	va_start(ap, fmt);
-	tvsprintf(buf, fmt, ap);
-	va_end(ap);
-	uint8_t len = tstrlen(buf);
-	uint8_t a = 0, b = advance_white(buf, 0);
-	for(;;)
-	{
+    char buf[128];
+    va_list ap;
+    va_start(ap, fmt);
+    tvsprintf(buf, fmt, ap);
+    va_end(ap);
+    uint8_t len = tstrlen(buf);
+    uint8_t a = 0, b = advance_white(buf, 0);
+    for(;;)
+    {
         if(uint8_t(statusn + b - a) > sizeof(statusbuf))
             status_more();
-		uint8_t n = text_width(&buf[a], false);
-		if(statusy >= 59 && statusx + n > 64 - MORE_WIDTH)
+        uint8_t n = text_width(&buf[a], false);
+        if(statusy >= 59 && statusx + n > 64 - MORE_WIDTH)
             status_more();
         for(uint8_t i = a; i < b; ++i)
             statusbuf[statusn++] = buf[i];
-		if(statusx + n > 64)
-			statusx = 1, statusy += 6;
-		statusx += n + SPACE_WIDTH + 1;
-		if(b >= len) break;
-		a = b;
-		b = advance_white(buf, a);
-	}
+        if(statusx + n > 64)
+            statusx = 1, statusy += 6;
+        statusx += n + SPACE_WIDTH + 1;
+        if(b >= len) break;
+        a = b;
+        b = advance_white(buf, a);
+    }
 }

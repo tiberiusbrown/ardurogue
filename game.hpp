@@ -750,6 +750,7 @@ bool wearing_uncursed_amulet(uint8_t subtype);
 int8_t ring_bonus(uint8_t subtype);
 bool wearing_uncursed_ring(uint8_t subtype);
 bool entity_perform_action(uint8_t i, action a);
+bool player_is_invisible();
 void aggro_monster(uint8_t i);
 void end_paralysis(uint8_t i);
 void end_confusion(uint8_t i);

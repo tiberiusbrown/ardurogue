@@ -2,6 +2,11 @@
 
 static constexpr uint8_t ARROW_BREAK_CHANCE = 64;
 
+bool player_is_invisible()
+{
+    return ents[0].invis || wearing_uncursed_ring(RNG_INVIS);
+}
+
 uint8_t entity_speed(uint8_t i)
 {
     uint8_t r;

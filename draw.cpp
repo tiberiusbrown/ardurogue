@@ -20,6 +20,7 @@ static uint16_t const ENTITY_IMGS[] PROGMEM =
     0xf996, // dragon
     0x0e5e, // fallen angel
     0x0f88, // Lord of Darkness
+    0x6996, // invis player
 };
 
 static uint16_t const ITEM_IMGS[] PROGMEM =
@@ -249,8 +250,14 @@ void draw_info_without_status()
     draw_text(33, 6, PSTR("XP"));
     draw_progress_bar(9, 7, e.health, entity_max_health(0));
     draw_progress_bar(41, 7, pstats.xp, xp_for_level());
-    if(hunger > 200)
-        draw_text(1, 12, PSTR("Hungry"));
+    {
+        char const* s = PSTR("");
+        if(hunger == 255)
+            s = PSTR("Starving");
+        else if(hunger > 200)
+            s = PSTR("Hungry");
+        draw_text(1, 12, s);
+    }
 }
 
 int8_t const DDIRX[16] PROGMEM =
@@ -504,7 +511,9 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         if(ex >= 13 || ey >= 13) continue;
         if(!tile_is_explored(e.x, e.y)) continue;
         uint16_t const* img = &ENTITY_IMGS[0];
-        if(e.type == entity::MIMIC && !e.aggro)
+        if(e.type == entity::PLAYER && player_is_invisible())
+            img = &ENTITY_IMGS[entity::DARKNESS + 1];
+        else if(e.type == entity::MIMIC && !e.aggro)
             img = &ITEM_IMGS[e.health];
         else if(player_can_see_entity(index_of_entity(e)))
             img = &ENTITY_IMGS[e.type];
