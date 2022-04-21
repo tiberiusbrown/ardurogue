@@ -35,7 +35,9 @@ void run();
 // detect C++11
 #if __cplusplus < 201103L && (!defined(_MSC_VER) || _MSC_VER < 1900)
 #error "At least C++11 is required to build ArduRogue"
-#elif __cplusplus < 201402L || (defined(_MSC_VER) && _MSC_VER < 1910)
+#endif
+
+#if defined(LIMIT_TO_CXX11) || __cplusplus < 201402L || (defined(_MSC_VER) && _MSC_VER < 1910)
 // disable constructs that require C++14
 #undef USE_CUSTOM_BITFIELDS
 #define USE_CUSTOM_BITFIELDS 0

@@ -66,6 +66,7 @@ add_executable(
 
 if(LIMIT_TO_CXX11)
     target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+	target_compile_definitions(${PROJECT_NAME} PUBLIC -DLIMIT_TO_CXX11)
 else()
     target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 endif()
