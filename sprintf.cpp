@@ -52,6 +52,8 @@ static char const* const ITEM_NAME_ARMORS[] PROGMEM =
 static char* item_name(char* dst, item it)
 {
     uint8_t n = it.quant_or_level;
+    int8_t t = (int8_t)n + 1;
+    if(it.cursed) t = -t;
     uint8_t st = it.subtype;
     if(it.cursed && it.identified)
         dst = tstrcpy_prog(dst, PSTR("cursed "));
@@ -87,8 +89,6 @@ static char* item_name(char* dst, item it)
             if(it.identified)
             {
                 char const* s = PSTR("");
-                uint8_t q = n + 1;
-                if(it.cursed) q = -q;
                 switch(st)
                 {
                 case RNG_STRENGTH:
@@ -106,7 +106,7 @@ static char* item_name(char* dst, item it)
                 default:
                     break;
                 }
-                dst += tsprintf(dst, s, q);
+                dst += tsprintf(dst, s, t);
             }
             return dst;
         }
@@ -126,10 +126,17 @@ static char* item_name(char* dst, item it)
                 switch(st)
                 {
                 case AMU_SPEED:
-                    dst += tsprintf(dst, PSTR(" [@c@u spd]"),
-                        it.cursed ? '-' : '+',
-                        n / 2 + 1);
+                {
+                    dst += tsprintf(dst, PSTR(" [@d spd]"),
+                        uint8_t(t + 1) / 2);
                     break;
+                }
+                case AMU_VITALITY:
+                {
+                    dst += tsprintf(dst, PSTR(" [@d mhp]"),
+                        uint8_t(t * AMU_VITALITY_BONUS));
+                    break;
+                }
                 default:
                     break;
                 }

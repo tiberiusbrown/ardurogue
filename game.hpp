@@ -16,7 +16,7 @@
 // costs about 100 bytes prog, 64 bytes ram
 #define ENABLE_GOT_ENTS 0
 
-// this saves like 230 bytes (!!!)
+// this saves like 300 bytes (!!!)
 // gcc must have poor codegen for standard bitfields
 #define USE_CUSTOM_BITFIELDS 1
 
@@ -33,7 +33,7 @@ void flush_persistent(); // (does nothing for Arduino)
 void run();
 
 #if !(__cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900))
-#error "At least C++11 is required to build ArduRogue"
+#error "Building ArduRogue requires support for at least C++11"
 #endif
 
 #ifdef ARDUINO
@@ -359,6 +359,9 @@ enum
     NUM_AMU = AMU_YENDOR,
 };
 
+static constexpr uint8_t AMU_VITALITY_BONUS = 5;
+static constexpr uint8_t MAX_ENCHANT_LEVEL = 9;
+
 static constexpr uint8_t NUM_IDENT =
     NUM_POT + NUM_SCR + NUM_RNG + NUM_AMU;
 
@@ -402,6 +405,60 @@ struct item
     uint8_t subtype        : 4;
 #endif
     bool stackable() { return type <= ARROW; }
+    constexpr bool is_same_type_as(item const& it)
+    {
+#if USE_CUSTOM_BITFIELDS
+        return raw1_ == it.raw1_;
+#else
+        return type == it.type && subtype == it.subtype;
+#endif
+    }
+    constexpr bool is_type(uint8_t type_, uint8_t subtype_ = 0)
+    {
+#if USE_CUSTOM_BITFIELDS
+        return make(type_, subtype_).raw1_ == raw1_;
+#else
+        return type == type_ && subtype == subtype_;
+#endif
+    }
+    bool is_nothing() const
+    {
+#if USE_CUSTOM_BITFIELDS
+        return raw1_ == 0;
+#else
+        return type == NONE;
+#endif
+    }
+    void reset()
+    {
+#if USE_CUSTOM_BITFIELDS
+        raw1_ = 0;
+#else
+        type = subtype = 0;
+#endif
+    }
+    static constexpr item make(
+        uint8_t type,
+        uint8_t subtype = 0,
+        bool identified = false)
+    {
+#if USE_CUSTOM_BITFIELDS
+        return
+        {
+            { uint8_t(
+                item{}.quant_or_level.make(0) |
+                item{}.identified.make(identified) |
+                item{}.cursed.make(0) |
+            0) },
+            { uint8_t(
+                item{}.type.make(type) |
+                item{}.subtype.make(subtype) |
+            0) },
+        };
+#else
+        return { 0, (uint8_t)identified, 0, type, subtype };
+#endif
+    }
 };
 static_assert(sizeof(item) == 2, "");
 
@@ -736,6 +793,7 @@ void status_more();
 void reset_status();
 
 // entity.cpp
+void adjust_health_to_max_health(uint8_t i);
 uint8_t entity_speed(uint8_t i);
 uint8_t entity_max_health(uint8_t i);
 uint8_t entity_strength(uint8_t i);
@@ -756,8 +814,9 @@ void paralyze_entity(uint8_t i);
 void slow_entity(uint8_t i);
 void advance_entity(uint8_t i);
 bool wearing_uncursed_amulet(uint8_t subtype);
-int8_t ring_bonus(uint8_t subtype);
 bool wearing_uncursed_ring(uint8_t subtype);
+int8_t amulet_bonus(uint8_t subtype);
+int8_t ring_bonus(uint8_t subtype);
 bool entity_perform_action(uint8_t i, action a);
 bool player_is_invisible();
 void aggro_monster(uint8_t i);

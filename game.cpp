@@ -118,6 +118,7 @@ uint8_t weapon_item_attack(item it)
 
 void player_gain_xp(uint8_t xp)
 {
+    if(plevel == 49) return;
     uint8_t txp = xp_for_level();
     if(wearing_uncursed_amulet(AMU_WISDOM))
         xp += (xp + 1) / 2;
@@ -153,7 +154,7 @@ bool player_pickup_item(uint8_t i)
     if(it.stackable())
     {
         for(j = 0; j < INV_ITEMS; ++j)
-            if(inv[j].type == it.type && inv[j].subtype == it.subtype)
+            if(inv[j].is_same_type_as(it))
             {
                 if(inv[j].quant_or_level >= 63)
                 {
@@ -166,7 +167,7 @@ bool player_pickup_item(uint8_t i)
     if(j >= INV_ITEMS)
     {
         for(j = 0; j < INV_ITEMS; ++j)
-            if(inv[j].type == item::NONE)
+            if(inv[j].is_nothing())
                 break;
     }
     if(j >= INV_ITEMS)
@@ -174,7 +175,7 @@ bool player_pickup_item(uint8_t i)
         status(PSTR("You can't hold any more items."));
         return false;
     }
-    if(inv[j].type != item::NONE)
+    if(!inv[j].is_nothing())
     {
         // add to stackable
         item tt = it;
@@ -188,7 +189,7 @@ bool player_pickup_item(uint8_t i)
         }
         else
         {
-            it.type = item::NONE;
+            it.reset();
         }
         inv[j].quant_or_level += tt.quant_or_level + 1;
         status(PSTR("You now have @i."), inv[j]);
@@ -196,7 +197,7 @@ bool player_pickup_item(uint8_t i)
     }
     else
         inv[j] = it;
-    it.type = item::NONE;
+    it.reset();
     status(PSTR("You got the @i."), inv[j]);
     return true;
 }
@@ -208,7 +209,7 @@ void player_remove_item(uint8_t i)
         inv[i].quant_or_level -= 1;
         return;
     }
-    inv[i].type = item::NONE;
+    inv[i].reset();
 }
 
 void put_item_on_ground(uint8_t x, uint8_t y, item it)
@@ -219,7 +220,7 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it)
         for(auto& t : items)
         {
             if(!(t.x == x && t.y == y)) continue;
-            if(t.it.type == it.type && t.it.subtype == it.subtype)
+            if(t.it.is_same_type_as(it))
             {
                 uint8_t n = t.it.quant_or_level;
                 if(n < 63) ++n;
@@ -229,7 +230,7 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it)
         }
     }
     for(auto& t : items)
-        if(t.it.type == item::NONE)
+        if(t.it.is_nothing())
         {
             t.x = x;
             t.y = y;
@@ -331,7 +332,7 @@ void step()
         for(int8_t i = MAP_ITEMS - 1; i >= 0; --i)
         {
             map_item& mit = items[i];
-            if(mit.it.type == item::NONE || mit.x != px || mit.y != py)
+            if(mit.it.is_nothing() || mit.x != px || mit.y != py)
                 continue;
             if(yesno_menu(PSTR("Pick up the @i?"), mit.it))
             {
@@ -358,7 +359,7 @@ void step()
             {
                 bool have_amulet = false;
                 for(auto it : inv)
-                    if(it.type == item::AMULET && it.subtype == AMU_YENDOR)
+                    if(it.is_type(item::AMULET, AMU_YENDOR))
                         have_amulet = true;
                 if(have_amulet)
                 {

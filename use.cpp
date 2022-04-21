@@ -46,7 +46,7 @@ static void use_scroll(uint8_t subtype)
                 status(PSTR("Nothing happens."));
             else
             {
-                if(it.quant_or_level < 63)
+                if(it.quant_or_level < MAX_ENCHANT_LEVEL)
                     it.quant_or_level += 1;
                 status(PSTR("The @i glows blue for a moment."), it);
             }
@@ -167,13 +167,14 @@ bool equip_item(uint8_t i)
     status(PSTR("You @p the @i."),
         weap ? PSTR("ready") : PSTR("put on"),
         inv[i]);
-    if(it.type == item::AMULET && it.subtype == AMU_IRONBLOOD)
+    if(it.is_type(item::AMULET, AMU_IRONBLOOD))
     {
         entity_restore_strength(0);
         end_paralysis(0);
     }
-    if(it.type == item::AMULET && it.subtype == AMU_CLARITY)
+    if(it.is_type(item::AMULET, AMU_CLARITY))
         end_confusion(0);
+    adjust_health_to_max_health(0);
     j = i;
     return true;
 }

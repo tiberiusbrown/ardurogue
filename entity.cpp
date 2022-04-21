@@ -7,6 +7,13 @@ bool player_is_invisible()
     return ents[0].invis || wearing_uncursed_ring(RNG_INVIS);
 }
 
+void adjust_health_to_max_health(uint8_t i)
+{
+    uint8_t mhp = entity_max_health(i);
+    if(ents[i].health > mhp)
+        ents[i].health = mhp;
+}
+
 uint8_t entity_speed(uint8_t i)
 {
     uint8_t r;
@@ -14,16 +21,8 @@ uint8_t entity_speed(uint8_t i)
     {
         r = pstats.speed;
         // amulet of speed
-        uint8_t j = pinfo.equipped[SLOT_AMULET];
-        if(j < INV_ITEMS && inv[j].subtype == AMU_SPEED)
-        {
-            item const& it = inv[j];
-            uint8_t n = it.quant_or_level / 2 + 1;
-            if(it.cursed)
-                r -= n;
-            else
-                r += n;
-        }
+        int8_t n = amulet_bonus(AMU_SPEED);
+        r += ((n + 1) / 2);
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].speed);
@@ -39,10 +38,11 @@ uint8_t entity_max_health(uint8_t i)
     if(i == 0)
     {
         r = pstats.max_health;
-        if(pinfo.vamp_drain >= r)
-            return 0;
-        if(wearing_uncursed_amulet(AMU_VITALITY))
-            r += 15;
+        r -= pinfo.vamp_drain;
+        int8_t t = amulet_bonus(AMU_VITALITY) * AMU_VITALITY_BONUS;
+        if(-t >= r)
+            return 1;
+        r += t;
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].max_health);
@@ -311,7 +311,7 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
                 pinfo.vamp_drain += 3;
                 if(pinfo.vamp_drain >= mhp)
                     pinfo.vamp_drain = mhp - 1;
-                ents[0].health = tmin(ents[0].health, entity_max_health(0));
+                adjust_health_to_max_health(0);
             }
             entity_heal(atti, 3);
         }
@@ -362,6 +362,17 @@ int8_t ring_bonus(uint8_t subtype)
     return
         ring_bonus_slot(SLOT_RING1, subtype) +
         ring_bonus_slot(SLOT_RING2, subtype);
+}
+
+int8_t amulet_bonus(uint8_t subtype)
+{
+    uint8_t j = pinfo.equipped[SLOT_AMULET];
+    if(j >= INV_ITEMS) return 0;
+    item it = inv[j];
+    if(it.subtype != subtype) return 0;
+    int8_t r = it.quant_or_level + 1;
+    if(it.cursed) r = -r;
+    return uint8_t(r);
 }
 
 bool wearing_uncursed_ring(uint8_t subtype)
@@ -523,7 +534,7 @@ bool entity_perform_action(uint8_t i, action a)
     case action::DROP:
     {
         item it = inv[a.data];
-        if(it.type == item::AMULET && it.subtype == AMU_YENDOR)
+        if(it.is_type(item::AMULET, AMU_YENDOR))
         {
             status(PSTR("You are unable to drop the @i."), it);
             return false;
@@ -536,7 +547,7 @@ bool entity_perform_action(uint8_t i, action a)
         status(PSTR("You drop the @i."), it);
         player_remove_item(a.data);
         put_item_on_ground(e.x, e.y, it);
-        inv[a.data].type = item::NONE;
+        inv[a.data].reset();
         return true;
     }
     case action::THROW:
@@ -568,11 +579,11 @@ bool entity_perform_action(uint8_t i, action a)
     {
         uint8_t arrow = 0;
         for(; arrow < INV_ITEMS; ++arrow)
-            if(inv[arrow].type == item::ARROW)
+            if(inv[arrow].is_type(item::ARROW))
                 break;
         uint8_t q = inv[arrow].quant_or_level;
         if(q == 0)
-            inv[arrow].type = item::NONE;
+            inv[arrow].reset();
         else
             inv[arrow].quant_or_level = q - 1;
         scan_result sr;
@@ -586,9 +597,7 @@ bool entity_perform_action(uint8_t i, action a)
         }
         if(u8rand() >= ARROW_BREAK_CHANCE)
         {
-            item t{};
-            t.type = item::ARROW;
-            put_item_on_ground(sr.x, sr.y, t);
+            put_item_on_ground(sr.x, sr.y, item::make(item::ARROW));
         }
         return true;
     }

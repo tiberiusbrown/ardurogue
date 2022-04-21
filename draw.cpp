@@ -286,12 +286,11 @@ void draw_map_offset(uint8_t ox)
         for(uint8_t x = t; x < 64; x += 2)
             set_pixel(x, y);
 
-    for(uint8_t y = 0; y < MAP_H; ++y)
+    for(uint8_t y = 0, py = 0; y < MAP_H; ++y, py += 2)
     {
-        for(uint8_t tx = 0; tx < 32; ++tx)
+        for(uint8_t tx = 0, px = 0; tx < 32; ++tx, px += 2)
         {
             uint8_t x = tx + ox;
-            uint8_t px = tx * 2, py = y * 2;
             if(tile_is_solid_or_unknown(x, y))
             {
                 uint8_t m;
@@ -310,7 +309,7 @@ void draw_map_offset(uint8_t ox)
                     do
                     {
                         i -= 4;
-                        if((m & pgm_read_byte(&TESTS[i])) == pgm_read_byte(&TESTS[i + 1]))
+                        if((m & pgm_read_byte(&TESTS[i + 0])) == pgm_read_byte(&TESTS[i + 1]))
                             set_pixel(px + 1, py - 1);
                         if((m & pgm_read_byte(&TESTS[i + 2])) == pgm_read_byte(&TESTS[i + 3]))
                             set_pixel(px, py);
@@ -494,7 +493,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
     // draw items
     for(auto const& i : items)
     {
-        if(i.it.type == entity::NONE) continue;
+        if(i.it.is_nothing()) continue;
         uint8_t ix = i.x - mx;
         uint8_t iy = i.y - my;
         if(ix >= 13 || iy >= 13) continue;

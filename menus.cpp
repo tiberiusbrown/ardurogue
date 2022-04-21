@@ -326,14 +326,14 @@ static bool act_use(action& a)
 static bool act_shoot(action& a)
 {
     uint8_t i = pinfo.equipped[SLOT_WEAPON];
-    if(!(i < INV_ITEMS && inv[i].type == item::BOW))
+    if(!(i < INV_ITEMS && inv[i].is_type(item::BOW)))
     {
         status(PSTR("You're not holding a bow."));
         return false;
     }
     bool have_arrow = false;
     for(uint8_t j = 0; j < INV_ITEMS; ++j)
-        have_arrow |= (inv[j].type == item::ARROW);
+        have_arrow |= inv[j].is_type(item::ARROW);
     if(!have_arrow)
     {
         status(PSTR("You have no arrows."));
@@ -417,39 +417,44 @@ static void draw_player_info(uint8_t x)
     draw_text(x + 30, 0, PSTR("Player Information"));
     set_hline(0, 63, 6);
 
-    static const char T0[] PROGMEM = "Score:";
-    static const char T1[] PROGMEM = "Level:";
-    static const char T2[] PROGMEM = "Max Health:";
-    static const char T3[] PROGMEM = "Strength:";
-    static const char T4[] PROGMEM = "Dexterity:";
-    static const char T5[] PROGMEM = "Attack:";
-    static const char T6[] PROGMEM = "Defense:";
-    static const char T7[] PROGMEM = "Speed:";
-    static const char* const TS[] PROGMEM =
+    static char const T0[] PROGMEM = "Level:";
+    static char const T1[] PROGMEM = "Max Health:";
+    static char const T2[] PROGMEM = "Strength:";
+    static char const T3[] PROGMEM = "Dexterity:";
+    static char const T4[] PROGMEM = "Attack:";
+    static char const T5[] PROGMEM = "Defense:";
+    static char const T6[] PROGMEM = "Speed:";
+    static char const* const TS[] PROGMEM =
     {
-        T0, T1, T2, T3, T4, T5, T6, T7,
+        T0, T1, T2, T3, T4, T5, T6,
     };
-    for(uint8_t i = 0, y = 9; i < 8; ++i, y += 6)
-        draw_text(x, y, pgmptr(&TS[i]));
 
-    draw_textf(x + 40, 6 + 3, PSTR("@u"), hs.score);
-    draw_textf(x + 40, 12 + 3, PSTR("@u"), plevel + 1);
-    draw_info_bonus(x + 40, 18 + 3, entity_max_health(0), pstats.max_health);
-    uint8_t t = entity_strength(0);
-    draw_info_bonus(x + 40, 24 + 3, t, pstats.strength);
-    draw_info_bonus(x + 40, 30 + 3, entity_dexterity(0), pstats.dexterity);
-    draw_info_bonus(x + 40, 36 + 3, entity_attack(0), t);
-    draw_info_bonus(x + 40, 42 + 3, entity_defense(0), pstats.defense);
-    draw_info_bonus(x + 40, 48 + 3, entity_speed(0), pstats.speed);
+    uint8_t ta[14];
+    uint8_t* const tb = &ta[7];
+
+    ta[0] = tb[0] = plevel + 1;
+    ta[1] = entity_max_health(0), tb[1] = pstats.max_health;
+    ta[2] = entity_strength(0), tb[2] = pstats.strength;
+    ta[3] = entity_dexterity(0), tb[3] = pstats.dexterity;
+    ta[4] = entity_attack(0), tb[4] = ta[2];
+    ta[5] = entity_defense(0), tb[5] = pstats.defense;
+    ta[6] = entity_speed(0), tb[6] = pstats.speed;
+
+    for(uint8_t i = 0, y = 9; i < 7; ++i, y += 6)
+    {
+        draw_text(x, y, pgmptr(&TS[i]));
+        draw_info_bonus(x + 40, y, ta[i], tb[i]);
+    }
 
     uint8_t y = 9;
     draw_text(x + 70, y, PSTR("Effects:"));
-    if(ents[0].confused ) draw_text(x + 75, y += 6, PSTR("confused"));
-    if(ents[0].paralyzed) draw_text(x + 75, y += 6, PSTR("paralyzed"));
-    if(ents[0].weakened ) draw_text(x + 75, y += 6, PSTR("weakened"));
-    if(ents[0].invis    ) draw_text(x + 75, y += 6, PSTR("invisible"));
-    if(hunger == 255    ) draw_text(x + 75, y += 6, PSTR("starving"));
-    if(y == 9) draw_text(x + 75, 15, PSTR("none"));
+    x += 75;
+    if(ents[0].confused ) draw_text(x, y += 6, PSTR("confused"));
+    if(ents[0].paralyzed) draw_text(x, y += 6, PSTR("paralyzed"));
+    if(ents[0].weakened ) draw_text(x, y += 6, PSTR("weakened"));
+    if(ents[0].invis    ) draw_text(x, y += 6, PSTR("invisible"));
+    if(hunger == 255    ) draw_text(x, y += 6, PSTR("starving"));
+    if(y == 9) draw_text(x, 15, PSTR("none"));
 }
 static void men_info()
 {
