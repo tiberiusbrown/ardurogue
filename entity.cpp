@@ -260,6 +260,9 @@ void entity_heal(uint8_t i, uint8_t amount)
 
 void entity_take_damage(uint8_t i, uint8_t dam)
 {
+#if PLAYER_INVULNERABLE
+    if(i == 0) return;
+#endif
     auto& te = ents[i];
     //bool cansee = player_can_see_entity(i);
     if(dam >= te.health)
@@ -287,6 +290,9 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
 
     if(defi == 0)
     {
+#if PLAYER_INVULNERABLE
+        return;
+#endif
         hs.type = HS_ENTITY;
         hs.data = e.type;
     }

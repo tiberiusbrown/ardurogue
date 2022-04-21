@@ -20,6 +20,11 @@
 // gcc must have poor codegen for standard bitfields
 #define USE_CUSTOM_BITFIELDS 1
 
+// makes the player invulnerable (for debug)
+#ifndef PLAYER_INVULNERABLE
+#define PLAYER_INVULNERABLE 0
+#endif
+
 // platform functionality
 void wait();        // wait about 100 ms
 uint8_t wait_btn(); // wait for button press

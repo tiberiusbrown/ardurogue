@@ -5,6 +5,8 @@ cmake_policy(SET CMP0117 NEW)
 
 project(ardurogue)
 
+option(PLAYER_INVULNERABLE "Make the player invulnerable" OFF)
+
 if(EMSCRIPTEN)
     option(EMSCRIPTEN_OPTIMIZED "Produce size-optimized emscripten build" ON)
     if(EMSCRIPTEN_OPTIMIZED)
@@ -64,6 +66,10 @@ add_executable(
 
 target_link_libraries(${PROJECT_NAME} PUBLIC git)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 11)
+
+if(PLAYER_INVULNERABLE)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC -DPLAYER_INVULNERABLE=1)
+endif()
 
 if(MSVC)
     set_property(TARGET ${PROJECT_NAME} PROPERTY
