@@ -19,6 +19,7 @@ static constexpr entity_info decl_ent(
     uint8_t xp         = 0
 )
 {
+#if USE_CUSTOM_BITFIELDS
     entity_info r{};
     r.mean       = mean      ;
     r.nomove     = nomove    ;
@@ -37,6 +38,27 @@ static constexpr entity_info decl_ent(
     r.max_health = max_health;
     r.xp         = xp        ;
     return r;
+#else
+	return
+	{
+		mean,
+		nomove,
+		regens,
+		invis,
+		poison,
+		vampire,
+		confuse,
+		paralyze,
+		fbreath,
+		opener,
+		strength,
+		dexterity,
+		speed,
+		defense,
+		max_health,
+		xp,
+	};
+#endif
 }
 
 entity_info const MONSTER_INFO[] PROGMEM =

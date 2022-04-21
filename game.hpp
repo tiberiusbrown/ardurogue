@@ -32,6 +32,15 @@ void flush_persistent(); // (does nothing for Arduino)
 // game logic
 void run();
 
+// detect C++11
+#if __cplusplus < 201103L && (!defined(_MSC_VER) || _MSC_VER < 1900)
+#error "At least C++11 is required to build ArduRogue"
+#elif __cplusplus < 201402L || (defined(_MSC_VER) && _MSC_VER < 1910)
+// disable constructs that require C++14
+#undef USE_CUSTOM_BITFIELDS
+#define USE_CUSTOM_BITFIELDS 0
+#endif
+
 #ifdef ARDUINO
 #include <Arduino.h>
 
@@ -104,6 +113,7 @@ template<size_t N> struct bitset
     void clear(size_t i) { d_[i / 8] &= ~(1 << (i % 8)); }
 };
 
+#if USE_CUSTOM_BITFIELDS
 template<size_t B, size_t N = 1> struct u8bitfield
 {
     uint8_t raw_;
@@ -130,6 +140,7 @@ template<size_t B, size_t N = 1> struct u8bitfield
         return *this = uint8_t(*this) - uint8_t(t);
     }
 };
+#endif
 
 template<class T> void swap(T& a, T& b)
 {

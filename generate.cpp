@@ -18,11 +18,15 @@ struct map_gen_info
 
 static constexpr item decl_item(uint8_t type, uint8_t subtype = 0, bool identified = false)
 {
+#if USE_CUSTOM_BITFIELDS
     item it{};
     it.type = type;
     it.subtype = subtype;
     it.identified = identified;
     return it;
+#else
+	return { 0, (uint8_t)identified, 0, type, subtype };
+#endif
 }
 
 static map_gen_info const MAP_GEN_INFOS[NUM_MAPS] PROGMEM =
