@@ -32,12 +32,24 @@ void flush_persistent(); // (does nothing for Arduino)
 // game logic
 void run();
 
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
+#define HAS_CXX11 1
+#else
+#define HAS_CXX11 0
+#endif
+
+#if __cplusplus >= 201402L || (defined(_MSC_VER) && _MSC_VER >= 1910)
+#define HAS_CXX14 1
+#else
+#define HAS_CXX14 0
+#endif
+
 // detect C++11
-#if __cplusplus < 201103L && (!defined(_MSC_VER) || _MSC_VER < 1900)
+#if !HAS_CXX11
 #error "At least C++11 is required to build ArduRogue"
 #endif
 
-#if defined(LIMIT_TO_CXX11) || __cplusplus < 201402L || (defined(_MSC_VER) && _MSC_VER < 1910)
+#if defined(LIMIT_TO_CXX11) || !HAS_CXX14
 // disable constructs that require C++14
 #undef USE_CUSTOM_BITFIELDS
 #define USE_CUSTOM_BITFIELDS 0
