@@ -16,7 +16,7 @@
 // costs about 100 bytes prog, 64 bytes ram
 #define ENABLE_GOT_ENTS 0
 
-// this saves like 300 bytes (!!!)
+// this saves like 600 bytes (!!!)
 // gcc must have poor codegen for standard bitfields
 #define USE_CUSTOM_BITFIELDS 1
 
@@ -125,6 +125,13 @@ template<size_t B, size_t N = 1> struct u8bitfield
     static constexpr uint8_t make(T const& t)
     {
         return (uint8_t(t) << B) & MASK;
+    }
+
+    // assign from other bitfield
+    template<size_t B2>
+    void assign(u8bitfield<B2, N> t)
+    {
+        raw_ = (raw_ & INV_MASK) | (((t.raw_ >> B2) << B) & MASK);
     }
 
     constexpr operator uint8_t() const
@@ -411,16 +418,16 @@ struct item
     uint8_t subtype        : 4;
 #endif
 private:
-	static constexpr int8_t sext_level(uint8_t level)
-	{
-		return (level & 0x20) ? (level | 0xc0) : level;
-	}
+    static constexpr int8_t sext_level(uint8_t level)
+    {
+        return (level & 0x20) ? (level | 0xc0) : level;
+    }
 public:
-	constexpr int8_t level_s8() const
-	{
-		return sext_level(uint8_t(quant_or_level));
-	}
-	constexpr bool stackable() const { return type <= ARROW; }
+    constexpr int8_t level_s8() const
+    {
+        return sext_level(uint8_t(quant_or_level));
+    }
+    constexpr bool stackable() const { return type <= ARROW; }
     constexpr bool is_same_type_as(item const& it) const
     {
 #if USE_CUSTOM_BITFIELDS
@@ -467,14 +474,14 @@ public:
         return { 0, (uint8_t)identified, 0, type, subtype };
 #endif
     }
-	constexpr bool is_type(uint8_t type_, uint8_t subtype_ = 0) const
-	{
+    constexpr bool is_type(uint8_t type_, uint8_t subtype_ = 0) const
+    {
 #if USE_CUSTOM_BITFIELDS
-		return make(type_, subtype_).raw1_ == raw1_;
+        return make(type_, subtype_).raw1_ == raw1_;
 #else
-		return type == type_ && subtype == subtype_;
+        return type == type_ && subtype == subtype_;
 #endif
-	}
+    }
 };
 static_assert(sizeof(item) == 2, "");
 

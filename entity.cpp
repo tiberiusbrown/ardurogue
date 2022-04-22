@@ -439,7 +439,7 @@ void slow_entity(uint8_t i)
 static void entity_attack_entity(uint8_t atti, uint8_t defi)
 {
     bool hit = test_attack_hit(atti, defi);
-    bool cansee = player_can_see_entity(atti) | player_can_see_entity(defi);
+    bool cansee = (uint8_t)player_can_see_entity(atti) | (uint8_t)player_can_see_entity(defi);
     if(!hit && cansee)
         status(PSTR("@W @O."), atti, atti == 0 ? PSTR("mis") : PSTR("misse"), defi);
     if(atti == 0)

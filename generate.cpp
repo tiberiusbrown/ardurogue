@@ -829,7 +829,10 @@ void generate_dungeon()
     for(uint8_t i = 1; i < MAP_ENTITIES; ++i)
     {
         auto& e = ents[i];
+#if !USE_CUSTOM_BITFIELDS
         e = {};
+#endif
+        e.type = entity::NONE;
         if(!find_unoccupied(e.x, e.y))
             continue;
         for(;;)
@@ -847,7 +850,12 @@ void generate_dungeon()
 #endif
                 entity_info info;
                 entity_get_info(i, info);
+#if USE_CUSTOM_BITFIELDS
+                e.raw0_ = 0;
+                e.invis.assign(info.invis);
+#else
                 e.invis = (uint8_t)info.invis;
+#endif
                 break;
             }
         }
