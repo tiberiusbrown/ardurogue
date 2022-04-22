@@ -410,7 +410,17 @@ struct item
     uint8_t type           : 4;
     uint8_t subtype        : 4;
 #endif
-    bool stackable() const { return type <= ARROW; }
+private:
+	static constexpr int8_t sext_level(uint8_t level)
+	{
+		return (level & 0x20) ? (level | 0xc0) : level;
+	}
+public:
+	constexpr int8_t level_s8() const
+	{
+		return sext_level(uint8_t(quant_or_level));
+	}
+	constexpr bool stackable() const { return type <= ARROW; }
     constexpr bool is_same_type_as(item const& it) const
     {
 #if USE_CUSTOM_BITFIELDS
@@ -419,7 +429,7 @@ struct item
         return type == it.type && subtype == it.subtype;
 #endif
     }
-    bool is_nothing() const
+    constexpr bool is_nothing() const
     {
 #if USE_CUSTOM_BITFIELDS
         return raw1_ == 0;
