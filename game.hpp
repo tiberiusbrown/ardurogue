@@ -410,21 +410,13 @@ struct item
     uint8_t type           : 4;
     uint8_t subtype        : 4;
 #endif
-    bool stackable() { return type <= ARROW; }
-    constexpr bool is_same_type_as(item const& it)
+    bool stackable() const { return type <= ARROW; }
+    constexpr bool is_same_type_as(item const& it) const
     {
 #if USE_CUSTOM_BITFIELDS
         return raw1_ == it.raw1_;
 #else
         return type == it.type && subtype == it.subtype;
-#endif
-    }
-    constexpr bool is_type(uint8_t type_, uint8_t subtype_ = 0)
-    {
-#if USE_CUSTOM_BITFIELDS
-        return make(type_, subtype_).raw1_ == raw1_;
-#else
-        return type == type_ && subtype == subtype_;
 #endif
     }
     bool is_nothing() const
@@ -465,6 +457,14 @@ struct item
         return { 0, (uint8_t)identified, 0, type, subtype };
 #endif
     }
+	constexpr bool is_type(uint8_t type_, uint8_t subtype_ = 0) const
+	{
+#if USE_CUSTOM_BITFIELDS
+		return make(type_, subtype_).raw1_ == raw1_;
+#else
+		return type == type_ && subtype == subtype_;
+#endif
+	}
 };
 static_assert(sizeof(item) == 2, "");
 
