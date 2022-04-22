@@ -10,6 +10,8 @@ static constexpr uint8_t DOOR_SECRET_CHANCE = 48;
 
 static constexpr uint8_t RANDOM_DOOR_SPACE = 4;
 
+static constexpr uint8_t ITEM_CURSED_CHANCE = 32;
+
 struct map_gen_info
 {
     uint8_t monster_types[6];
@@ -581,8 +583,8 @@ bool occupied(uint8_t x, uint8_t y)
     for(auto const& e : ents)
         if(e.type != entity::NONE && e.x == x && e.y == y)
             return true; 
-    for(auto const& i : items)
-        if(i.it.is_nothing() && i.x == x && i.y == y)
+    for(auto i : items)
+        if(!i.it.is_nothing() && i.x == x && i.y == y)
             return true;
     for(uint8_t i = 0; i < num_doors; ++i)
         if(doors[i].x == x && doors[i].y == y)
@@ -632,7 +634,7 @@ static void generate_random_item(uint8_t i)
     uint8_t type = 0;
     uint8_t subtype = 0;
 
-    bool cursed = (u8rand() < 32);
+    bool cursed = (u8rand() < ITEM_CURSED_CHANCE);
     
     uint8_t quant = 0;
     uint8_t enchant = 0;

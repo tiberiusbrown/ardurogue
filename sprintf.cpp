@@ -235,9 +235,9 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         case 'T': // subject possessive
         case 'P': // object possessive
         case 'U': // subject is/are
-            dec[0] = (uint8_t)u16; // index
-            u = ents[dec[0]].type;
-            if(dec[0] == 0) // player
+        case 'W': // subject verb
+            u = ents[(uint8_t)u16].type;
+            if((uint8_t)u16 == 0) // player
             {
                 *b++ = (c >= 'S' ? 'Y' : 'y');
                 *b++ = 'o';
@@ -246,7 +246,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             }
             else
             {
-                if(player_can_see_entity(dec[0]))
+                if(player_can_see_entity((uint8_t)u16))
                 {
                     b = tstrcpy_prog(b, c >= 'S' ? PSTR("The ") : PSTR("the "));
                     b = tstrcpy_prog(b, pgmptr(&MONSTER_NAMES[u]));
@@ -264,17 +264,13 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             }
             if(c == 'U')
                 b = tstrcpy_prog(b, u == entity::PLAYER ? PSTR(" are") : PSTR(" is"));
-            break;
-        case 'V': // verb
-        case 'v': // verb whose plural needs +es
-            u = (uint8_t)u16; // index
-            u = ents[u].type;
-            s = va_arg(ap, char const*);
-            b = tstrcpy_prog(b, s);
-            if(u != entity::PLAYER)
+            if(c == 'W')
             {
-                if(c == 'v') *b++ = 'e';
-                *b++ = 's';
+                *b++ = ' ';
+                s = va_arg(ap, char const*);
+                b = tstrcpy_prog(b, s);
+                if(u != entity::PLAYER)
+                    *b++ = 's';
             }
             break;
         case 'i': // item

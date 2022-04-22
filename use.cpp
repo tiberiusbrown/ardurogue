@@ -136,19 +136,25 @@ uint8_t slot_of_item(uint8_t type)
     return 255;
 }
 
+static void status_pi(char const* s, char const* p, item i)
+{
+    status(s, p, i);
+}
+
 bool unequip_item(uint8_t i)
 {
-    char const* verb = inv[i].type <= item::SWORD ?
+    auto it = inv[i];
+    char const* verb = it.type <= item::SWORD ?
         PSTR("stop using") : PSTR("take off");
-    if(inv[i].cursed)
+    if(it.cursed)
     {
-        status(PSTR("You are unable to @p the @i."), verb, inv[i]);
+        status_pi(PSTR("You are unable to @p the @i."), verb, it);
         return false;
     }
     for(auto& j : pinfo.equipped)
         if(j == i)
         {
-            status(PSTR("You @p the @i."), verb, inv[i]);
+            status_pi(PSTR("You @p the @i."), verb, it);
             return j = 255, true;
         }
     return false;

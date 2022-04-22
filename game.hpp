@@ -131,6 +131,7 @@ template<size_t B, size_t N = 1> struct u8bitfield
     {
         return (raw_ & MASK) >> B;
     }
+
     template<class T>
     u8bitfield& operator=(T const& t)
     {
@@ -734,6 +735,7 @@ void draw_text(uint8_t x, uint8_t y, const char* p);
 void draw_text_nonprog(uint8_t x, uint8_t y, const char* p);
 // fmt is PROGMEM
 void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...); // max 64
+
 uint8_t char_width(char c);
 uint8_t text_width(char const* s, bool prog = true);
 

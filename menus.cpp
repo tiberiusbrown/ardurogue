@@ -452,6 +452,7 @@ static void draw_player_info(uint8_t x)
     if(ents[0].confused ) draw_text(x, y += 6, PSTR("confused"));
     if(ents[0].paralyzed) draw_text(x, y += 6, PSTR("paralyzed"));
     if(ents[0].weakened ) draw_text(x, y += 6, PSTR("weakened"));
+    if(ents[0].slowed   ) draw_text(x, y += 6, PSTR("slowed"));
     if(ents[0].invis    ) draw_text(x, y += 6, PSTR("invisible"));
     if(hunger == 255    ) draw_text(x, y += 6, PSTR("starving"));
     if(y == 9) draw_text(x, 15, PSTR("none"));

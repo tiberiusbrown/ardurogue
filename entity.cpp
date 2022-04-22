@@ -118,13 +118,18 @@ uint8_t entity_defense(uint8_t i)
     return r;
 }
 
+static void status_you_are_no_longer(char const* s)
+{
+    status(PSTR("You are no longer @p."), s);
+}
+
 void end_paralysis(uint8_t i)
 {
     auto& e = ents[i];
     if(e.paralyzed)
     {
         e.paralyzed = 0;
-        if(i == 0) status(PSTR("You are no longer paralyzed."));
+        if(i == 0) status_you_are_no_longer(PSTR("paralyzed"));
     }
 }
 
@@ -134,7 +139,7 @@ void end_confusion(uint8_t i)
     if(e.confused)
     {
         e.confused = 0;
-        if(i == 0) status(PSTR("You are no longer confused."));
+        if(i == 0) status_you_are_no_longer(PSTR("confused"));
     }
 }
 
@@ -144,7 +149,7 @@ void end_slow(uint8_t i)
     if(e.slowed)
     {
         e.slowed = 0;
-        if(i == 0) status(PSTR("You are no longer slowed."));
+        if(i == 0) status_you_are_no_longer(PSTR("slowed"));
     }
 }
 
@@ -190,7 +195,7 @@ void advance_entity(uint8_t i)
         if(end)
         {
             e.invis = 0;
-            if(i == 0) status(PSTR("You are no longer invisible."));
+            if(i == 0) status_you_are_no_longer(PSTR("invisible"));
         }
     }
 }
@@ -267,7 +272,7 @@ void entity_take_damage(uint8_t i, uint8_t dam)
     //bool cansee = player_can_see_entity(i);
     if(dam >= te.health)
     {
-        status(PSTR("@S @V!"), i, i, PSTR("die"));
+        status(PSTR("@W!"), i, PSTR("die"));
         te.health = 0;
         te.type = entity::NONE;
 #if ENABLE_GOT_ENTS
@@ -388,14 +393,18 @@ bool wearing_uncursed_ring(uint8_t subtype)
         is_uncursed_subtype(subtype, SLOT_RING2);;
 }
 
+static void status_you_are(char const* s, uint8_t i)
+{
+    status(PSTR("@U @p!"), i, s);
+}
+
 void confuse_entity(uint8_t i)
 {
     if(i == 0 && wearing_uncursed_amulet(AMU_CLARITY))
         return;
-    auto& te = ents[i];
     if(player_can_see_entity(i))
-        status(PSTR("@U confused!"), i);
-    te.confused = 1;
+        status_you_are(PSTR("confused"), i);
+    ents[i].confused = 1;
 }
 
 void poison_entity(uint8_t i)
@@ -405,7 +414,7 @@ void poison_entity(uint8_t i)
     auto& te = ents[i];
     if(te.weakened) return;
     if(player_can_see_entity(i))
-        status(PSTR("@U weakened!"), i);
+        status_you_are(PSTR("weakened"), i);
     te.weakened = 1;
 }
 
@@ -414,7 +423,7 @@ void paralyze_entity(uint8_t i)
     auto& te = ents[i];
     if(te.paralyzed) return;
     if(player_can_see_entity(i))
-        status(PSTR("@U paralyzed!"), i);
+        status_you_are(PSTR("paralyzed"), i);
     te.paralyzed = 1;
 }
 
@@ -423,16 +432,16 @@ void slow_entity(uint8_t i)
     auto& te = ents[i];
     if(te.slowed) return;
     if(player_can_see_entity(i))
-        status(PSTR("@U slowed!"), i);
+        status_you_are(PSTR("slowed"), i);
     te.slowed = 1;
 }
 
 static void entity_attack_entity(uint8_t atti, uint8_t defi)
 {
     bool hit = test_attack_hit(atti, defi);
-    bool cansee = player_can_see_entity(atti) || player_can_see_entity(defi);
+    bool cansee = player_can_see_entity(atti) | player_can_see_entity(defi);
     if(!hit && cansee)
-        status(PSTR("@S @v @O."), atti, atti, PSTR("miss"), defi);
+        status(PSTR("@W @O."), atti, atti == 0 ? PSTR("mis") : PSTR("misse"), defi);
     if(atti == 0)
         aggro_monster(defi);
     if(hit)
@@ -441,9 +450,9 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
         if(cansee)
         {
             if(dam > 0)
-                status(PSTR("@S @V @O."), atti, atti, PSTR("hit"), defi);
+                status(PSTR("@W @O."), atti, PSTR("hit"), defi);
             else
-                status(PSTR("@S @V @P attack."), defi, defi, PSTR("block"), atti);
+                status(PSTR("@W @P attack."), defi, PSTR("block"), atti);
         }
         entity_take_damage_from_entity(atti, defi, dam);
     }
@@ -458,14 +467,14 @@ bool entity_perform_action(uint8_t i, action a)
         if(e.paralyzed)
         {
             if(i == 0)
-                status(PSTR("You are paralyzed!"));
+                status_you_are(PSTR("paralyzed"), 0);
             return true; // absorb action
         }
         if(e.confused)
         {
             dir = u8rand() & 3;
             if(i == 0)
-                status(PSTR("You are confused!"));
+                status_you_are(PSTR("confused"), 0);
         }
     }
     int8_t dx = (int8_t)pgm_read_byte(&DIRX[dir]);
@@ -525,8 +534,8 @@ bool entity_perform_action(uint8_t i, action a)
             // search
             for(uint8_t j = 0; j < 8; ++j)
             {
-                uint8_t tx = e.x + (int8_t)pgm_read_byte(&DDIRX[j]);
-                uint8_t ty = e.y + (int8_t)pgm_read_byte(&DDIRY[j]);
+                uint8_t tx = e.x + pgm_read_byte(&DDIRX[j]);
+                uint8_t ty = e.y + pgm_read_byte(&DDIRY[j]);
                 door* d = get_door(tx, ty);
                 if(!d) continue;
                 if(d->secret)

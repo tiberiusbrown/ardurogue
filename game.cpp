@@ -513,7 +513,6 @@ void run()
         status(PSTR("Welcome @pto ArduRogue."), back);
 
         update_light();
-        render();
 
         for(;;)
         {

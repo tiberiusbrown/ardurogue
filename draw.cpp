@@ -196,11 +196,8 @@ static void draw_sprite_precise_nonprog(
     tt[1] = (tp >> 8) & 0xf;
     tt[2] = (tp >> 4) & 0xf;
     tt[3] = (tp >> 0) & 0xf;
-    clear_img(tt, 4, x - 1, y - 1);
-    clear_img(tt, 4, x + 0, y - 1);
-    clear_img(tt, 4, x + 1, y - 1);
-    clear_img(tt, 4, x - 1, y);
-    clear_img(tt, 4, x + 1, y);
+    for(uint8_t i = 0; i < 8; ++i)
+        clear_img(tt, 4, x + pgm_read_byte(&DDIRX[i]), y + pgm_read_byte(&DDIRY[i]));
     set_img(tt, 4, x, y);
 }
 
