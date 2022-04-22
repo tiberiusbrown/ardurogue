@@ -102,18 +102,15 @@ uint8_t xp_for_level()
 uint8_t armor_item_defense(item it)
 {
     // assumes item is armor, helm, or boots
-    uint8_t level = it.quant_or_level;
-    if(it.cursed) level = -(level + 2);
-    return item::BOOTS - it.type + level + 1;
+    uint8_t level = it.quant_or_level - ENCHANT_LEVEL_ZERO;
+    return item::BOOTS - it.type + level;
 }
 
 uint8_t weapon_item_attack(item it)
 {
     // assumes item is sword
-    uint8_t level = it.quant_or_level;
-    if(it.cursed) level = -(level + 2);
-    uint8_t m = 3;
-    return level + m;
+    uint8_t level = it.quant_or_level - ENCHANT_LEVEL_ZERO;
+    return level + 2;
 }
 
 void player_gain_xp(uint8_t xp)

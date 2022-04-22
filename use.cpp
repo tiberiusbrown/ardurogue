@@ -46,7 +46,7 @@ static void use_scroll(uint8_t subtype)
                 status(PSTR("Nothing happens."));
             else
             {
-                if(it.quant_or_level < MAX_ENCHANT_LEVEL)
+                if(it.quant_or_level < ENCHANT_LEVEL_MAX)
                     it.quant_or_level += 1;
                 status(PSTR("The @i glows blue for a moment."), it);
             }

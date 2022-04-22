@@ -52,8 +52,7 @@ static char const* const ITEM_NAME_ARMORS[] PROGMEM =
 static char* item_name(char* dst, item it)
 {
     uint8_t n = it.quant_or_level;
-    int8_t t = (int8_t)n + 1;
-    if(it.cursed) t = -t;
+    int8_t t = n - ENCHANT_LEVEL_ZERO;
     uint8_t st = it.subtype;
     if(it.cursed && it.identified)
         dst = tstrcpy_prog(dst, PSTR("cursed "));

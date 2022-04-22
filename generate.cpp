@@ -637,11 +637,13 @@ static void generate_random_item(uint8_t i)
     bool cursed = (u8rand() < ITEM_CURSED_CHANCE);
     
     uint8_t quant = 0;
-    uint8_t enchant = 0;
+    uint8_t enchant = ENCHANT_LEVEL_ZERO + 1;
     {
         uint8_t chance = 96 + map_index * 8;
-        while(enchant < MAX_ENCHANT_LEVEL && u8rand() < chance)
+        while(enchant < ENCHANT_LEVEL_MAX && u8rand() < chance)
             ++enchant;
+        if(cursed)
+            enchant = ENCHANT_LEVEL_ZERO * 2 - enchant;
     }
 
 #if 1

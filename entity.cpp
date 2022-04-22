@@ -329,13 +329,13 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
             entity_heal(atti, 3);
         }
 
-        if(info.confuse && u8rand() < 40)
+        if(info.confuse && u8rand() < 64)
             confuse_entity(defi);
 
-        if(info.poison && u8rand() < 40)
+        if(info.poison && u8rand() < 64)
             poison_entity(defi);
 
-        if(info.paralyze && u8rand() < 40)
+        if(info.paralyze && u8rand() < 64)
             paralyze_entity(defi);
     }
 }
@@ -365,8 +365,7 @@ static uint8_t ring_bonus_slot(uint8_t slot, uint8_t subtype)
     if(j >= INV_ITEMS) return 0;
     item it = inv[j];
     if(it.subtype != subtype) return 0;
-    int8_t r = it.quant_or_level + 1;
-    if(it.cursed) r = -r;
+    int8_t r = it.quant_or_level - ENCHANT_LEVEL_ZERO;
     return uint8_t(r);
 }
 
@@ -383,8 +382,7 @@ int8_t amulet_bonus(uint8_t subtype)
     if(j >= INV_ITEMS) return 0;
     item it = inv[j];
     if(it.subtype != subtype) return 0;
-    int8_t r = it.quant_or_level + 1;
-    if(it.cursed) r = -r;
+    int8_t r = it.quant_or_level - ENCHANT_LEVEL_ZERO;
     return uint8_t(r);
 }
 
@@ -518,8 +516,8 @@ bool entity_perform_action(uint8_t i, action a)
             maps[map_index].got_doors.set(index_of_door(*d));
             return true;
         }
-        if(!e.confused && tile_is_solid(nx, ny))
-            return false;
+        if(tile_is_solid(nx, ny))
+            return e.confused; // absorb action if confused
         if(te)
         {
             uint8_t ti = index_of_entity(*te);

@@ -373,7 +373,8 @@ enum
 };
 
 static constexpr uint8_t AMU_VITALITY_BONUS = 5;
-static constexpr uint8_t MAX_ENCHANT_LEVEL = 9;
+static constexpr uint8_t ENCHANT_LEVEL_ZERO = 32;
+static constexpr uint8_t ENCHANT_LEVEL_MAX = ENCHANT_LEVEL_ZERO + 9;
 
 static constexpr uint8_t NUM_IDENT =
     NUM_POT + NUM_SCR + NUM_RNG + NUM_AMU;
@@ -417,16 +418,6 @@ struct item
     uint8_t type           : 4;
     uint8_t subtype        : 4;
 #endif
-private:
-    static constexpr int8_t sext_level(uint8_t level)
-    {
-        return (level & 0x20) ? (level | 0xc0) : level;
-    }
-public:
-    constexpr int8_t level_s8() const
-    {
-        return sext_level(uint8_t(quant_or_level));
-    }
     constexpr bool stackable() const { return type <= ARROW; }
     constexpr bool is_same_type_as(item const& it) const
     {
