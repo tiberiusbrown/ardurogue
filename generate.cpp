@@ -825,8 +825,7 @@ void generate_dungeon()
     // add monsters
     //
 
-    if(map_index < 15)
-    for(uint8_t i = 1; i < MAP_ENTITIES; ++i)
+    for(uint8_t i = 2; i < MAP_ENTITIES; ++i)
     {
         auto& e = ents[i];
 #if !USE_CUSTOM_BITFIELDS

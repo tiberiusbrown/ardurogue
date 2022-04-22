@@ -301,6 +301,8 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
         hs.type = HS_ENTITY;
         hs.data = e.type;
     }
+    if(atti == 0)
+        aggro_monster(defi);
     entity_take_damage(defi, dam);
     if(te.type == entity::NONE) // entity was killed
     {
@@ -460,7 +462,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
 
 bool entity_perform_action(uint8_t i, action a)
 {
-    auto& e = ents[i];
+    auto e = ents[i];
     uint8_t dir = a.data & 3;
     if(a.type != action::WAIT)
     {
@@ -516,7 +518,7 @@ bool entity_perform_action(uint8_t i, action a)
             maps[map_index].got_doors.set(index_of_door(*d));
             return true;
         }
-        if(tile_is_solid(nx, ny))
+        if(!e.confused && tile_is_solid(nx, ny))
             return false;
         if(te)
         {
@@ -524,8 +526,8 @@ bool entity_perform_action(uint8_t i, action a)
             entity_attack_entity(i, ti);
             return true;
         }
-        e.x = nx;
-        e.y = ny;
+        ents[i].x = nx;
+        ents[i].y = ny;
         return true;
     }
     case action::WAIT:
@@ -569,23 +571,19 @@ bool entity_perform_action(uint8_t i, action a)
     {
         if(!direction_menu(dir))
             return false;
+        // TODO: confused corrupts direction?
         dx = (int8_t)pgm_read_byte(&DIRX[dir]);
         dy = (int8_t)pgm_read_byte(&DIRY[dir]);
         item it = inv[a.data];
         player_remove_item(a.data);
         it.quant_or_level = 0;
-        for(uint8_t i = 0, x = e.x, y = e.y; i < 8; ++i)
+        scan_result sr;
+        scan_dir(0, dir, 8, sr);
+        if(sr.i < MAP_ENTITIES)
         {
-            x += dx;
-            y += dy;
-            if(tile_is_solid(x, y)) break;
-            if(entity* te = get_entity(x, y))
-            {
-                uint8_t ti = index_of_entity(*te);
-                aggro_monster(ti);
-                status(PSTR("The @i hits @O!"), it, ti);
-                entity_apply_potion(ti, it.subtype);
-            }
+            aggro_monster(sr.i);
+            status(PSTR("The @i hits @O!"), it, sr.i);
+            entity_apply_potion(sr.i, it.subtype);
         }
         status(PSTR("The @i shatters."), it);
         return true;
@@ -596,6 +594,7 @@ bool entity_perform_action(uint8_t i, action a)
         for(; arrow < INV_ITEMS; ++arrow)
             if(inv[arrow].is_type(item::ARROW))
                 break;
+        // arrow is guaranteed valid here (checked in act_shoot)
         uint8_t q = inv[arrow].quant_or_level;
         if(q == 0)
             inv[arrow].reset();
@@ -611,9 +610,7 @@ bool entity_perform_action(uint8_t i, action a)
             entity_take_damage_from_entity(0, sr.i, dam);
         }
         if(u8rand() >= ARROW_BREAK_CHANCE)
-        {
             put_item_on_ground(sr.x, sr.y, item::make(item::ARROW));
-        }
         return true;
     }
     default:
