@@ -437,7 +437,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
     bool hit = test_attack_hit(atti, defi);
     bool cansee = (uint8_t)player_can_see_entity(atti) | (uint8_t)player_can_see_entity(defi);
     if(!hit && cansee)
-        status(PSTR("@W @O."), atti, atti == 0 ? PSTR("mis") : PSTR("misse"), defi);
+        status(PSTR("@W @O."), atti, atti == 0 ? PSTR("miss") : PSTR("misse"), defi);
     if(atti == 0)
         aggro_monster(defi);
     if(hit)
