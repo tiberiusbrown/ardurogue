@@ -11,6 +11,7 @@ static constexpr entity_info decl_ent(
     uint8_t paralyze   = 0,
     uint8_t fbreath    = 0,
     uint8_t opener     = 0,
+    uint8_t see_invis  = 0,
     uint8_t strength   = 0,
     uint8_t dexterity  = 0,
     uint8_t speed      = 0,
@@ -23,18 +24,19 @@ static constexpr entity_info decl_ent(
     return
     {
         { uint8_t(
-            entity_info{}.mean    .make(mean    ) |
-            entity_info{}.nomove  .make(nomove  ) |
-            entity_info{}.regens  .make(regens  ) |
-            entity_info{}.invis   .make(invis   ) |
-            entity_info{}.poison  .make(poison  ) |
-            entity_info{}.vampire .make(vampire ) |
-            entity_info{}.confuse .make(confuse ) |
-            entity_info{}.paralyze.make(paralyze) |
+            entity_info{}.mean     .make(mean     ) |
+            entity_info{}.nomove   .make(nomove   ) |
+            entity_info{}.regens   .make(regens   ) |
+            entity_info{}.invis    .make(invis    ) |
+            entity_info{}.poison   .make(poison   ) |
+            entity_info{}.vampire  .make(vampire  ) |
+            entity_info{}.confuse  .make(confuse  ) |
+            entity_info{}.paralyze .make(paralyze ) |
         0) },
         { uint8_t(
-            entity_info{}.fbreath .make(fbreath ) |
-            entity_info{}.opener  .make(opener  ) |
+            entity_info{}.fbreath  .make(fbreath  ) |
+            entity_info{}.opener   .make(opener   ) |
+            entity_info{}.see_invis.make(see_invis) |
         0) },
         strength,
         dexterity,
@@ -56,6 +58,7 @@ static constexpr entity_info decl_ent(
         paralyze,
         fbreath,
         opener,
+        see_invis,
         strength,
         dexterity,
         speed,
@@ -69,29 +72,29 @@ static constexpr entity_info decl_ent(
 entity_info const MONSTER_INFO[] PROGMEM =
 {
     /*
-    *        mean        poison      fbreath       speed
-    *           nomove      vampire     opener        defense
-    *              regens      confuse     strength        max_health
-    *                 invis       paralyze     dexterity        xp
+    *        mean        poison      fbreath      dexterity        xp
+    *           nomove      vampire     opener        speed
+    *              regens      confuse     see invis      defense
+    *                 invis       paralyze    strength        max_health
     */
-    decl_ent(),                                                      // none
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  4,  4,  4,  0,  10,  0), // player
-    decl_ent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1,  6,  8,  0,   1,  1), // bat
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  2,  3,  3,  0,   3,  2), // snake
-    decl_ent(1, 0, 0, 0, 1, 0, 0, 0, 0, 0,  3,  3,  3,  0,   4,  3), // rattlesnake
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  4,  2,  2,  0,   6,  5), // zombie
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  5,  4,  4,  1,  10,  6), // goblin
-    decl_ent(1, 0, 0, 1, 0, 0, 0, 0, 0, 1,  6,  4,  4,  1,  12,  7), // phantom
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  7,  4,  4,  3,  16,  8), // orc
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 1, 0, 0,  5,  4,  4,  0,  12,  9), // tarantula
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1,  8,  4,  4,  2,  20, 11), // hobgoblin
-    decl_ent(1, 1, 0, 0, 0, 0, 0, 0, 0, 0,  7,  4,  4,  3,  20, 11), // mimic
-    decl_ent(1, 0, 0, 0, 0, 0, 1, 0, 0, 1,  9,  4,  4,  3,  24, 14), // incubus
-    decl_ent(1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 10,  3,  3,  5,  32, 18), // troll
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  7,  6,  6,  1,  24, 18), // griffin
-    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 12,  4,  4,  8,  48, 25), // dragon
-    decl_ent(1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 10,  6,  6,  3,  24, 35), // fallen angel
-    decl_ent(1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 16,  6,  8,  8,  64, 90), // lord of darkness
+    decl_ent(),                                                         // none
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  4,  4,  4,  0,  10,  0), // player
+    decl_ent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1,  6,  8,  0,   1,  1), // bat
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  2,  3,  3,  0,   3,  2), // snake
+    decl_ent(1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,  3,  3,  3,  0,   4,  3), // rattlesnake
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  4,  2,  2,  0,   6,  5), // zombie
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  5,  4,  4,  1,  10,  6), // goblin
+    decl_ent(1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,  6,  4,  4,  1,  12,  7), // phantom
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  7,  4,  4,  3,  16,  8), // orc
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,  5,  4,  4,  0,  12,  9), // tarantula
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  8,  4,  4,  2,  20, 11), // hobgoblin
+    decl_ent(1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  7,  4,  4,  3,  20, 11), // mimic
+    decl_ent(1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1,  9,  4,  4,  3,  24, 14), // incubus
+    decl_ent(1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 10,  3,  3,  5,  32, 18), // troll
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  7,  6,  6,  1,  24, 18), // griffin
+    decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 12,  4,  4,  8,  48, 25), // dragon
+    decl_ent(1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 10,  6,  6,  3,  24, 35), // fallen angel
+    decl_ent(1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 16,  6,  8,  8, 128, 90), // lord of darkness
 };
 
 void entity_get_info(uint8_t i, entity_info& info)
@@ -121,7 +124,7 @@ void monster_ai(uint8_t i, action& a)
     uint8_t dp = dist_to_player(e.x, e.y);
     bool mean = info.mean | e.aggro;
 
-    if(!mean || player_is_invisible() || dp >= 10)
+    if(!mean || (player_is_invisible() && !info.see_invis) || dp >= 10)
     {
         a.data = u8rand() & 3;
         uint8_t nx = ex + pgm_read_byte(&DIRX[a.data]);

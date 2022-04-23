@@ -205,6 +205,7 @@ struct entity_info
         uint8_t raw1_;
         u8bitfield<0> fbreath;
         u8bitfield<1> opener;
+        u8bitfield<2> see_invis;
     };
 #else
     uint8_t mean     : 1; // whether it can attack
