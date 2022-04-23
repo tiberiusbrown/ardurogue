@@ -150,8 +150,11 @@ void monster_ai(uint8_t i, action& a)
             status(PSTR("@S breathes fire!"), i);
             render();
             draw_ray_anim(ex - px + 6, ey - py + 6, dir, sr.n);
-            if(!wearing_uncursed_ring(RNG_FIRE_PROTECT))
-                entity_take_damage_from_entity(i, 0, u8rand(8) + 8);
+            int8_t rb = ring_bonus(RNG_FIRE_PROTECT);
+            uint8_t dam = u8rand(8) + 8;
+            if(rb < 0) dam *= 2;
+            if(rb <= 0)
+                entity_take_damage_from_entity(i, 0, dam);
             return;
         }
     }

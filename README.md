@@ -2,6 +2,8 @@
 
 ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/).
 
+Read the guide [here](guide.md).
+
 ## Features
 
 - Random dungeon generation

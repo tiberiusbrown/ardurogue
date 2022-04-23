@@ -4,7 +4,7 @@ static constexpr uint8_t ARROW_BREAK_CHANCE = 64;
 
 bool player_is_invisible()
 {
-    return ents[0].invis || wearing_uncursed_ring(RNG_INVIS);
+    return ents[0].invis || ring_bonus(RNG_INVIS) > 0;
 }
 
 void adjust_health_to_max_health(uint8_t i)
@@ -254,7 +254,11 @@ void entity_heal(uint8_t i, uint8_t amount)
     if(e.health >= mhp) return;
     char const* s = (amount < 3 ? PSTR("slightly ") : PSTR(""));
     if(i == 0)
+    {
+        if(amulet_bonus(AMU_REGENERATION) < 0)
+            amount = (amount + 1) / 2;
         status(PSTR("You feel @pbetter."), s);
+    }
     else if(player_can_see_entity(i))
         status(PSTR("@S looks @pbetter."), i, s);
     if(mhp - e.health <= amount)
@@ -348,15 +352,9 @@ void teleport_entity(uint8_t i)
     confuse_entity(i);
 }
 
-static bool is_uncursed_subtype(uint8_t subtype, uint8_t slot)
-{
-    uint8_t j = pinfo.equipped[slot];
-    return j < INV_ITEMS && inv[j].subtype == subtype && !inv[j].cursed;
-}
-
 bool wearing_uncursed_amulet(uint8_t subtype)
 {
-    return is_uncursed_subtype(subtype, SLOT_AMULET);
+    return amulet_bonus(subtype) > 0;
 }
 
 static uint8_t ring_bonus_slot(uint8_t slot, uint8_t subtype)
@@ -388,9 +386,7 @@ int8_t amulet_bonus(uint8_t subtype)
 
 bool wearing_uncursed_ring(uint8_t subtype)
 {
-    return
-        is_uncursed_subtype(subtype, SLOT_RING1) ||
-        is_uncursed_subtype(subtype, SLOT_RING2);;
+    return ring_bonus(subtype) > 0;
 }
 
 static void status_you_are(char const* s, uint8_t i)
@@ -409,8 +405,6 @@ void confuse_entity(uint8_t i)
 
 void poison_entity(uint8_t i)
 {
-    if(i == 0 && wearing_uncursed_amulet(AMU_IRONBLOOD))
-        return;
     auto& te = ents[i];
     if(te.weakened) return;
     if(player_can_see_entity(i))
@@ -420,6 +414,8 @@ void poison_entity(uint8_t i)
 
 void paralyze_entity(uint8_t i)
 {
+    if(i == 0 && wearing_uncursed_amulet(AMU_IRONBLOOD))
+        return;
     auto& te = ents[i];
     if(te.paralyzed) return;
     if(player_can_see_entity(i))

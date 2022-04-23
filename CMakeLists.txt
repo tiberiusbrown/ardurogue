@@ -44,6 +44,7 @@ endif()
 add_executable(
     ${PROJECT_NAME} ${WINFLAG}
     README.md
+    guide.md
     .editorconfig
     main_emscripten.cpp
     main_win32.cpp

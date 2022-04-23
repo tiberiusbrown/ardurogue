@@ -1,12 +1,5 @@
 #include "game.hpp"
 
-static bool consume_consumable()
-{
-    if(!wearing_uncursed_amulet(AMU_CONSERVATION)) return true;
-    // wearing uncursed amulet of conservation: 50% chance not to consume
-    return u8rand() < 128;
-}
-
 static void identify_item(uint8_t i)
 {
     auto& it = inv[i];
@@ -189,8 +182,16 @@ bool use_item(uint8_t i)
 {
     item it = inv[i];
     uint8_t subtype = it.subtype;
-    if(it.stackable() && consume_consumable())
-        player_remove_item(i);
+    {
+        if(it.stackable())
+        {
+            int8_t cb = amulet_bonus(AMU_CONSERVATION);
+            if(cb <= 0 || u8rand() < 192)
+                player_remove_item(i);
+            if(cb < 0 && u8rand() < 64)
+                player_remove_item(i);
+        }
+    }
     switch(it.type)
     {
     case item::FOOD:
@@ -251,6 +252,8 @@ void entity_apply_potion(uint8_t i, uint8_t subtype)
     case POT_INVIS:
         if(i == 0)
         {
+            if(ring_bonus(RNG_INVIS) < 0)
+                break;
             pinfo.invis_rem = u8rand() % 16 + 12;
             status(PSTR("You turn invisible."));
         }

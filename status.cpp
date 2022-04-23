@@ -31,6 +31,11 @@ void draw_status()
     }
 }
 
+void status_cursed_amulet()
+{
+    status(PSTR("Your cursed amulet burns at you."));
+}
+
 void reset_status()
 {
     statusn = 0;

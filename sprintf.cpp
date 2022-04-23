@@ -87,7 +87,7 @@ static char* item_name(char* dst, item it)
             dst = tstrcpy_prog(dst, pgmptr(&RNG_NAMES[st]));
             if(it.identified)
             {
-                char const* s = PSTR("");
+                char const* s = PSTR(" [@d]");
                 switch(st)
                 {
                 case RNG_STRENGTH:
@@ -137,6 +137,7 @@ static char* item_name(char* dst, item it)
                     break;
                 }
                 default:
+                    dst += tsprintf(dst, PSTR(" [@d]"), t);
                     break;
                 }
             }

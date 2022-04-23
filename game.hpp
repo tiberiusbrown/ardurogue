@@ -806,6 +806,7 @@ void draw_status();
 void status(char const* fmt, ...);
 void status_more();
 void reset_status();
+void status_cursed_amulet();
 
 // entity.cpp
 void adjust_health_to_max_health(uint8_t i);

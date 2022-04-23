@@ -255,11 +255,14 @@ static void init_perm(uint8_t* p, uint8_t n)
 
 void advance_hunger()
 {
-    if(wearing_uncursed_ring(RNG_SUSTENANCE) && u8rand() % 2 == 0)
+    int8_t rs = ring_bonus(RNG_SUSTENANCE);
+    if(rs > 0 && u8rand() % 2 == 0)
         return;
     if(hunger < 255)
     {
         ++hunger;
+        if(hunger < 255 && rs < 0)
+            ++hunger;
     }
     else if(ents[0].health > 0)
     {
@@ -287,6 +290,21 @@ static void advance()
 
     if(u8rand() < 128)
         advance_hunger();
+
+    if(u8rand() % 64 == 0)
+    {
+        if(!ents[0].confused && amulet_bonus(AMU_CLARITY) < 0)
+        {
+            status_cursed_amulet();
+            confuse_entity(0);
+        }
+        if(!ents[0].weakened && amulet_bonus(AMU_IRONBLOOD) < 0)
+        {
+            status_cursed_amulet();
+            paralyze_entity(0);
+        }
+    }
+
 }
 
 void scan_dir(uint8_t i, uint8_t d, uint8_t n, scan_result& r)
