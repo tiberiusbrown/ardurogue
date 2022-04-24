@@ -318,13 +318,11 @@ bool use_item(uint8_t i)
     case item::WAND:
     {
         uint8_t n = it.quant_or_level;
-        if(n == 0)
+        if(n <= 1)
         {
-            status(PSTR("It has no charges left."));
-            return false;
-        }
-        else if(n == 1)
             player_remove_item(i);
+            status(PSTR("The @i crumbles to dust."), it);
+        }
         else
             inv[i].quant_or_level = n - 1;
         use_wand(subtype);
