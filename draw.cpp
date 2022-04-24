@@ -235,7 +235,7 @@ void draw_info_without_status()
     auto const& e = ents[0];
     draw_textf(1, 0, PSTR("Dungeon Level @u"), map_index + 1);
     if(num_rooms == 0) return;
-    draw_textf(1, 6, PSTR("HP: @u/@u"), e.health, entity_max_health(0));
+    draw_textf(1, 6, PSTR("LV @u   HP: @u/@u"), plevel + 1, e.health, entity_max_health(0));
     {
         char const* s = PSTR("");
         if(hunger == 255)
