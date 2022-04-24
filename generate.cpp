@@ -761,9 +761,10 @@ static void generate_random_item(uint8_t i)
 
     it.type = type;
     it.subtype = subtype;
+
+    it.quant = quant; // assign quant first
     it.identified = 0;
     it.cursed = cursed;
-    it.quant_or_level = quant;
 
     generate_item(i, it);
 }

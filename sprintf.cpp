@@ -56,8 +56,7 @@ static uint8_t tsprintf_d(char* b, char const* fmt, uint8_t d)
 
 static char* item_name(char* dst, item it)
 {
-    uint8_t n = it.quant_or_level;
-    int8_t t = n - ENCHANT_LEVEL_ZERO;
+    int8_t t = it.level - ENCHANT_LEVEL_ZERO;
     uint8_t st = it.subtype;
     if(it.cursed && it.identified)
         dst = tstrcpy_prog(dst, PSTR("cursed "));
@@ -65,10 +64,10 @@ static char* item_name(char* dst, item it)
     switch(it.type)
     {
     case item::FOOD:
-        dst = quantify_item(dst, n, PSTR("food ration"));
+        dst = quantify_item(dst, it.quant, PSTR("food ration"));
         return dst;
     case item::ARROW:
-        dst = quantify_item(dst, n, PSTR("arrow"));
+        dst = quantify_item(dst, it.quant, PSTR("arrow"));
         return dst;
     case item::BOW:
         dst = tstrcpy_prog(dst, PSTR("bow"));
@@ -171,28 +170,28 @@ static char* item_name(char* dst, item it)
     case item::POTION:
         if(potion_is_identified(st))
         {
-            dst = quantify_item(dst, n, PSTR("potion"));
+            dst = quantify_item(dst, it.quant, PSTR("potion"));
             dst = tstrcpy_prog(dst, PSTR(" of "));
             dst = tstrcpy_prog(dst, pgmptr(&POT_NAMES[st]));
             return dst;
         }
         else
         {
-            return quantify_item(dst, n,
+            return quantify_item(dst, it.quant,
                 pgmptr(&UNID_POT_NAMES[perm_pot[st]]),
                 PSTR("potion"));
         }
     case item::SCROLL:
         if(scroll_is_identified(st))
         {
-            dst = quantify_item(dst, n, PSTR("scroll"));
+            dst = quantify_item(dst, it.quant, PSTR("scroll"));
             dst = tstrcpy_prog(dst, PSTR(" of "));
             dst = tstrcpy_prog(dst, pgmptr(&SCR_NAMES[st]));
             return dst;
         }
         else
         {
-            return quantify_item(dst, n,
+            return quantify_item(dst, it.quant,
                 pgmptr(&UNID_SCR_NAMES[perm_scr[st]]),
                 PSTR("scroll"));
         }

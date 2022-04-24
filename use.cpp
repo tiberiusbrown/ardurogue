@@ -148,8 +148,9 @@ static void use_scroll(uint8_t subtype)
             {
                 uint8_t n = 1;
                 if(it.type == item::WAND) n = 4;
-                if(it.quant_or_level < ENCHANT_LEVEL_MAX)
-                    it.quant_or_level += n;
+                it.level += n;
+                if(it.level < ENCHANT_LEVEL_MAX)
+                    it.level = ENCHANT_LEVEL_MAX;
                 status(PSTR("The @i glows blue for a moment."), it);
             }
         }
@@ -161,12 +162,11 @@ static void use_scroll(uint8_t subtype)
         if(i < INV_ITEMS)
         {
             auto& it = inv[i];
-            if(it.stackable() || !it.cursed)
+            if(it.type <= item::WAND || !it.cursed)
                 status(PSTR("Nothing happens."));
             else
             {
                 it.cursed = 0;
-                it.quant_or_level = 0;
                 status(PSTR("The @i glows white for a moment."), it);
             }
         }
@@ -317,14 +317,14 @@ bool use_item(uint8_t i)
         return true;
     case item::WAND:
     {
-        uint8_t n = it.quant_or_level;
+        uint8_t n = it.quant;
         if(n <= 1)
         {
             player_remove_item(i);
             status(PSTR("The @i crumbles to dust."), it);
         }
         else
-            inv[i].quant_or_level = n - 1;
+            inv[i].quant = n - 1;
         use_wand(subtype);
         return true;
     }

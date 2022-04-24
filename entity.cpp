@@ -320,7 +320,7 @@ void entity_take_melee_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t da
     entity_get_info(atti, info);
     if(info.vampire || (atti == 0 && wearing_uncursed_amulet(AMU_VAMPIRE)))
     {
-        status(PSTR("@S drains @P health!"), atti, defi);
+        status(PSTR("@W @P health!"), atti, PSTR("drain"), defi);
         if(defi == 0)
         {
             uint8_t mhp = entity_max_health(0);
@@ -395,7 +395,7 @@ static uint8_t ring_bonus_slot(uint8_t slot, uint8_t subtype)
     if(j >= INV_ITEMS) return 0;
     item it = inv[j];
     if(it.subtype != subtype) return 0;
-    int8_t r = it.quant_or_level - ENCHANT_LEVEL_ZERO;
+    int8_t r = it.level - ENCHANT_LEVEL_ZERO;
     return uint8_t(r);
 }
 
@@ -412,7 +412,7 @@ int8_t amulet_bonus(uint8_t subtype)
     if(j >= INV_ITEMS) return 0;
     item it = inv[j];
     if(it.subtype != subtype) return 0;
-    int8_t r = it.quant_or_level - ENCHANT_LEVEL_ZERO;
+    int8_t r = it.level - ENCHANT_LEVEL_ZERO;
     return uint8_t(r);
 }
 
@@ -602,7 +602,7 @@ bool entity_perform_action(uint8_t i, action a)
         dy = (int8_t)pgm_read_byte(&DIRY[dir]);
         item it = inv[a.data];
         player_remove_item(a.data);
-        it.quant_or_level = 0;
+        it.quant = 0;
         scan_result sr;
         scan_dir(0, dir, 8, sr);
         if(sr.i < MAP_ENTITIES)
@@ -621,11 +621,11 @@ bool entity_perform_action(uint8_t i, action a)
             if(inv[arrow].is_type(item::ARROW))
                 break;
         // arrow is guaranteed valid here (checked in act_shoot)
-        uint8_t q = inv[arrow].quant_or_level;
+        uint8_t q = inv[arrow].quant;
         if(q == 0)
             inv[arrow].reset();
         else
-            inv[arrow].quant_or_level = q - 1;
+            inv[arrow].quant = q - 1;
         scan_result sr;
         scan_dir(0, a.data, 8, sr);
         if(sr.i < MAP_ENTITIES)

@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+static constexpr uint8_t MAX_ITEM_QUANT = 98;
+
 void pgm_memcpy(void* dst, void const* src, uint8_t n)
 {
     uint8_t* d = (uint8_t*)dst;
@@ -102,14 +104,14 @@ uint8_t xp_for_level()
 uint8_t armor_item_defense(item it)
 {
     // assumes item is armor, helm, or boots
-    uint8_t level = it.quant_or_level - ENCHANT_LEVEL_ZERO;
+    uint8_t level = it.level - ENCHANT_LEVEL_ZERO;
     return item::BOOTS - it.type + level;
 }
 
 uint8_t weapon_item_attack(item it)
 {
     // assumes item is sword
-    uint8_t level = it.quant_or_level - ENCHANT_LEVEL_ZERO;
+    uint8_t level = it.level - ENCHANT_LEVEL_ZERO;
     return level + 2;
 }
 
@@ -158,7 +160,7 @@ bool player_pickup_item(uint8_t i)
         for(j = 0; j < INV_ITEMS; ++j)
             if(inv[j].is_same_type_as(it))
             {
-                if(inv[j].quant_or_level >= 63)
+                if(inv[j].quant >= MAX_ITEM_QUANT)
                 {
                     status(PSTR("You can't hold any more of those."));
                     return false;
@@ -181,19 +183,19 @@ bool player_pickup_item(uint8_t i)
     {
         // add to stackable
         item tt = it;
-        uint8_t tot = inv[j].quant_or_level + it.quant_or_level + 1;
-        if(tot > 63)
+        uint8_t tot = inv[j].quant + it.quant + 1;
+        if(tot > MAX_ITEM_QUANT)
         {
             // overflow back onto ground
-            tot -= 64; // remaining on the ground
-            tt.quant_or_level -= (tot + 1);
-            it.quant_or_level = tot;
+            tot -= (MAX_ITEM_QUANT + 1); // remaining on the ground
+            tt.quant -= (tot + 1);
+            it.quant = tot;
         }
         else
         {
             it.reset();
         }
-        inv[j].quant_or_level += tt.quant_or_level + 1;
+        inv[j].quant += tt.quant + 1;
         status(PSTR("You now have @i."), inv[j]);
         return true;
     }
@@ -206,9 +208,9 @@ bool player_pickup_item(uint8_t i)
 
 void player_remove_item(uint8_t i)
 {
-    if(inv[i].stackable() && inv[i].quant_or_level > 0)
+    if(inv[i].stackable() && inv[i].quant > 0)
     {
-        inv[i].quant_or_level -= 1;
+        inv[i].quant -= 1;
         return;
     }
     inv[i].reset();
@@ -224,9 +226,9 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it)
             if(!(t.x == x && t.y == y)) continue;
             if(t.it.is_same_type_as(it))
             {
-                uint8_t n = t.it.quant_or_level;
-                if(n < 63) ++n;
-                t.it.quant_or_level = n;
+                uint8_t n = t.it.quant;
+                if(n < MAX_ITEM_QUANT) ++n;
+                t.it.quant = n;
                 return;
             }
         }

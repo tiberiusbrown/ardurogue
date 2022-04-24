@@ -388,7 +388,7 @@ enum
 
 static constexpr uint8_t AMU_VITALITY_BONUS = 5;
 static constexpr uint8_t ENCHANT_LEVEL_ZERO = 32;
-static constexpr uint8_t ENCHANT_LEVEL_MAX = ENCHANT_LEVEL_ZERO + 9;
+static constexpr uint8_t ENCHANT_LEVEL_MAX = ENCHANT_LEVEL_ZERO + 15;
 
 static constexpr uint8_t NUM_IDENT =
     NUM_POT + NUM_SCR + NUM_RNG + NUM_AMU + NUM_WND;
@@ -416,7 +416,8 @@ struct item
     union
     {
         uint8_t raw0_;
-        u8bitfield<0, 6> quant_or_level;
+        uint8_t          quant;
+        u8bitfield<0, 6> level;
         u8bitfield<7, 1> identified;
         u8bitfield<6, 1> cursed;
     };
@@ -467,9 +468,7 @@ struct item
         return
         {
             { uint8_t(
-                item{}.quant_or_level.make(0) |
                 item{}.identified.make(identified) |
-                item{}.cursed.make(0) |
             0) },
             { uint8_t(
                 item{}.type.make(type) |
