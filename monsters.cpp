@@ -139,7 +139,6 @@ void monster_ai(uint8_t i, action& a)
     // fire breathing
     if(info.fbreath)
     {
-        uint8_t px = ents[0].x, py = ents[0].y;
         scan_result sr;
         uint8_t dir;
         for(dir = 0; dir < 4; ++dir)
