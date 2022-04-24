@@ -838,9 +838,6 @@ void generate_dungeon()
     for(uint8_t i = 2; i < MAP_ENTITIES; ++i)
     {
         auto& e = ents[i];
-#if !USE_CUSTOM_BITFIELDS
-        e = {};
-#endif
         e.type = entity::NONE;
         if(!find_unoccupied(e.x, e.y))
             continue;
