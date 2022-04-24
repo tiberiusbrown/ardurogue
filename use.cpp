@@ -5,14 +5,20 @@ static constexpr uint8_t WAND_RANGE = 6;
 static void identify_item(uint8_t i)
 {
     auto& it = inv[i];
-    it.identified = 1;
+    uint8_t st = it.subtype;
     switch(it.type)
     {
-    case item::POTION: identify_potion(it.subtype); break;
-    case item::SCROLL: identify_scroll(it.subtype); break;
-    case item::RING: identify_ring(it.subtype); break;
-    case item::AMULET: identify_amulet(it.subtype); break;
-    default: break;
+    case item::POTION: identify_potion(st); break;
+    case item::SCROLL: identify_scroll(st); break;
+    case item::RING:   identify_ring(st);   break;
+    case item::AMULET: identify_amulet(st); break;
+    case item::WAND:   identify_wand(st);   break;
+    case item::FOOD:
+    case item::ARROW:
+        break;
+    default:
+        it.identified = 1;
+        break;
     }
 }
 
