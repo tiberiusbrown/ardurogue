@@ -224,16 +224,6 @@ static void draw_sprite(
     draw_sprite_precise(p, x * 5, y * 5);
 }
 
-static void draw_progress_bar(
-    uint8_t x, uint8_t y,
-    uint8_t a, uint8_t b)
-{
-    constexpr uint8_t W = 16;
-    set_box(x, x + W + 1, y, y + 2);
-    uint8_t f = b == 0 ? 0 : uint8_t(uint16_t(a * W + W / 2) / b);
-    set_hline(x + 1, x + f, y + 1);
-}
-
 void draw_info()
 {
     draw_info_without_status();
@@ -244,10 +234,7 @@ void draw_info_without_status()
 {
     auto const& e = ents[0];
     draw_textf(1, 0, PSTR("Dungeon Level @u"), map_index + 1);
-    draw_text(1, 6, PSTR("HP"));
-    draw_text(33, 6, PSTR("XP"));
-    draw_progress_bar(9, 7, e.health, entity_max_health(0));
-    draw_progress_bar(41, 7, pstats.xp, xp_for_level());
+    draw_textf(1, 6, PSTR("HP: @u/@u"), e.health, entity_max_health(0));
     {
         char const* s = PSTR("");
         if(hunger == 255)

@@ -68,7 +68,7 @@ static void draw_inventory(
     for(uint8_t i = 0, y = 10; i < 9; ++i, y += 6)
     {
         uint8_t j = i + offi;
-        if(j >= INV_ITEMS + 6) continue;
+        if(j >= INV_ITEMS + 7) continue;
         uint8_t it = its[j];
         if(it == 255) continue;
         if(it < INV_ITEMS)
@@ -86,10 +86,10 @@ static void draw_inventory(
 
 static uint8_t inventory_menu_ex(char const* prompt, uint8_t const* cats)
 {
-    uint8_t its[INV_ITEMS + 7];
+    uint8_t its[INV_ITEMS + 8];
     uint8_t* itp = &its[0];
 
-    for(uint8_t j = 0; j < 6; ++j)
+    for(uint8_t j = 0; j < 7; ++j)
     {
         *itp++ = INV_ITEMS + j;
         uint8_t* tp = itp;
@@ -144,7 +144,7 @@ static uint8_t inventory_menu_ex(char const* prompt, uint8_t const* cats)
 
 static uint8_t const DEFAULT_ITEM_CATS[item::NUM_ITEM_TYPES] PROGMEM =
 {
-    255, 5, 3, 4, 0, 0, 0, 2, 2, 1, 1, 1,
+    255, 6, 3, 4, 6, 2, 0, 0, 5, 5, 1, 1, 1,
 };
 
 uint8_t inventory_menu(char const* prompt)
@@ -359,7 +359,7 @@ static bool act_drop(action& a)
 
 static uint8_t const POTION_ITEM_CATS[item::NUM_ITEM_TYPES] PROGMEM =
 {
-    255, 255, 3, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 3, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 };
 
 static bool act_throw(action& a)

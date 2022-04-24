@@ -262,17 +262,19 @@ char const* const UNID_WND_NAMES[NUM_WND] PROGMEM =
 
 static char const INV_CAT_WEAPON[] PROGMEM = "Weapons";
 static char const INV_CAT_ARMOR[] PROGMEM = "Armor";
-static char const INV_CAT_JEWELRY[] PROGMEM = "Jewelry";
+static char const INV_CAT_WAND[] PROGMEM = "Wands";
 static char const INV_CAT_POTION[] PROGMEM = "Potions";
 static char const INV_CAT_SCROLL[] PROGMEM = "Scrolls";
+static char const INV_CAT_JEWELRY[] PROGMEM = "Jewelry";
 static char const INV_CAT_MISC[] PROGMEM = "Misc";
 
 char const* const INV_CATEGORIES[] PROGMEM =
 {
     INV_CAT_WEAPON,
     INV_CAT_ARMOR,
-    INV_CAT_JEWELRY,
+    INV_CAT_WAND,
     INV_CAT_POTION,
     INV_CAT_SCROLL,
+    INV_CAT_JEWELRY,
     INV_CAT_MISC,
 };

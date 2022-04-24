@@ -180,7 +180,7 @@ static constexpr uint8_t MAP_ITEMS = 48;
 static constexpr uint8_t MAP_ENTITIES = 32;
 static constexpr uint8_t MAP_ROOMS = 32;
 static constexpr uint8_t MAP_DOORS = 32;
-static constexpr uint8_t INV_ITEMS = 16;
+static constexpr uint8_t INV_ITEMS = 24;
 static constexpr uint8_t NUM_MAPS = 16;
 
 struct coord { uint8_t x, y; };
@@ -754,6 +754,7 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it);
 void render();
 uint8_t process_high_score();
 void advance_hunger();
+void add_to_score(uint8_t amount);
 
 struct scan_result
 {

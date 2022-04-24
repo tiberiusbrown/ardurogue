@@ -113,8 +113,16 @@ uint8_t weapon_item_attack(item it)
     return level + 2;
 }
 
+void add_to_score(uint8_t amount)
+{
+    hs.score += amount;
+    if(hs.score >= 0xff00)
+        hs.score = 0xff00;
+}
+
 void player_gain_xp(uint8_t xp)
 {
+    add_to_score(xp);
     if(plevel == 49) return;
     uint8_t txp = xp_for_level();
     if(wearing_uncursed_amulet(AMU_WISDOM))
@@ -124,18 +132,15 @@ void player_gain_xp(uint8_t xp)
         ++plevel;
         status(PSTR("You advance to level @u!"), plevel + 1);
         pstats.max_health += 4;
-        if(plevel <= 19)
+        if(plevel % 4 == 2)
         {
-            if(plevel % 4 == 2)
-            {
-                status(PSTR("You feel stronger."));
-                pstats.strength += 1;
-            }
-            if(plevel % 4 == 0)
-            {
-                status(PSTR("You feel quicker."));
-                pstats.dexterity += 1;
-            }
+            status(PSTR("You feel stronger."));
+            pstats.strength += 1;
+        }
+        if(plevel % 4 == 0)
+        {
+            status(PSTR("You feel more agile."));
+            pstats.dexterity += 1;
         }
         ents[0].health = entity_max_health(0);
         pstats.xp = 0;

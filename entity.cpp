@@ -372,7 +372,6 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
         {
             uint8_t xp = pgm_read_byte(&MONSTER_INFO[tetype].xp);
             player_gain_xp(xp);
-            hs.score += xp;
         }
     }
 }
