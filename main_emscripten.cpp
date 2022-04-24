@@ -32,7 +32,7 @@ static EM_BOOL keydown_callback(int type, EmscriptenKeyboardEvent const* e, void
 
 void wait()
 {
-    emscripten_sleep(100);
+    emscripten_sleep(50);
 }
 
 uint8_t wait_btn()

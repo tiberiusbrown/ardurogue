@@ -26,7 +26,7 @@
 #endif
 
 // platform functionality
-void wait();        // wait about 100 ms
+void wait();        // wait about 50 ms
 uint8_t wait_btn(); // wait for button press
 void seed();        // sets rand_seed
 void paint_offset(uint8_t x, bool clear = true);
@@ -373,12 +373,25 @@ enum
     NUM_AMU = AMU_YENDOR,
 };
 
+// wand types
+enum
+{
+    WND_FORCE,        // pushes target back
+    WND_TELEPORT,     // teleports target
+    WND_DIGGING,      // digs through walls
+    WND_FIRE,         // fire damage in a 3x3 area around target
+    WND_STRIKING,     // strong magic damage to target
+    WND_ICE,          // magic damage and slow to target
+    WND_POLYMORPH,    // changes a monster to one level below (LoD immune)
+    NUM_WND,
+};
+
 static constexpr uint8_t AMU_VITALITY_BONUS = 5;
 static constexpr uint8_t ENCHANT_LEVEL_ZERO = 32;
 static constexpr uint8_t ENCHANT_LEVEL_MAX = ENCHANT_LEVEL_ZERO + 9;
 
 static constexpr uint8_t NUM_IDENT =
-    NUM_POT + NUM_SCR + NUM_RNG + NUM_AMU;
+    NUM_POT + NUM_SCR + NUM_RNG + NUM_AMU + NUM_WND;
 
 struct item
 {
@@ -389,6 +402,7 @@ struct item
         POTION, // quantity
         SCROLL, // quantity
         ARROW,  // quantity
+        WAND,   // charges
         BOW,    // level
         SWORD,  // level
         RING,   // level
@@ -587,6 +601,7 @@ struct globals
     array<uint8_t, NUM_SCR> perm_scr;
     array<uint8_t, NUM_RNG> perm_rng;
     array<uint8_t, NUM_AMU> perm_amu;
+    array<uint8_t, NUM_WND> perm_wnd;
     bool just_moved;
 };
 
@@ -622,6 +637,7 @@ static auto& perm_pot = globals_.perm_pot;
 static auto& perm_scr = globals_.perm_scr;
 static auto& perm_rng = globals_.perm_rng;
 static auto& perm_amu = globals_.perm_amu;
+static auto& perm_wnd = globals_.perm_wnd;
 static auto& identified = globals_.saved.identified;
 static auto& prev_action = globals_.saved.prev_action;
 static auto& plevel = globals_.saved.plevel;
@@ -646,6 +662,10 @@ inline bool amulet_is_identified(uint8_t subtype)
 {
     return identified.test(NUM_POT + NUM_SCR + NUM_RNG + subtype);
 }
+inline bool wand_is_identified(uint8_t subtype)
+{
+    return identified.test(NUM_POT + NUM_SCR + NUM_RNG + NUM_AMU + subtype);
+}
 
 inline void identify_potion(uint8_t subtype)
 {
@@ -662,6 +682,10 @@ inline void identify_ring(uint8_t subtype)
 inline void identify_amulet(uint8_t subtype)
 {
     identified.set(NUM_POT + NUM_SCR + NUM_RNG + subtype);
+}
+inline void identify_wand(uint8_t subtype)
+{
+    identified.set(NUM_POT + NUM_SCR + NUM_RNG + NUM_AMU + subtype);
 }
 
 template<class T>
@@ -700,9 +724,11 @@ extern char const* const POT_NAMES[] PROGMEM;
 extern char const* const SCR_NAMES[] PROGMEM;
 extern char const* const RNG_NAMES[] PROGMEM;
 extern char const* const AMU_NAMES[] PROGMEM;
+extern char const* const WND_NAMES[] PROGMEM;
 extern char const* const UNID_POT_NAMES[] PROGMEM;
 extern char const* const UNID_SCR_NAMES[] PROGMEM;
 extern char const* const UNID_RNG_AMU_NAMES[] PROGMEM;
+extern char const* const UNID_WND_NAMES[] PROGMEM;
 extern char const* const INV_CATEGORIES[] PROGMEM;
 
 // game.cpp
@@ -731,12 +757,14 @@ void advance_hunger();
 
 struct scan_result
 {
+    uint8_t px, py; // prior to landing spot
     uint8_t x, y; // landing spot
     uint8_t i;    // entity
     uint8_t n;    // length
 };
 // scan from entity in a direction up to n tiles
 void scan_dir(uint8_t i, uint8_t d, uint8_t n, scan_result& r);
+void scan_dir_pos(uint8_t x, uint8_t y, uint8_t d, uint8_t n, scan_result& r);
 
 // font.cpp
 uint8_t draw_char(uint8_t x, uint8_t y, char c); // returns width of char
@@ -772,8 +800,10 @@ void draw_map_offset(uint8_t ox);
 void draw_dungeon(uint8_t mx, uint8_t my);
 void draw_dungeon_at_player();
 void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n);
+void draw_sprite_nonprog_rel_and_wait(uint16_t tp, uint8_t x, uint8_t y);
 
 // generate.cpp
+void dig_tile(uint8_t x, uint8_t y);
 void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y);
 void dig_nonsecret_door_tiles();
 void update_doors();   // set tile to solid for closed doors
@@ -824,6 +854,9 @@ void entity_restore_strength(uint8_t i);
 void entity_heal(uint8_t i, uint8_t amount);
 void entity_take_damage(uint8_t i, uint8_t dam);
 void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam);
+void entity_take_fire_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam);
+void entity_take_magic_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam);
+void entity_take_melee_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam);
 void teleport_entity(uint8_t i);
 void confuse_entity(uint8_t i);
 void poison_entity(uint8_t i);
@@ -836,6 +869,7 @@ int8_t amulet_bonus(uint8_t subtype);
 int8_t ring_bonus(uint8_t subtype);
 bool entity_perform_action(uint8_t i, action a);
 bool player_is_invisible();
+bool entity_is_invisible(uint8_t i);
 void aggro_monster(uint8_t i);
 void end_paralysis(uint8_t i);
 void end_confusion(uint8_t i);
@@ -868,6 +902,7 @@ uint8_t slot_of_item(uint8_t type);
 bool item_is_equipped(uint8_t i);
 bool use_item(uint8_t i);
 void entity_apply_potion(uint8_t i, uint8_t subtype);
+void wand_effect(uint8_t i, uint8_t d, uint8_t subtype);
 
 // save.cpp
 void save();

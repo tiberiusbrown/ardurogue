@@ -380,7 +380,7 @@ bool room::inside_bb(uint8_t tx, uint8_t ty) const
     return (rx < w() && ry < h());
 }
 
-static void dig_tile(uint8_t x, uint8_t y)
+void dig_tile(uint8_t x, uint8_t y)
 {
     uint16_t const i = y / 8 * MAP_W + x;
     uint8_t const m = 1 << (y % 8);
@@ -654,7 +654,8 @@ static void generate_random_item(uint8_t i)
         item::POTION, item::POTION, item::POTION, item::POTION, item::POTION,
         item::POTION,
         item::SCROLL, item::SCROLL, item::SCROLL, item::SCROLL, item::SCROLL,
-        item::SCROLL, item::SCROLL, item::SCROLL, item::SCROLL,
+        item::SCROLL, item::SCROLL,
+        item::WAND, item::WAND,
         item::ARROW, item::ARROW,
         item::FOOD, item::FOOD,
         item::BOW,
@@ -664,6 +665,7 @@ static void generate_random_item(uint8_t i)
     };
 
     type = pgm_read_byte(&TYPES[u8rand() % 32]);
+
     if(type == item::POTION)
         subtype = u8rand(NUM_POT);
     else if(type == item::SCROLL)
@@ -672,8 +674,13 @@ static void generate_random_item(uint8_t i)
         subtype = u8rand(NUM_RNG);
     else if(type == item::AMULET)
         subtype = u8rand(NUM_AMU);
+    else if(type == item::WAND)
+    {
+        subtype = u8rand(NUM_WND);
+        quant = 3 + u8rand() % 8; // charges
+    }
     else if(type == item::ARROW)
-        quant = u8rand() % 4 + 3;
+        quant = u8rand() % 4 + 2;
     if(type >= item::SWORD)
         quant = enchant;
 
@@ -848,14 +855,6 @@ void generate_dungeon()
 #if ENABLE_GOT_ENTS
                 if(maps[map_index].got_ents.test(i))
                     e.type = entity::NONE;
-#endif
-                entity_info info;
-                entity_get_info(i, info);
-#if USE_CUSTOM_BITFIELDS
-                e.raw0_ = 0;
-                e.invis.assign(info.invis);
-#else
-                e.invis = (uint8_t)info.invis;
 #endif
                 break;
             }

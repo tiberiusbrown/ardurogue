@@ -30,6 +30,7 @@ static uint16_t const ITEM_IMGS[] PROGMEM =
     0x0bb0, // potion
     0x01b3, // scroll
     0x8421, // arrow
+    0x1248, // wand
     0x0960, // bow
     0x04f4, // sword
     0x0aaa, // ring
@@ -531,6 +532,15 @@ void draw_dungeon_at_player()
     draw_dungeon(ents[0].x, ents[0].y);
 }
 
+void draw_sprite_nonprog_rel_and_wait(uint16_t tp, uint8_t x, uint8_t y)
+{
+    x = x - ents[0].x + 6;
+    y = y - ents[0].y + 6;
+    draw_sprite_nonprog(tp, x, y);
+    paint_left(false);
+    wait();
+}
+
 void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n)
 {
     uint8_t dx = pgm_read_byte(&DIRX[d]);
@@ -540,9 +550,7 @@ void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n)
     {
         x += dx;
         y += dy;
-        draw_sprite_nonprog(0x0eae, x, y);
-        paint_left(false);
-        wait();
+        draw_sprite_nonprog_rel_and_wait(0x0eae, x, y);
     }
     paint_left();
 }

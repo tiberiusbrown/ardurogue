@@ -309,7 +309,11 @@ static void advance()
 
 void scan_dir(uint8_t i, uint8_t d, uint8_t n, scan_result& r)
 {
-    uint8_t x = ents[i].x, y = ents[i].y;
+    scan_dir_pos(ents[i].x, ents[i].y, d, n, r);
+}
+
+void scan_dir_pos(uint8_t x, uint8_t y, uint8_t d, uint8_t n, scan_result& r)
+{
     uint8_t dx = pgm_read_byte(&DIRX[d]);
     uint8_t dy = pgm_read_byte(&DIRY[d]);
     uint8_t k = 0;
@@ -329,6 +333,8 @@ void scan_dir(uint8_t i, uint8_t d, uint8_t n, scan_result& r)
     r.n = k;
     r.x = x;
     r.y = y;
+    r.px = x - dx;
+    r.py = y - dy;
 }
 
 void step()
@@ -442,6 +448,7 @@ static void init_all_perms()
     init_perm(perm_scr.data(), (uint8_t)perm_scr.size());
     init_perm(perm_rng.data(), (uint8_t)perm_rng.size());
     init_perm(perm_amu.data(), (uint8_t)perm_amu.size());
+    init_perm(perm_wnd.data(), (uint8_t)perm_wnd.size());
 }
 
 static void new_game()

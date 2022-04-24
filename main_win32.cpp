@@ -93,7 +93,7 @@ void wait()
 {
     constexpr UINT_PTR timer_id = 0x1001;
     MSG msg{};
-    SetTimer(hwnd, timer_id, 100, (TIMERPROC)NULL);
+    SetTimer(hwnd, timer_id, 50, (TIMERPROC)NULL);
     while(GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);

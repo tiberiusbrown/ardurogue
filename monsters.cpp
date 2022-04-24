@@ -94,7 +94,7 @@ entity_info const MONSTER_INFO[] PROGMEM =
     decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  7,  6,  6,  1,  24, 18), // griffin
     decl_ent(1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 12,  4,  4,  8,  48, 25), // dragon
     decl_ent(1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 10,  6,  6,  3,  24, 35), // fallen angel
-    decl_ent(1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 16,  6,  8,  8, 128, 90), // lord of darkness
+    decl_ent(1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 16,  6,  8,  8, 128, 90), // lord of darkness
 };
 
 void entity_get_info(uint8_t i, entity_info& info)
@@ -152,12 +152,7 @@ void monster_ai(uint8_t i, action& a)
         {
             status(PSTR("@S breathes fire!"), i);
             render();
-            draw_ray_anim(ex - px + 6, ey - py + 6, dir, sr.n);
-            int8_t rb = ring_bonus(RNG_FIRE_PROTECT);
-            uint8_t dam = u8rand(8) + 8;
-            if(rb < 0) dam *= 2;
-            if(rb <= 0)
-                entity_take_damage_from_entity(i, 0, dam);
+            wand_effect(i, dir, WND_FIRE);
             return;
         }
     }

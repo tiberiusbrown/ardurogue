@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+static constexpr uint8_t WAND_RANGE = 6;
+
 static void identify_item(uint8_t i)
 {
     auto& it = inv[i];
@@ -12,6 +14,111 @@ static void identify_item(uint8_t i)
     case item::AMULET: identify_amulet(it.subtype); break;
     default: break;
     }
+}
+
+void wand_effect(uint8_t i, uint8_t d, uint8_t subtype)
+{
+    scan_result sr;
+    if(d < 4)
+    {
+        scan_dir(i, d, WAND_RANGE, sr);
+        if(subtype != WND_DIGGING)
+            draw_ray_anim(ents[i].x, ents[i].y, d, sr.n);
+    }
+    else
+    {
+        sr.x = ents[i].x;
+        sr.y = ents[i].y;
+        sr.i = i;
+        d = u8rand() % 4;
+    }
+
+    entity* te = get_entity(sr.x, sr.y);
+    if(subtype == WND_DIGGING)
+    {
+        uint8_t x = ents[i].x, y = ents[i].y;
+        uint8_t dx = pgm_read_byte(&DIRX[d]);
+        uint8_t dy = pgm_read_byte(&DIRY[d]);
+        for(uint8_t i = 0; i < WAND_RANGE; ++i)
+        {
+            x += dx;
+            y += dy;
+            if(x >= MAP_W || y >= MAP_H) break;
+            dig_tile(x, y);
+            if(door* d = get_door(x, y))
+            {
+                d->open = 1;
+                d->secret = 0;
+            }
+        }
+        return;
+    }
+    else if(subtype == WND_FIRE)
+    {
+        static int8_t const FIRE[18] PROGMEM =
+        {
+            0, 0, -1, -1, 0, -1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 1, -1, 0,
+        };
+        draw_dungeon_at_player();
+        for(uint8_t i = 0; i < 18; i += 2)
+        {
+            uint8_t tx = sr.x + pgm_read_byte(&FIRE[i]);
+            uint8_t ty = sr.y + pgm_read_byte(&FIRE[i + 1]);
+            draw_sprite_nonprog_rel_and_wait(0x0eae, tx, ty);
+            if(entity* e = get_entity(tx, ty))
+                entity_take_fire_damage_from_entity(i, index_of_entity(*e), u8rand(8) + 8);
+        }
+        paint_left();
+        return;
+    }
+    else if(!te) return;
+    switch(subtype)
+    {
+    case WND_FORCE:
+    {
+        scan_result tsr;
+        scan_dir_pos(te->x, te->y, d, 8, tsr);
+        te->x = tsr.px;
+        te->y = tsr.py;
+        // TODO: if(entity* pe = get_entity(tsr.x, tsr.y))
+        //           damage both te and pe
+        break;
+    }
+    case WND_TELEPORT:
+        if(sr.i < MAP_ENTITIES)
+            teleport_entity(sr.i);
+        break;
+    case WND_STRIKING:
+        entity_take_magic_damage_from_entity(i, sr.i, u8rand(12) + 12);
+        break;
+    case WND_ICE:
+        slow_entity(sr.i);
+        entity_take_magic_damage_from_entity(i, sr.i, u8rand(8) + 8);
+        break;
+    case WND_POLYMORPH:
+    {
+        uint8_t t = te->type;
+        if(t > entity::BAT && t < entity::DARKNESS)
+        {
+            te->type = u8rand() < 64 ? t + 1 : t - 1;
+            te->health = entity_max_health(sr.i);
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+}
+
+static void use_wand(uint8_t subtype)
+{
+    draw_dungeon_at_player();
+    paint_left();
+    identify_wand(subtype);
+    uint8_t d = 255;
+    direction_menu(d); // canceling will mean target self
+    wand_effect(0, d, subtype);
 }
 
 static void use_scroll(uint8_t subtype)
@@ -39,8 +146,10 @@ static void use_scroll(uint8_t subtype)
                 status(PSTR("Nothing happens."));
             else
             {
+                uint8_t n = 1;
+                if(it.type == item::WAND) n = 4;
                 if(it.quant_or_level < ENCHANT_LEVEL_MAX)
-                    it.quant_or_level += 1;
+                    it.quant_or_level += n;
                 status(PSTR("The @i glows blue for a moment."), it);
             }
         }
@@ -206,6 +315,21 @@ bool use_item(uint8_t i)
     case item::SCROLL:
         use_scroll(subtype);
         return true;
+    case item::WAND:
+    {
+        uint8_t n = it.quant_or_level;
+        if(n == 0)
+        {
+            status(PSTR("It has no charges left."));
+            return false;
+        }
+        else if(n == 1)
+            player_remove_item(i);
+        else
+            inv[i].quant_or_level = n - 1;
+        use_wand(subtype);
+        return true;
+    }
     case item::BOW:
     case item::SWORD:
     case item::HELM:

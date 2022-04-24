@@ -49,6 +49,11 @@ static char const* const ITEM_NAME_ARMORS[] PROGMEM =
     ITEM_NAME_BOOTS,
 };
 
+static uint8_t tsprintf_d(char* b, char const* fmt, uint8_t d)
+{
+    return tsprintf(b, fmt, d);
+}
+
 static char* item_name(char* dst, item it)
 {
     uint8_t n = it.quant_or_level;
@@ -71,15 +76,29 @@ static char* item_name(char* dst, item it)
     case item::SWORD:
         dst = tstrcpy_prog(dst, PSTR("sword"));
         if(it.identified)
-            dst += tsprintf(dst, PSTR(" [@d atk]"), weapon_item_attack(it));
+            dst += tsprintf_d(dst, PSTR(" [@d atk]"), weapon_item_attack(it));
         return dst;
     case item::ARMOR:
     case item::HELM:
     case item::BOOTS:
         dst = tstrcpy_prog(dst, pgmptr(&ITEM_NAME_ARMORS[it.type - item::ARMOR]));
         if(it.identified)
-            dst += tsprintf(dst, PSTR(" [@d def]"), armor_item_defense(it));
+            dst += tsprintf_d(dst, PSTR(" [@d def]"), armor_item_defense(it));
         return dst;
+    case item::WAND:
+        if(wand_is_identified(st))
+        {
+            dst = tstrcpy_prog(dst, PSTR("wand of "));
+            dst = tstrcpy_prog(dst, pgmptr(&WND_NAMES[st]));
+            //dst += tsprintf_d(dst, PSTR(" [@u]"), n);
+            return dst;
+        }
+        else
+        {
+            dst = tstrcpy_prog(dst, pgmptr(&UNID_WND_NAMES[perm_wnd[st]]));
+            dst = tstrcpy_prog(dst, PSTR(" wand"));
+            return dst;
+        }
     case item::RING:
         if(ring_is_identified(st))
         {
@@ -105,7 +124,7 @@ static char* item_name(char* dst, item it)
                 default:
                     break;
                 }
-                dst += tsprintf(dst, s, t);
+                dst += tsprintf_d(dst, s, (uint8_t)t);
             }
             return dst;
         }
@@ -126,18 +145,18 @@ static char* item_name(char* dst, item it)
                 {
                 case AMU_SPEED:
                 {
-                    dst += tsprintf(dst, PSTR(" [@d spd]"),
+                    dst += tsprintf_d(dst, PSTR(" [@d spd]"),
                         uint8_t(t + 1) / 2);
                     break;
                 }
                 case AMU_VITALITY:
                 {
-                    dst += tsprintf(dst, PSTR(" [@d mhp]"),
+                    dst += tsprintf_d(dst, PSTR(" [@d mhp]"),
                         uint8_t(t * AMU_VITALITY_BONUS));
                     break;
                 }
                 default:
-                    dst += tsprintf(dst, PSTR(" [@d]"), t);
+                    dst += tsprintf_d(dst, PSTR(" [@d]"), t);
                     break;
                 }
             }

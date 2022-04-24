@@ -223,6 +223,43 @@ char const* const UNID_RNG_AMU_NAMES[NUM_RNG < NUM_AMU ? NUM_AMU : NUM_RNG] PROG
     UNID_RNG_AMU_7,
 };
 
+static char const  NWND_FORCE[] PROGMEM = "force";
+static char const  NWND_DIGGING[] PROGMEM = "digging";
+static char const  NWND_FIRE[] PROGMEM = "fire";
+static char const  NWND_STRIKING[] PROGMEM = "striking";
+static char const  NWND_ICE[] PROGMEM = "ice";
+static char const  NWND_POLYMORPH[] PROGMEM = "polymorph";
+
+char const* const WND_NAMES[NUM_WND] PROGMEM =
+{
+    NWND_FORCE,
+    NSCR_TELEPORT, // reuse string from scroll
+    NWND_DIGGING,
+    NWND_FIRE,
+    NWND_STRIKING,
+    NWND_ICE,
+    NWND_POLYMORPH,
+};
+
+static char const UNID_WND_0[] PROGMEM = "long";
+static char const UNID_WND_1[] PROGMEM = "short";
+static char const UNID_WND_2[] PROGMEM = "slender";
+static char const UNID_WND_3[] PROGMEM = "thick";
+static char const UNID_WND_4[] PROGMEM = "twisted";
+static char const UNID_WND_5[] PROGMEM = "curved";
+static char const UNID_WND_6[] PROGMEM = "glossy";
+
+char const* const UNID_WND_NAMES[NUM_WND] PROGMEM =
+{
+    UNID_WND_0,
+    UNID_WND_1,
+    UNID_WND_2,
+    UNID_WND_3,
+    UNID_WND_4,
+    UNID_WND_5,
+    UNID_WND_6,
+};
+
 static char const INV_CAT_WEAPON[] PROGMEM = "Weapons";
 static char const INV_CAT_ARMOR[] PROGMEM = "Armor";
 static char const INV_CAT_JEWELRY[] PROGMEM = "Jewelry";

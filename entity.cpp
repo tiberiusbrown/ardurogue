@@ -4,7 +4,15 @@ static constexpr uint8_t ARROW_BREAK_CHANCE = 64;
 
 bool player_is_invisible()
 {
-    return ents[0].invis || ring_bonus(RNG_INVIS) > 0;
+    return entity_is_invisible(0);
+}
+
+bool entity_is_invisible(uint8_t i)
+{
+    if(i == 0 && ring_bonus(RNG_INVIS) > 0) return true;
+    entity_info info;
+    entity_get_info(i, info);
+    return ents[i].invis | info.invis;
 }
 
 void adjust_health_to_max_health(uint8_t i)
@@ -289,11 +297,61 @@ void entity_take_damage(uint8_t i, uint8_t dam)
     }
 }
 
-void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
+void entity_take_fire_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
 {
-    auto e = ents[atti];
+    if(defi == 0)
+    {
+        int8_t rb = ring_bonus(RNG_FIRE_PROTECT);
+        if(rb > 0) dam = 0;
+        if(rb < 0) dam *= 2;
+    }
+    else
+    {
+        // TODO: monster immune to fire
+    }
+    if(dam == 0)
+        status(PSTR("The flames do not affect @O."), defi);
+    entity_take_damage_from_entity(atti, defi, dam);
+}
+
+void entity_take_melee_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
+{
     entity_info info;
     entity_get_info(atti, info);
+    if(info.vampire || (atti == 0 && wearing_uncursed_amulet(AMU_VAMPIRE)))
+    {
+        status(PSTR("@S drains @P health!"), atti, defi);
+        if(defi == 0)
+        {
+            uint8_t mhp = entity_max_health(0);
+            pinfo.vamp_drain += 3;
+            if(pinfo.vamp_drain >= mhp)
+                pinfo.vamp_drain = mhp - 1;
+            adjust_health_to_max_health(0);
+        }
+        entity_heal(atti, 3);
+    }
+    entity_take_damage_from_entity(atti, defi, dam);
+    if(ents[defi].type != entity::NONE) // target was not killed
+    {
+        if(info.confuse && u8rand() < 64)
+            confuse_entity(defi);
+
+        if(info.poison && u8rand() < 64)
+            poison_entity(defi);
+
+        if(info.paralyze && u8rand() < 64)
+            paralyze_entity(defi);
+    }
+}
+
+void entity_take_magic_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
+{
+    entity_take_damage_from_entity(atti, defi, dam);
+}
+
+void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
+{
     auto& te = ents[defi];
     uint8_t tetype = te.type;
 
@@ -303,7 +361,7 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
         return;
 #endif
         hs.type = HS_ENTITY;
-        hs.data = e.type;
+        hs.data = ents[atti].type;
     }
     if(atti == 0)
         aggro_monster(defi);
@@ -316,31 +374,6 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
             player_gain_xp(xp);
             hs.score += xp;
         }
-    }
-    else // entity was damaged but not killed: on hit effects
-    {
-        if(info.vampire || (atti == 0 && wearing_uncursed_amulet(AMU_VAMPIRE)))
-        {
-            status(PSTR("@S drains @P health!"), atti, defi);
-            if(defi == 0)
-            {
-                uint8_t mhp = entity_max_health(0);
-                pinfo.vamp_drain += 3;
-                if(pinfo.vamp_drain >= mhp)
-                    pinfo.vamp_drain = mhp - 1;
-                adjust_health_to_max_health(0);
-            }
-            entity_heal(atti, 3);
-        }
-
-        if(info.confuse && u8rand() < 64)
-            confuse_entity(defi);
-
-        if(info.poison && u8rand() < 64)
-            poison_entity(defi);
-
-        if(info.paralyze && u8rand() < 64)
-            paralyze_entity(defi);
     }
 }
 
@@ -450,7 +483,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
             else
                 status(PSTR("@W @P attack."), defi, PSTR("block"), atti);
         }
-        entity_take_damage_from_entity(atti, defi, dam);
+        entity_take_melee_damage_from_entity(atti, defi, dam);
     }
 }
 
