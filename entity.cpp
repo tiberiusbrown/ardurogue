@@ -609,7 +609,7 @@ bool entity_perform_action(uint8_t i, action a)
         {
             aggro_monster(sr.i);
             status(PSTR("The @i hits @O!"), it, sr.i);
-            entity_apply_potion(sr.i, it.subtype);
+            entity_apply_potion(it.subtype, sr.i);
         }
         status(PSTR("The @i shatters."), it);
         return true;

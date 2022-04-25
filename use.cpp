@@ -317,7 +317,7 @@ bool use_item(uint8_t i)
         return true;
     }
     case item::POTION:
-        entity_apply_potion(0, subtype);
+        entity_apply_potion(subtype, 0);
         return true;
     case item::SCROLL:
         use_scroll(subtype);
@@ -351,7 +351,7 @@ bool use_item(uint8_t i)
     return false;
 }
 
-void entity_apply_potion(uint8_t i, uint8_t subtype)
+void entity_apply_potion(uint8_t subtype, uint8_t i)
 {
     identify_potion(subtype);
     switch(subtype)

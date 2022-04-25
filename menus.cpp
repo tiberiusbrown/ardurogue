@@ -169,6 +169,7 @@ void draw_yesno(uint8_t x, uint8_t y)
 bool yesno_menu(char const* fmt, ...)
 {
     draw_info_without_status();
+    uint8_t y = STATUS_START_Y;
     {
         char t[128];
         va_list ap;
@@ -176,7 +177,7 @@ bool yesno_menu(char const* fmt, ...)
         tvsprintf(t, fmt, ap);
         va_end(ap);
         uint8_t len = tstrlen(t);
-        uint8_t x = 1, y = STATUS_START_Y;
+        uint8_t x = 1;
         uint8_t n = 0;
         while(n < len) n = advance_white(t, n);
         n = 0;
@@ -195,7 +196,7 @@ bool yesno_menu(char const* fmt, ...)
         }
     }
 
-    draw_yesno(7, 56);
+    draw_yesno(7, y + 8);
     paint_right();
     for(;;)
     {

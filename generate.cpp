@@ -81,7 +81,7 @@ static map_gen_info const MAP_GEN_INFOS[NUM_MAPS] PROGMEM =
     item::make(item::SCROLL, SCR_ENCHANT),
 },
 { // level 16
-    { entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, },
+    { entity::INCUBUS, entity::INCUBUS, entity::ANGEL, entity::ANGEL, entity::ANGEL, entity::ANGEL, },
     item::make(item::POTION, POT_CONFUSION),
 },
 };

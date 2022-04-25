@@ -767,7 +767,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap);
 uint8_t tstrlen(char const* s); // s not progmem
 
 // status.cpp: fmt is PROGMEM
-static constexpr uint8_t NUM_STATUS_ROWS = 6;
+static constexpr uint8_t NUM_STATUS_ROWS = 8;
 static constexpr uint8_t STATUS_START_Y = 65 - 6 * NUM_STATUS_ROWS;
 uint8_t advance_white(char* b, uint8_t i);
 void draw_status();
@@ -838,7 +838,7 @@ bool unequip_item(uint8_t i);
 uint8_t slot_of_item(uint8_t type);
 bool item_is_equipped(uint8_t i);
 bool use_item(uint8_t i);
-void entity_apply_potion(uint8_t i, uint8_t subtype);
+void entity_apply_potion(uint8_t subtype, uint8_t i);
 void wand_effect(uint8_t i, uint8_t d, uint8_t subtype);
 
 // save.cpp
