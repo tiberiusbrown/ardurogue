@@ -257,7 +257,6 @@ void entity_restore_strength(uint8_t i)
 
 void entity_heal(uint8_t i, uint8_t amount)
 {
-    auto& e = ents[i];
     uint8_t mhp = entity_max_health(i);
     if(healths[i] >= mhp) return;
     char const* s = (amount < 3 ? PSTR("slightly ") : PSTR(""));
