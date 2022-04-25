@@ -18,8 +18,8 @@ bool entity_is_invisible(uint8_t i)
 void adjust_health_to_max_health(uint8_t i)
 {
     uint8_t mhp = entity_max_health(i);
-    if(ents[i].health > mhp)
-        ents[i].health = mhp;
+    if(healths[i] > mhp)
+        healths[i] = mhp;
 }
 
 uint8_t entity_speed(uint8_t i)
@@ -259,7 +259,7 @@ void entity_heal(uint8_t i, uint8_t amount)
 {
     auto& e = ents[i];
     uint8_t mhp = entity_max_health(i);
-    if(e.health >= mhp) return;
+    if(healths[i] >= mhp) return;
     char const* s = (amount < 3 ? PSTR("slightly ") : PSTR(""));
     if(i == 0)
     {
@@ -269,10 +269,10 @@ void entity_heal(uint8_t i, uint8_t amount)
     }
     else if(player_can_see_entity(i))
         status(PSTR("@S looks @pbetter."), i, s);
-    if(mhp - e.health <= amount)
-        e.health = mhp;
+    if(mhp - healths[i] <= amount)
+        healths[i] = mhp;
     else
-        e.health += amount;
+        healths[i] += amount;
 }
 
 void entity_take_damage(uint8_t i, uint8_t dam)
@@ -282,10 +282,10 @@ void entity_take_damage(uint8_t i, uint8_t dam)
 #endif
     auto& te = ents[i];
     //bool cansee = player_can_see_entity(i);
-    if(dam >= te.health)
+    if(dam >= healths[i])
     {
         status(PSTR("@W!"), i, PSTR("die"));
-        te.health = 0;
+        healths[i] = 0;
         te.type = entity::NONE;
 #if ENABLE_GOT_ENTS
         maps[map_index].got_ents.set(i);   
@@ -293,7 +293,7 @@ void entity_take_damage(uint8_t i, uint8_t dam)
     }
     else
     {
-        te.health -= dam;
+        healths[i] -= dam;
     }
 }
 
@@ -649,7 +649,7 @@ void aggro_monster(uint8_t i)
 {
     if(!ents[i].aggro)
     {
-        ents[i].health = entity_max_health(i);
+        healths[i] = entity_max_health(i);
         ents[i].aggro = 1;
     }
 }

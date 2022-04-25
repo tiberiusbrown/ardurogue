@@ -852,7 +852,7 @@ void generate_dungeon()
             {
                 e.type = j;
                 if(j == entity::MIMIC)
-                    e.health = u8rand(item::NUM_ITEM_TYPES - 1) + 1;
+                    healths[i] = u8rand(item::NUM_ITEM_TYPES - 1) + 1;
 #if ENABLE_GOT_ENTS
                 if(maps[map_index].got_ents.test(i))
                     e.type = entity::NONE;
@@ -889,7 +889,7 @@ void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y)
     auto& e = ents[i];
     e = {};
     e.type = type;
-    e.health = entity_max_health(i);
+    healths[i] = entity_max_health(i);
     e.x = x;
     e.y = y;
 }

@@ -235,7 +235,7 @@ void draw_info_without_status()
     auto const& e = ents[0];
     draw_textf(1, 0, PSTR("Dungeon Level @u"), map_index + 1);
     if(num_rooms == 0) return;
-    draw_textf(1, 6, PSTR("LV @u   HP: @u/@u"), plevel + 1, e.health, entity_max_health(0));
+    draw_textf(1, 6, PSTR("LV @u   HP: @u/@u"), plevel + 1, healths[0], entity_max_health(0));
     {
         char const* s = PSTR("");
         if(hunger == 255)
@@ -488,8 +488,9 @@ void draw_dungeon(uint8_t mx, uint8_t my)
     }
 
     // draw entities
-    for(auto const& e : ents)
+    for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
     {
+        auto const& e = ents[i];
         if(e.type == entity::NONE) continue;
         uint8_t ex = e.x - mx;
         uint8_t ey = e.y - my;
@@ -499,7 +500,7 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         if(e.type == entity::PLAYER && player_is_invisible())
             img = &ENTITY_IMGS[entity::DARKNESS + 1];
         else if(e.type == entity::MIMIC && !e.aggro)
-            img = &ITEM_IMGS[e.health];
+            img = &ITEM_IMGS[healths[i]];
         else if(player_can_see_entity(index_of_entity(e)))
             img = &ENTITY_IMGS[e.type];
         draw_sprite(img, ex, ey);

@@ -108,7 +108,7 @@ void wand_effect(uint8_t i, uint8_t d, uint8_t subtype)
         if(t > entity::BAT && t < entity::DARKNESS)
         {
             te->type = u8rand() < 64 ? t + 1 : t - 1;
-            te->health = entity_max_health(sr.i);
+            healths[index_of_entity(*te)] = entity_max_health(sr.i);
         }
         break;
     }
@@ -206,7 +206,7 @@ static void use_scroll(uint8_t subtype)
             }
             else if(subtype == SCR_TORMENT)
             {
-                e.health /= 2;
+                healths[i] /= 2;
                 status(PSTR("@U stricken!"), i);
             }
             else if(subtype == SCR_MASS_CONFUSE)

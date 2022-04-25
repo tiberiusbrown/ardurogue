@@ -144,7 +144,7 @@ void player_gain_xp(uint8_t xp)
             status(PSTR("You feel more agile."));
             pstats.dexterity += 1;
         }
-        ents[0].health = entity_max_health(0);
+        healths[0] = entity_max_health(0);
         pstats.xp = 0;
     }
     else
@@ -271,7 +271,7 @@ void advance_hunger()
         if(hunger < 255 && rs < 0)
             ++hunger;
     }
-    else if(ents[0].health > 0)
+    else if(healths[0] > 0)
     {
         status(PSTR("You are starving!"));
         hs.type = HS_STARVED;

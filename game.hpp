@@ -266,7 +266,6 @@ struct entity
         u8bitfield<5> scared;    // monster is fleeing
         u8bitfield<6> slowed;
     };
-    uint8_t health;
     uint8_t type;
 };
 
@@ -498,26 +497,27 @@ static constexpr uint8_t NUM_HIGH_SCORES = 4;
 
 struct saved_data
 {
-    uint16_t                    game_seed;
-    high_score                  hs;
-    array<map_info, NUM_MAPS>   maps;
-    array<item, INV_ITEMS>      inv;
-    array<entity, MAP_ENTITIES> ents;
-    array<map_item, MAP_ITEMS>  items;
-    array<room, MAP_ROOMS>      rooms;
-    array<door, MAP_DOORS>      doors;
-    uint8_t                     num_rooms;
-    uint8_t                     num_doors;
-    uint8_t                     map_index;
-    entity_info                 pstats;
-    player_info                 pinfo;
-    bitset<NUM_IDENT>           identified;
-    uint8_t                     prev_action;
-    uint8_t                     plevel;
-    uint8_t                     hunger;
+    uint16_t                     game_seed;
+    high_score                   hs;
+    array<map_info, NUM_MAPS>    maps;
+    array<item, INV_ITEMS>       inv;
+    array<entity, MAP_ENTITIES>  ents;
+    array<uint8_t, MAP_ENTITIES> healths;
+    array<map_item, MAP_ITEMS>   items;
+    array<room, MAP_ROOMS>       rooms;
+    array<door, MAP_DOORS>       doors;
+    uint8_t                      num_rooms;
+    uint8_t                      num_doors;
+    uint8_t                      map_index;
+    entity_info                  pstats;
+    player_info                  pinfo;
+    bitset<NUM_IDENT>            identified;
+    uint8_t                      prev_action;
+    uint8_t                      plevel;
+    uint8_t                      hunger;
 
     // options, high score table, etc
-    uint8_t                     wall_style;
+    uint8_t                      wall_style;
     array<high_score, NUM_HIGH_SCORES> high_scores;
 };
 
@@ -553,6 +553,7 @@ static auto& yup = globals_.yup;
 static auto& num_rooms = globals_.saved.num_rooms;
 static auto& num_doors = globals_.saved.num_doors;
 static auto& ents = globals_.saved.ents;
+static auto& healths = globals_.saved.healths;
 static auto& items = globals_.saved.items;
 static auto& maps = globals_.saved.maps;
 static auto& rooms = globals_.saved.rooms;
