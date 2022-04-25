@@ -495,8 +495,6 @@ void draw_dungeon(uint8_t mx, uint8_t my)
         uint8_t ey = e.y - my;
         if(ex >= 13 || ey >= 13) continue;
         if(!tile_is_explored(e.x, e.y)) continue;
-        if(ring_bonus(RNG_SEE_INVIS) < 0 && u8rand() % 2 == 0)
-            continue;
         uint16_t const* img = &ENTITY_IMGS[0];
         if(e.type == entity::PLAYER && player_is_invisible())
             img = &ENTITY_IMGS[entity::DARKNESS + 1];
