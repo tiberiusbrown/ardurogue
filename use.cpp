@@ -6,6 +6,8 @@ static void identify_item(uint8_t i)
 {
     auto& it = inv[i];
     uint8_t st = it.subtype;
+    if(it.type >= item::WAND)
+        it.identified = 1;
     switch(it.type)
     {
     case item::POTION: identify_potion(st); break;
@@ -17,7 +19,6 @@ static void identify_item(uint8_t i)
     case item::ARROW:
         break;
     default:
-        it.identified = 1;
         break;
     }
 }

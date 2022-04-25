@@ -681,8 +681,6 @@ static void generate_random_item(uint8_t i)
     }
     else if(type == item::ARROW)
         quant = u8rand() % 4 + 2;
-    if(type >= item::SWORD)
-        quant = enchant;
 
 #else
 
@@ -762,9 +760,14 @@ static void generate_random_item(uint8_t i)
     it.type = type;
     it.subtype = subtype;
 
-    it.quant = quant; // assign quant first
-    it.identified = 0;
-    it.cursed = cursed;
+    if(type <= item::ARROW)
+        it.quant = quant;
+    else
+    {
+        it.level = enchant;
+        it.identified = 0;
+        it.cursed = cursed;
+    }
 
     generate_item(i, it);
 }
