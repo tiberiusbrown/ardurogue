@@ -489,6 +489,7 @@ enum
     HS_RETURNED,  // returned to the surface without the amulet
     HS_ABANDONED, // chose to end the game
     HS_ENTITY,    // killed by entity
+    HS_SUICIDE,   // killed yourself (by a wand?)
     //HS_TRAP,      // killed by trap
     HS_STARVED,   // starved to death
 };

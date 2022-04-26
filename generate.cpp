@@ -765,7 +765,7 @@ static void generate_random_item(uint8_t i)
     it.type = type;
     it.subtype = subtype;
 
-    if(type <= item::ARROW)
+    if(type <= item::WAND)
         it.quant = quant;
     else
     {

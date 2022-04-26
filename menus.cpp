@@ -6,14 +6,16 @@ static char const HS_MSG_ESCAPED[] PROGMEM = "Escaped with the amulet";
 static char const HS_MSG_RETURNED[] PROGMEM = "Returned to the surface";
 static char const HS_MSG_ABANDONED[] PROGMEM = "Abandoned the game";
 static char const HS_MSG_ENTITY[] PROGMEM = "Death by @M";
+static char const HS_MSG_SUICIDE[] PROGMEM = "Committed suicide... somehow";
 //static char const HS_MSG_TRAP[] PROGMEM = "";
 static char const HS_MSG_STARVED[] PROGMEM = "Starved to death";
-static char const* const HS_MSGS[5] PROGMEM =
+static char const* const HS_MSGS[6] PROGMEM =
 {
     HS_MSG_ESCAPED,
     HS_MSG_RETURNED,
     HS_MSG_ABANDONED,
     HS_MSG_ENTITY,
+    HS_MSG_SUICIDE,
     //HS_MSG_TRAP,
     HS_MSG_STARVED,
 };
@@ -283,6 +285,7 @@ static char const MEN_INV[] PROGMEM = "Inventory";
 static char const MEN_STATS[] PROGMEM = "Player Info";
 static char const MEN_HS[] PROGMEM = "High Scores";
 static char const MEN_SETTINGS[] PROGMEM = "Settings";
+static char const MEN_ABANDON[] PROGMEM = "Abandon Game";
 static char const MEN_SAVE[] PROGMEM = "Save Progress";
 #if ENABLE_DEBUG_MENU
 static char const MEN_DEBUG[] PROGMEM = "Debug Info";
@@ -300,6 +303,7 @@ static char const* const MEN_ITEMS[] PROGMEM =
     MEN_STATS,
     MEN_HS,
     MEN_SETTINGS,
+    MEN_ABANDON,
     MEN_SAVE,
 #if ENABLE_DEBUG_MENU
     MEN_DEBUG,
@@ -490,6 +494,11 @@ static void men_settings()
     }
 }
 
+static void men_abandon()
+{
+
+}
+
 static void men_save()
 {
     save();
@@ -556,6 +565,7 @@ static men_method const MEN_METHODS[] PROGMEM =
     men_info,
     men_high_scores,
     men_settings,
+    men_abandon,
     men_save,
 #if ENABLE_DEBUG_MENU
     men_debug,
@@ -591,7 +601,7 @@ bool action_menu(action& a)
             if(act)
             {
                 text = MEN_ITEMS;
-                n = 4 + ENABLE_MINIMAP + ENABLE_DUNGEON_SCROLL + ENABLE_DEBUG_MENU;
+                n = 5 + ENABLE_MINIMAP + ENABLE_DUNGEON_SCROLL + ENABLE_DEBUG_MENU;
                 i = 0;
             }
             else

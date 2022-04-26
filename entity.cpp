@@ -365,6 +365,8 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
 #endif
         hs.type = HS_ENTITY;
         hs.data = ents[atti].type;
+        if(atti == 0)
+            hs.type = HS_SUICIDE;
     }
     if(atti == 0)
         aggro_monster(defi);
