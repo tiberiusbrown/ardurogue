@@ -156,7 +156,7 @@ static void use_scroll(uint8_t subtype)
                 uint8_t n = 1;
                 if(it.type == item::WAND) n = 4;
                 it.level += n;
-                if(it.level < ENCHANT_LEVEL_MAX)
+                if(it.level > ENCHANT_LEVEL_MAX)
                     it.level = ENCHANT_LEVEL_MAX;
                 status(PSTR("The @i glows blue for a moment."), it);
             }
