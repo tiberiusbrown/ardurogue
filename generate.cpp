@@ -671,7 +671,10 @@ static void generate_random_item(uint8_t i)
     else if(type == item::SCROLL)
         subtype = u8rand(NUM_SCR);
     else if(type == item::RING)
-        subtype = u8rand(NUM_RNG);
+    {
+        subtype = u8rand(NUM_RNG - 1);
+        if(u8rand() < 5) subtype = RNG_INVIS;
+    }
     else if(type == item::AMULET)
         subtype = u8rand(NUM_AMU);
     else if(type == item::WAND)

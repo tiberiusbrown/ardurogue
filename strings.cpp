@@ -74,10 +74,10 @@ static char const NPOT_HEALING[] PROGMEM = "healing";
 static char const NPOT_CONFUSION[] PROGMEM = "confusion";
 static char const NPOT_POISON[] PROGMEM = "poison";
 static char const NPOT_STRENGTH[] PROGMEM = "strength";
-static char const NPOT_INVIS[] PROGMEM = "invisibility";
 static char const NPOT_PARALYSIS[] PROGMEM = "paralysis";
 static char const NPOT_SLOWING[] PROGMEM = "slowing";
 static char const NPOT_EXPERIENCE[] PROGMEM = "experience";
+static char const NPOT_INVIS[] PROGMEM = "invisibility";
 
 char const* const POT_NAMES[NUM_POT] PROGMEM =
 {
@@ -85,10 +85,10 @@ char const* const POT_NAMES[NUM_POT] PROGMEM =
     NPOT_CONFUSION,
     NPOT_POISON,
     NPOT_STRENGTH,
-    NPOT_INVIS,
     NPOT_PARALYSIS,
     NPOT_SLOWING,
     NPOT_EXPERIENCE,
+    NPOT_INVIS,
 };
 
 static char const UNID_POT_0[] PROGMEM = "red";

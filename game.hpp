@@ -170,7 +170,7 @@ static constexpr uint8_t BTN_B     = 0x04;
 
 static constexpr uint8_t MAP_W = 64;
 static constexpr uint8_t MAP_H = 32;
-static constexpr uint8_t MAP_ITEMS = 48;
+static constexpr uint8_t MAP_ITEMS = 32;
 static constexpr uint8_t MAP_ENTITIES = 32;
 static constexpr uint8_t MAP_ROOMS = 32;
 static constexpr uint8_t MAP_DOORS = 32;
@@ -321,10 +321,10 @@ enum
     RNG_STRENGTH,     // bonus to strength
     RNG_DEXTERITY,    // bonus to dexterity
     RNG_PROTECTION,   // bonus to armor
-    RNG_INVIS,        // permanent invis
     RNG_FIRE_PROTECT, // immunity to fire breath
     RNG_ATTACK,       // bonus to attack
     RNG_SUSTENANCE,   // slows down hunger
+    RNG_INVIS,        // permanent invis
     NUM_RNG,
 };
 

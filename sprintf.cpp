@@ -159,7 +159,8 @@ static char* item_name(char* dst, item it)
                     break;
                 }
                 default:
-                    dst += tsprintf_d(dst, PSTR(" [@d]"), t);
+                    // can't wear two amulets to cancel each other
+                    //dst += tsprintf_d(dst, PSTR(" [@d]"), t);
                     break;
                 }
             }
