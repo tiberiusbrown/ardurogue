@@ -83,9 +83,10 @@ static char* item_name(char* dst, item it)
         dst = tstrcpy_prog(dst, pgmptr(&ITEM_NAME_ARMORS[it.type - item::ARMOR]));
         if(it.identified)
         {
+            char const* s = PSTR(" [@d def]");
             if(it.is_type(item::BOOTS, BOOTS_SPEED))
-                dst = tstrcpy_prog(dst, PSTR(" [+2 spd]"));
-            dst += tsprintf_d(dst, PSTR(" [@d def]"), armor_item_defense(it));
+                s = PSTR(" of speed [+2 spd @d def]");
+            dst += tsprintf_d(dst, s, armor_item_defense(it));
         }
         return dst;
     case item::WAND:
