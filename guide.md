@@ -3,106 +3,154 @@
 **WARNING: Spoilers ahead!**
 
 Jump to Section:
-- [Item Types](#itemtypes)
-- [Item Effects](#itemeffects)
-   - [Potions](#potions)
-   - [Scrolls](#scrolls)
-   - [Rings](#rings)
-   - [Amulets](#amulets)
-   - [Wands](#wands)
-- [Enemy Types](#enemytypes)
+- [How to Play](#howtoplay)
+    - [Controls](#controls)
+    - [Action Menu](#actionmenu)
+    - [Game Menu](#gamemenu)
+    - [Saving and Loading](#saving)
+- [Game Reference](#gamereference)
+    - [Items](#itemtypes)
+        - [Potions](#potions)
+        - [Scrolls](#scrolls)
+        - [Rings](#rings)
+        - [Amulets](#amulets)
+        - [Wands](#wands)
+    - [Enemies](#enemytypes)
 
-## Item Types <a name="itemtypes"></a>
+## How to Play <a name="howtoplay"></a>
 
-| Symbol | Name        | Stackable | Equippable | Notes |
-| :-: | :-: | :-: | :-: | - |
-| ![](img/food.png)   | food ration | &#9745; |        | Consumable. Staves off hunger. |
-| ![](img/potion.png) | potion      | &#9745; |        | Provides a temporary magical effect. Affects the user when drunk, or the target when thrown. |
-| ![](img/scroll.png) | scroll      | &#9745; |        | Performs some magical effect when read. |
-| ![](img/wand.png)   | wand        |         |        | Performs some directed ranged magical effect when used. |
-| ![](img/bow.png)    | bow         |         | Weapon | Must be equipped for ranged combat. |
-| ![](img/arrow.png)  | arrow       | &#9745; |        | Required for ranged combat. |
-| ![](img/sword.png)  | sword       |         | Weapon | Gives bonus to attack. |
-| ![](img/ring.png)   | ring        |         | Hand   | Can wear up to two rings at a time. Provides a constant magical effect. |
-| ![](img/amulet.png) | amulet      |         | Neck   | Provides a constant magical effect. |
-| ![](img/armor.png)  | armor       |         | Body   | Gives bonus to defense. |
-| ![](img/armor.png)  | helm        |         | Head   | Gives bonus to defense. |
-| ![](img/armor.png)  | boots       |         | Feet   | Gives bonus to defense. |
+### Controls <a name="controls"></a>
 
-## Item Effects <a name="itemeffects"></a>
+Use the arrow buttons to move in the cardinal directions.
+Unlike most roguelikes, ArduRogue does not support diagonal movement or actions.
+- Moving into an [enemy](#enemytypes) will perform a melee attack on that enemy.
+- Moving onto an [item](#itemtypes) will produce a prompt asking whether to pick up the item.
+- Moving onto stairs will produce a prompt asking whether to descend or ascend the stairs.
 
-### Potions <a name="potions"></a>
+When presented with a prompt, press A to accept or B to decline.
+
+### Action Menu <a name="actionmenu"></a>
+
+During normal gameplay, press B to access the action menu.
+The action menu allows you to perform non-movement actions, such as shooting an arrow or drinking a potion.
+While in the action menu, use UP or DOWN to cycle the menu options, and LEFT or RIGHT to switch to the game menu.
+Press A to select an action to perform, or B to leave the menu with no selection.
+
+During normal gameplay, press A to repeat the previously performed action from the action menu.
+This is useful to perform the same action multiple times without having to access the action menu each time, such as when
+- searching for a hidden door,
+- using a bow and arrow for ranged combat,
+- dropping several items to clean out your inventory, or
+- using items multiple times in a row, like a wand.
+
+### Game Menu <a name="gamemenu"></a>
+
+While in the action menu, press LEFT or RIGHT to switch to the game menu.
+The game menu provides access to additional information, such as a map of the current dungeon level or player stats.
+It also provides the option to [save your game](#saving).
+
+### Saving and Loading <a name="saving"></a>
+
+When starting up, ArduRogue will automatically continue from a saved game if it exists. If there is no saved game, the title screen will prompt you to begin a new game.
+
+The game will only save (write to EEPROM) when
+- you select "Save Progress" from the game menu,
+- you die while there is an existing save file for your current game (it is then invalidated to enforce permadeath), or
+- you consent to saving a high score after the end of a game.
+
+If you never save your progress or save a high score, ArduRogue will leave the EEPROM untouched.
+
+## Game Reference <a name="gamereference"></a>
+
+### Items <a name="itemtypes"></a>
+
+| Symbol              | Name        | Stackable | Equippable | Notes |
+| :-----------------: | :---------: | :-------: | :--------: | ----- |
+| ![](img/food.png)   | food ration | &#9745;   |            | Consumable. Staves off hunger. |
+| ![](img/potion.png) | potion      | &#9745;   |            | Provides a temporary magical effect. Affects the user when drunk, or the target when thrown. |
+| ![](img/scroll.png) | scroll      | &#9745;   |            | Performs some magical effect when read. |
+| ![](img/wand.png)   | wand        |           |            | Performs some directed ranged magical effect when used. |
+| ![](img/bow.png)    | bow         |           | Weapon     | Must be equipped for ranged combat. |
+| ![](img/arrow.png)  | arrow       | &#9745;   |            | Required for ranged combat. |
+| ![](img/sword.png)  | sword       |           | Weapon     | Gives bonus to attack. |
+| ![](img/ring.png)   | ring        |           | Hand       | Can wear up to two rings at a time. Provides a constant magical effect. |
+| ![](img/amulet.png) | amulet      |           | Neck       | Provides a constant magical effect. |
+| ![](img/armor.png)  | armor       |           | Body       | Gives bonus to defense. |
+| ![](img/armor.png)  | helm        |           | Head       | Gives bonus to defense. |
+| ![](img/armor.png)  | boots       |           | Feet       | Gives bonus to defense. |
+
+#### Potions <a name="potions"></a>
 
 | Potion of... | Effect |
-| - | - |
-| healing | Restores the target's strength if weakened. Heals the target for 1/4 to 3/4 of max health. |
-| confusion | Temporarily confused the target. |
-| poison | Weakens the target. |
-| strength | Restores the target's strength if weakened. Otherwise, increases the target's strength by 1. |
+| ------------ | ------ |
+| healing      | Restores the target's strength if weakened. Heals the target for 1/4 to 3/4 of max health. |
+| confusion    | Temporarily confused the target. |
+| poison       | Weakens the target. |
+| strength     | Restores the target's strength if weakened. Otherwise, increases the target's strength by 1. |
 | invisibility | Makes the target temporarily invisible. |
-| paralysis | Temporarily paralyzes the target. |
-| slowing | Temporarily slows the target. |
-| experience | Immediately grants a set amount of experience. |
+| paralysis    | Temporarily paralyzes the target. |
+| slowing      | Temporarily slows the target. |
+| experience   | Immediately grants a set amount of experience. |
 
-### Scrolls <a name="scrolls"></a>
+#### Scrolls <a name="scrolls"></a>
 
-| Scroll of... | Effect |
-| - | - |
-| identify | Reveals the type and quality of a chosen item. |
-| enchant | Enhances the quality of a chosen item, or recharges a wand. |
-| remove curse | Removes the curse on an item, allowing it to be removed. |
-| teleport | Teleports the reader. |
+| Scroll of...  | Effect |
+| ------------- | ------ |
+| identify      | Reveals the type and quality of a chosen item. |
+| enchant       | Enhances the quality of a chosen item, or recharges a wand. |
+| remove curse  | Removes the curse on an item, allowing it to be removed. |
+| teleport      | Teleports the reader. |
 | magic mapping | Reveals the full layout of the current dungeon level. |
-| fear | Causes all enemies in view to flee temporarily. |
-| torment | Immediately halves the health of the reader and all enemies in view. |
-| mass confuse | Temporarily confuses the reader and all enemies in view. |
-| mass poison | Weakens the reader and all enemies in view. |
+| fear          | Causes all enemies in view to flee temporarily. |
+| torment       | Immediately halves the health of the reader and all enemies in view. |
+| mass confuse  | Temporarily confuses the reader and all enemies in view. |
+| mass poison   | Weakens the reader and all enemies in view. |
 
-### Rings <a name="rings"></a>
+#### Rings <a name="rings"></a>
 
-| Ring of... | Effect | Cursed Effect |
-| - | - | - |
-| see invisible | Allows the wearer to see invisible beings. | The wearer has a 50% chance to be unable to see a creature, whether or not it is invisible. |
-| strength | Grants a bonus to the user's strength. | Gives a penalty to the user's strength. |
-| dexterity | Grants a bonus to the user's dexterity. | Gives a penalty to the user's dexterity. |
-| protection | Grants a bonus to the user's defense, as if wearing better armor. | Gives a penalty to the user's defense. |
-| invisibility | The user is permanently invisible. | The user cannot become invisible, even temporarily. |
-| fire protection | The user is immune to fire. | Fire damages the user twice as much. |
-| attack | Grants a bonus to the user's attack, as if holding a stronger weapon. | Gives a penalty to the user's attack. |
-| sustenance | Slows down the advance of hunger. | Hastens the advance of hunger. |
+| Ring of...      | Effect | Cursed Effect |
+| --------------- | ------ | ------------- |
+| see invisible   | Allows the wearer to see invisible beings. | The wearer has a 50% chance to be unable to see an enemy, whether or not it is invisible. |
+| strength        | Grants a bonus to the wearer's strength. | Gives a penalty to the wearer's strength. |
+| dexterity       | Grants a bonus to the wearer's dexterity. | Gives a penalty to the wearer's dexterity. |
+| protection      | Grants a bonus to the wearer's defense, as if wearing better armor. | Gives a penalty to the wearer's defense. |
+| fire protection | The wearer is immune to fire. | Fire damages the wearer twice as much. |
+| attack          | Grants a bonus to the wearer's attack, as if holding a stronger weapon. | Gives a penalty to the wearer's attack. |
+| sustenance      | Slows down the advance of hunger. | Hastens the advance of hunger. |
+| invisibility    | The wearer is permanently invisible. | The wearer cannot become invisible, even temporarily. |
 
-### Amulets <a name="amulets"></a>
+#### Amulets <a name="amulets"></a>
 
 | Amulet of... | Effect | Cursed Effect |
-| - | - | - |
-| speed | 
-| clarity | 
-| conservation |
-| regeneration |
-| the vampire |
-| ironblood |
-| vitality |
-| wisdom |
+| ------------ | ------ | ------------- |
+| speed        | Grants a bonus to the wearer's speed. | Gives a penalty to the wearer's speed. |
+| clarity      | The wearer cannot be confused. | The wearer occasionally becomes confused. |
+| conservation | Chance for the wearer to not consume the item when using scrolls or potions. | Chance for the wearer to consume two items. |
+| regeneration | The wearer slowly heals. | Halves all healing the wearer receives. |
+| the vampire  | The wearer heals for a small amount on each melee hit. | Nothing. |
+| ironblood    | The wearer cannot be paralyzed. | The wearer occasionally becomes paralyzed. |
+| vitality     | Grants a bonus to the wearer's maximum health. | Gives a penalty to the wearer's maximum health. |
+| wisdom       | The wearer gains experience 50% more quickly. | The wearer gains experience 50% more slowly. |
 
-### Wands <a name="wands"></a>
+#### Wands <a name="wands"></a>
 
-## Enemy Types <a name="enemytypes"></a>
+### Enemies <a name="enemytypes"></a>
 
-| Symbol | Name | Str | Dex | Spd | Def | Health | Notes |
-| - | - | -: | -: | -: | -: | -: | - |
-| ![](img/bat.png)         | bat              |  1 | 6 | 8 | 0 |   1 | Passive: does not attack until attacked. |
-| ![](img/snake.png)       | snake            |  2 | 3 | 3 | 0 |   3 |  |
-| ![](img/rattlesnake.png) | rattlesnake      |  3 | 3 | 3 | 0 |   4 | Chance to poison on hit. |
-| ![](img/zombie.png)      | zombie           |  4 | 2 | 2 | 0 |   6 |  |
-| ![](img/goblin.png)      | goblin           |  5 | 4 | 4 | 1 |  10 |  |
-| ![](img/phantom.png)     | phantom          |  6 | 4 | 4 | 1 |  12 | Invisible. |
-| ![](img/orc.png)         | orc              |  7 | 4 | 4 | 3 |  16 |  |
-| ![](img/tarantula.png)   | tarantula        |  5 | 4 | 4 | 0 |  12 | Chance to paralyze on hit. |
-| ![](img/hobgoblin.png)   | hobgoblin        |  8 | 4 | 4 | 2 |  20 |  |
-| ![](img/mimic.png)       | mimic            |  7 | 4 | 4 | 3 |  20 | Disguises itself as an item. |
-| ![](img/incubus.png)     | incubus          |  9 | 4 | 4 | 3 |  24 | Chance to confuse on hit. |
-| ![](img/troll.png)       | troll            | 10 | 3 | 3 | 5 |  32 | Regenerates health. |
-| ![](img/griffin.png)     | griffin          |  7 | 6 | 6 | 1 |  24 |  |
-| ![](img/dragon.png)      | dragon           | 12 | 4 | 4 | 8 |  48 | Breathes fire. |
-| ![](img/angel.png)       | fallen angel     | 10 | 6 | 6 | 3 |  24 | Chance to confuse or paralyze on hit. |
-| ![](img/darkness.png)    | Lord of Darkness | 16 | 6 | 8 | 8 | 128 | Regenerates. Chance to poison, confuse, or paralyze on hit. |
+| Symbol                   | Name             | Str | Dex | Spd | Def | Health | Notes |
+| ------------------------ | ---------------- | --: | --: | --: | --: | -----: | ----- |
+| ![](img/bat.png)         | bat              |   1 |   6 |   8 |   0 |      1 | Passive: does not attack until attacked. |
+| ![](img/snake.png)       | snake            |   2 |   3 |   3 |   0 |      3 |  |
+| ![](img/rattlesnake.png) | rattlesnake      |   3 |   3 |   3 |   0 |      4 | Chance to poison on hit. |
+| ![](img/zombie.png)      | zombie           |   4 |   2 |   2 |   0 |      6 |  |
+| ![](img/goblin.png)      | goblin           |   5 |   4 |   4 |   1 |     10 |  |
+| ![](img/phantom.png)     | phantom          |   6 |   4 |   4 |   1 |     12 | Invisible. |
+| ![](img/orc.png)         | orc              |   7 |   4 |   4 |   3 |     16 |  |
+| ![](img/tarantula.png)   | tarantula        |   5 |   4 |   4 |   0 |     12 | Chance to paralyze on hit. |
+| ![](img/hobgoblin.png)   | hobgoblin        |   8 |   4 |   4 |   2 |     20 |  |
+| ![](img/mimic.png)       | mimic            |   7 |   4 |   4 |   3 |     20 | Disguises itself as an item. |
+| ![](img/incubus.png)     | incubus          |   9 |   4 |   4 |   3 |     24 | Chance to confuse on hit. |
+| ![](img/troll.png)       | troll            |  10 |   3 |   3 |   5 |     32 | Regenerates health. |
+| ![](img/griffin.png)     | griffin          |   7 |   6 |   6 |   1 |     24 |  |
+| ![](img/dragon.png)      | dragon           |  12 |   4 |   4 |   8 |     48 | Breathes fire. |
+| ![](img/angel.png)       | fallen angel     |  10 |   6 |   6 |   3 |     24 | Chance to confuse or paralyze on hit. |
+| ![](img/darkness.png)    | Lord of Darkness |  16 |   6 |   8 |   8 |    128 | Regenerates. Chance to poison, confuse, or paralyze on hit. |

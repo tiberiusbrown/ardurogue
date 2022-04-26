@@ -759,7 +759,7 @@ static void generate_random_item(uint8_t i)
 
     if(type == item::BOOTS)
     {
-        if(u8rand() < 5) subtype = BOOTS_SPEED;
+        if(u8rand() < 12) subtype = BOOTS_SPEED;
     }
 
     it.type = type;

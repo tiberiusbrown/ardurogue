@@ -336,7 +336,7 @@ enum
     AMU_CONSERVATION, // chance to prevent consuming potions/scrolls
     AMU_REGENERATION, // (chance to) heal each turn
     AMU_VAMPIRE,      // chance to drain health on hit
-    AMU_IRONBLOOD,    // poison immunity
+    AMU_IRONBLOOD,    // paralysis immunity
     AMU_VITALITY,     // bonus to max health
     AMU_WISDOM,       // buff to experience gain
     AMU_YENDOR,
@@ -774,7 +774,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap);
 uint8_t tstrlen(char const* s); // s not progmem
 
 // status.cpp: fmt is PROGMEM
-static constexpr uint8_t NUM_STATUS_ROWS = 8;
+static constexpr uint8_t NUM_STATUS_ROWS = 7;
 static constexpr uint8_t STATUS_START_Y = 65 - 6 * NUM_STATUS_ROWS;
 uint8_t advance_white(char* b, uint8_t i);
 void draw_status();

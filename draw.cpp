@@ -242,6 +242,7 @@ void draw_info_without_status()
         else if(hunger > 200)
             s = PSTR("Hungry");
         draw_text(1, 12, s);
+        set_hline(1, 63, 20);
     }
 }
 
