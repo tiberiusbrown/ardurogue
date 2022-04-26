@@ -37,6 +37,14 @@ void run();
 #error "Building ArduRogue requires support for at least C++11"
 #endif
 
+#if defined(__GNUC__)
+#define FORCEINLINE __attribute__((always_inline))
+#elif defined(_MSC_VER)
+#define FORCEINLINE __forceinline
+#else
+#define FORCEINLINE inline
+#endif
+
 #ifdef ARDUINO
 #include <Arduino.h>
 
@@ -676,8 +684,15 @@ extern char const* const UNID_WND_NAMES[] PROGMEM;
 extern char const* const INV_CATEGORIES[] PROGMEM;
 
 // game.cpp
-void paint_left(bool clear = true);  // draw to left half screen
-void paint_right(bool clear = true); // draw to right half screen
+void set_pixel(uint8_t x, uint8_t y);
+void clear_pixel(uint8_t x, uint8_t y);
+void inv_pixel(uint8_t x, uint8_t y);
+void dig_tile(uint8_t x, uint8_t y);
+void fill_tile(uint8_t x, uint8_t y);
+void paint_left();  // draw to left half screen
+void paint_right(); // draw to right half screen
+void paint_left_no_clear();
+void paint_right_no_clear();
 uint8_t u8rand();
 uint8_t u8rand(uint8_t m);
 bool tile_is_solid(uint8_t x, uint8_t y);
@@ -726,9 +741,6 @@ extern int8_t const DDIRX[16] PROGMEM;
 static int8_t const* DDIRY = &DDIRX[8];
 static constexpr uint8_t SPACE_WIDTH = 1;
 void set_img_prog(uint8_t const* p, uint8_t w, uint8_t x, uint8_t y);
-void set_pixel(uint8_t x, uint8_t y);
-void clear_pixel(uint8_t x, uint8_t y);
-void inv_pixel(uint8_t x, uint8_t y);
 void set_hline(uint8_t x0, uint8_t x1, uint8_t y);
 void clear_hline(uint8_t x0, uint8_t x1, uint8_t y);
 void inv_hline(uint8_t x0, uint8_t x1, uint8_t y);
@@ -748,7 +760,6 @@ void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n);
 void draw_sprite_nonprog_rel_and_wait(uint16_t tp, uint8_t x, uint8_t y);
 
 // generate.cpp
-void dig_tile(uint8_t x, uint8_t y);
 void new_entity(uint8_t i, uint8_t type, uint8_t x, uint8_t y);
 void dig_nonsecret_door_tiles();
 void update_doors();   // set tile to solid for closed doors
@@ -822,6 +833,7 @@ void end_slow(uint8_t i);
 
 // monsters.cpp
 extern entity_info const MONSTER_INFO[] PROGMEM;
+entity_info entity_get_info(uint8_t i);
 void entity_get_info(uint8_t i, entity_info& info);
 void monster_ai(uint8_t i, action& a);
 
@@ -829,7 +841,8 @@ void monster_ai(uint8_t i, action& a);
 void draw_yesno(uint8_t x, uint8_t y);
 uint8_t inventory_menu(char const* s);
 void show_high_scores(uint8_t i);
-bool yesno_menu(char const* fmt, ...);
+bool yesno_menui(char const* fmt, item it);
+bool yesno_menu(char const* s);
 bool direction_menu_nocancel(uint8_t& d, char const* s);
 bool direction_menu(uint8_t& d, char const* s);
 bool direction_menu(uint8_t& d);

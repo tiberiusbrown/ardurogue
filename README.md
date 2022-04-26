@@ -28,12 +28,7 @@ If enough prog bytes could be freed up...
 - Spawn new monsters on occasion
 - Different map types (cave style?)
 - Wands
-  - Striking (simple single-target damage)
-  - Force (pushes monsters back)
-  - Fire (area of effect damage)
   - Lightning (arcs between monsters)
-  - Teleportation (teleports target)
-  - Frenzy (target attacks any nearest entity)
 
 ## Build Notes
 

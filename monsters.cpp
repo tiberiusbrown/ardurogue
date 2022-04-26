@@ -74,6 +74,13 @@ entity_info const MONSTER_INFO[] PROGMEM =
     decl_ent(1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 16,  6,  8,  8, 128, 90), // lord of darkness
 };
 
+entity_info entity_get_info(uint8_t i)
+{
+    entity_info r;
+    entity_get_info(i, r);
+    return r;
+}
+
 void entity_get_info(uint8_t i, entity_info& info)
 {
     if(i == 0)

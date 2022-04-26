@@ -40,34 +40,92 @@ uint8_t u8rand(uint8_t m)
     return simple_mod(u8rand(), m);
 }
 
+static FORCEINLINE uint8_t ymask(uint8_t y)
+{
+    uint8_t m;
+#if defined(__GNUC__) && defined(__AVR_ARCH__)
+    asm volatile(
+        "      ldi  %[m], 1  \n\t"
+        "      andi %[y], 7  \n\t"
+        "      breq L%=2     \n\t"
+        "L%=1: lsl  %[m]     \n\t"
+        "      dec  %[y]     \n\t"
+        "      brne L%=1     \n\t"
+        "L%=2:               \n\t"
+        : [m] "=&d" (m),
+          [y] "+d"  (y)
+    );
+#else
+    m = 1 << (y % 8);
+#endif
+    return m;
+}
+
+void set_pixel(uint8_t x, uint8_t y)
+{
+    if(x < 64 && y < 64)
+    {
+        uint8_t& b = buf[(uint16_t(y << 3) & 0xffc0) | x];
+        b |= ymask(y);
+    }
+}
+
+void clear_pixel(uint8_t x, uint8_t y)
+{
+    if(x < 64 && y < 64)
+    {
+        uint8_t& b = buf[(uint16_t(y << 3) & 0xffc0) | x];
+        b &= ~ymask(y);
+    }
+}
+
+void inv_pixel(uint8_t x, uint8_t y)
+{
+    if(x < 64 && y < 64)
+    {
+        uint8_t& b = buf[(uint16_t(y << 3) & 0xffc0) | x];
+        b ^= ymask(y);
+    }
+}
+
+void dig_tile(uint8_t x, uint8_t y)
+{
+    uint16_t i = (uint16_t(y * (MAP_W / 8)) & 0xffc0) | x;
+    tmap[i] &= ~ymask(y);
+}
+
+void fill_tile(uint8_t x, uint8_t y)
+{
+    uint16_t i = (uint16_t(y * (MAP_W / 8)) & 0xffc0) | x;
+    tmap[i] |= ymask(y);
+}
+
 bool tile_is_unknown(uint8_t x, uint8_t y)
 {
     if(x >= MAP_W || y >= MAP_H) return false;
-    uint16_t i = y / 8 * MAP_W + x;
-    uint8_t m = 1 << (y % 8);
-    return (tfog[i] & m) == 0;
+    uint16_t i = (uint16_t(y * (MAP_W / 8)) & 0xffc0) | x;
+    return (tfog[i] & ymask(y)) == 0;
 }
 
 bool tile_is_solid_or_unknown(uint8_t x, uint8_t y)
 {
     if(x >= MAP_W || y >= MAP_H) return true;
-    uint16_t i = y / 8 * MAP_W + x;
-    uint8_t m = 1 << (y % 8);
-    return ((tmap[i] | ~tfog[i]) & m) != 0;
+    uint16_t i = (uint16_t(y * (MAP_W / 8)) & 0xffc0) | x;
+    return ((tmap[i] | ~tfog[i]) & ymask(y)) != 0;
 }
 
 bool tile_is_solid(uint8_t x, uint8_t y)
 {
     if(x >= MAP_W || y >= MAP_H) return true;
-    uint8_t t = tmap[y / 8 * MAP_W + x];
-    return (t & (1 << (y % 8))) != 0;
+    uint16_t i = (uint16_t(y * (MAP_W / 8)) & 0xffc0) | x;
+    return (tmap[i] & ymask(y)) != 0;
 }
 
 bool tile_is_explored(uint8_t x, uint8_t y)
 {
     if(x >= MAP_W || y >= MAP_H) return false;
-    uint8_t t = tfog[y / 8 * MAP_W + x];
-    return (t & (1 << (y % 8))) != 0;
+    uint16_t i = (uint16_t(y * (MAP_W / 8)) & 0xffc0) | x;
+    return (tfog[i] & ymask(y)) != 0;
 }
 
 door* get_door(uint8_t x, uint8_t y)
@@ -362,7 +420,7 @@ void step()
             map_item& mit = items[i];
             if(mit.it.is_nothing() || mit.x != px || mit.y != py)
                 continue;
-            if(yesno_menu(PSTR("Pick up the @i?"), mit.it))
+            if(yesno_menui(PSTR("Pick up the @i?"), mit.it))
             {
                 player_pickup_item(i);
                 render();
@@ -397,7 +455,7 @@ void step()
                 else
                 {
                     hs.type = HS_RETURNED;
-                    status(PSTR("You leave without the amulet of Yendor."));
+                    status(PSTR("You have left without the amulet of Yendor."));
                 }
                 ents[0].type = entity::NONE;
                 return;
@@ -488,8 +546,10 @@ uint8_t process_high_score()
     return i;
 }
 
-void paint_left(bool clear) { paint_offset(0, clear); }
-void paint_right(bool clear) { paint_offset(64, clear); }
+void paint_left() { paint_offset(0, true); }
+void paint_right() { paint_offset(64, true); }
+void paint_left_no_clear() { paint_offset(0, false); }
+void paint_right_no_clear() { paint_offset(64, false); }
 
 void run()
 {

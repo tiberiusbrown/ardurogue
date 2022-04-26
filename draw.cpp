@@ -42,87 +42,60 @@ static uint16_t const ITEM_IMGS[] PROGMEM =
 
 static uint16_t const DOOR_IMGS[2] PROGMEM = { 0xefbe, 0xe11e };
 
-void set_pixel(uint8_t x, uint8_t y)
-{
-    if(!((x | y) & 0xc0)) // if(x < 64 && y < 64)
-    {
-        uint8_t& b = buf[y / 8 * 64 + x];
-        b |= (1 << (y % 8));
-    }
-}
-
-void clear_pixel(uint8_t x, uint8_t y)
-{
-    if(!((x | y) & 0xc0)) // if(x < 64 && y < 64)
-    {
-        uint8_t& b = buf[y / 8 * 64 + x];
-        b &= ~(1 << (y % 8));
-    }
-}
-
-void inv_pixel(uint8_t x, uint8_t y)
-{
-    if(!((x | y) & 0xc0)) // if(x < 64 && y < 64)
-    {
-        uint8_t& b = buf[y / 8 * 64 + x];
-        b ^= (1 << (y % 8));
-    }
-}
-
 void set_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
     ++x1;
-    for(; x0 != x1; ++x0)
-        set_pixel(x0, y);
+    do set_pixel(x0, y);
+    while(++x0 != x1);
 }
 
 void clear_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
     ++x1;
-    for(; x0 != x1; ++x0)
-        clear_pixel(x0, y);
+    do clear_pixel(x0, y);
+    while(++x0 != x1);
 }
 
 void inv_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
     ++x1;
-    for(; x0 != x1; ++x0)
-        inv_pixel(x0, y);
+    do inv_pixel(x0, y);
+    while(++x0 != x1);
 }
 
 void set_vline(uint8_t x, uint8_t y0, uint8_t y1)
 {
     ++y1;
-    for(; y0 != y1; ++y0)
-        set_pixel(x, y0);
+    do set_pixel(x, y0);
+    while(++y0 != y1);
 }
 
 void clear_vline(uint8_t x, uint8_t y0, uint8_t y1)
 {
     ++y1;
-    for(; y0 != y1; ++y0)
-        clear_pixel(x, y0);
+    do clear_pixel(x, y0);
+    while(++y0 != y1);
 }
 
 void set_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     ++y1;
-    for(; y0 != y1; ++y0)
-        set_hline(x0, x1, y0);
+    do set_hline(x0, x1, y0);
+    while(++y0 != y1);
 }
 
 void clear_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     ++y1;
-    for(; y0 != y1; ++y0)
-        clear_hline(x0, x1, y0);
+    do clear_hline(x0, x1, y0);
+    while(++y0 != y1);
 }
 
 void inv_rect(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
 {
     ++y1;
-    for(; y0 != y1; ++y0)
-        inv_hline(x0, x1, y0);
+    do inv_hline(x0, x1, y0);
+    while(++y0 != y1);
 }
 
 void set_box(uint8_t x0, uint8_t x1, uint8_t y0, uint8_t y1)
@@ -524,7 +497,7 @@ void draw_sprite_nonprog_rel_and_wait(uint16_t tp, uint8_t x, uint8_t y)
     x = x - ents[0].x + 6;
     y = y - ents[0].y + 6;
     draw_sprite_nonprog(tp, x, y);
-    paint_left(false);
+    paint_left_no_clear();
     wait();
 }
 

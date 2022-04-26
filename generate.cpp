@@ -380,25 +380,32 @@ bool room::inside_bb(uint8_t tx, uint8_t ty) const
     return (rx < w() && ry < h());
 }
 
-void dig_tile(uint8_t x, uint8_t y)
+static FORCEINLINE uint8_t ymask(uint8_t y)
 {
-    uint16_t const i = y / 8 * MAP_W + x;
-    uint8_t const m = 1 << (y % 8);
-    tmap[i] &= ~m;
-}
-
-static void fill_tile(uint8_t x, uint8_t y)
-{
-    uint16_t const i = y / 8 * MAP_W + x;
-    uint8_t const m = 1 << (y % 8);
-    tmap[i] |= m;
+    uint8_t m;
+#if defined(__GNUC__) && defined(__AVR_ARCH__)
+    asm volatile(
+        "      ldi  %[m], 1  \n\t"
+        "      andi %[y], 7  \n\t"
+        "      breq L%=2     \n\t"
+        "L%=1: lsl  %[m]     \n\t"
+        "      dec  %[y]     \n\t"
+        "      brne L%=1     \n\t"
+        "L%=2:               \n\t"
+        : [m] "=&d" (m),
+          [y] "+d"  (y)
+    );
+#else
+    m = 1 << (y % 8);
+#endif
+    return m;
 }
 
 void dig_nonsecret_door_tiles()
 {
     for(int i = 0; i < num_doors; ++i)
     {
-        auto const& d = doors[i];
+        auto d = doors[i];
         if(!d.secret)
             dig_tile(d.x, d.y);
     }
@@ -408,7 +415,7 @@ void update_doors()
 {
     for(int i = 0; i < num_doors; ++i)
     {
-        auto const& d = doors[i];
+        auto d = doors[i];
         if(d.open)
             dig_tile(d.x, d.y);
         else
@@ -424,12 +431,10 @@ static bool dig_room(
     r.y = y;
     r.type = type;
 
-    if(x >= MAP_W) return false;
-    if(y >= MAP_H) return false;
+    if(x >= MAP_W || y >= MAP_H) return false;
     uint8_t bx = x + r.w();
     uint8_t by = y + r.h();
-    if(bx > MAP_W) return false;
-    if(by > MAP_H) return false;
+    if(bx > MAP_W || by > MAP_H) return false;
 
     // ensure room can fit here
     for(uint8_t ty = y; ty < by; ++ty)

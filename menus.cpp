@@ -168,16 +168,27 @@ void draw_yesno(uint8_t x, uint8_t y)
     draw_text(x + 43, y + 1, PSTR("No"));
 }
 
-bool yesno_menu(char const* fmt, ...)
+bool yesno_menu(char const* s)
+{
+    item undefined_item;
+#if defined(__GNUC__) && defined(__AVR_ARCH__)
+    // trick gcc into thinking "undefined_item" is defined
+    // this prevents inserting additional instructions to initialize regs
+    asm("" : "=r"(undefined_item));
+#else
+    // who cares about non avr
+    undefined_item = {};
+#endif
+    return yesno_menui(s, undefined_item);
+}
+
+bool yesno_menui(char const* fmt, item it)
 {
     draw_info_without_status();
     uint8_t y = STATUS_START_Y;
     {
         char t[128];
-        va_list ap;
-        va_start(ap, fmt);
-        tvsprintf(t, fmt, ap);
-        va_end(ap);
+        tsprintf(t, fmt, it);
         uint8_t len = tstrlen(t);
         uint8_t x = 1;
         uint8_t n = 0;
