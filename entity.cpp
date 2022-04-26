@@ -31,6 +31,10 @@ uint8_t entity_speed(uint8_t i)
         // amulet of speed
         int8_t n = amulet_bonus(AMU_SPEED);
         r += ((n + 1) / 2);
+        // boots of speed
+        uint8_t j = pinfo.equipped[SLOT_BOOTS];
+        if(j < INV_ITEMS && inv[i].is_type(item::BOOTS, BOOTS_SPEED))
+            r += 2;
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].speed);

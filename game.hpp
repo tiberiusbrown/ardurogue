@@ -356,6 +356,13 @@ enum
     NUM_WND,
 };
 
+// boot types
+enum
+{
+    BOOTS_NORMAL,
+    BOOTS_SPEED,
+};
+
 static constexpr uint8_t AMU_VITALITY_BONUS = 5;
 static constexpr uint8_t ENCHANT_LEVEL_ZERO = 32;
 static constexpr uint8_t ENCHANT_LEVEL_MAX = ENCHANT_LEVEL_ZERO + 15;

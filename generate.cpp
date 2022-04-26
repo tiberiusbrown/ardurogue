@@ -752,10 +752,12 @@ static void generate_random_item(uint8_t i)
     else if(r < (uint8_t)N_BOOTS)
         type = item::BOOTS;
 
-    if(type >= item::SWORD)
-        quant = enchant;
-
 #endif
+
+    if(type == item::BOOTS)
+    {
+        if(u8rand() < 5) subtype = BOOTS_SPEED;
+    }
 
     it.type = type;
     it.subtype = subtype;
