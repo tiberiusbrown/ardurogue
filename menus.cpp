@@ -496,7 +496,12 @@ static void men_settings()
 
 static void men_abandon()
 {
-
+    if(yesno_menu(PSTR("Are you sure you want to end this game?")))
+    {
+        status(PSTR("You have abandoned this game."));
+        hs.type = HS_ABANDONED;
+        ents[0].type = entity::NONE;
+    }
 }
 
 static void men_save()
