@@ -40,54 +40,6 @@ uint8_t u8rand(uint8_t m)
     return simple_mod(u8rand(), m);
 }
 
-static FORCEINLINE uint8_t ymask(uint8_t y)
-{
-    uint8_t m;
-#if defined(__GNUC__) && defined(__AVR_ARCH__)
-    asm volatile(
-        "      ldi  %[m], 1  \n\t"
-        "      andi %[y], 7  \n\t"
-        "      breq L%=2     \n\t"
-        "L%=1: lsl  %[m]     \n\t"
-        "      dec  %[y]     \n\t"
-        "      brne L%=1     \n\t"
-        "L%=2:               \n\t"
-        : [m] "=&d" (m),
-          [y] "+d"  (y)
-    );
-#else
-    m = 1 << (y % 8);
-#endif
-    return m;
-}
-
-void set_pixel(uint8_t x, uint8_t y)
-{
-    if(x < 64 && y < 64)
-    {
-        uint8_t& b = buf[(uint16_t(y << 3) & 0xffc0) | x];
-        b |= ymask(y);
-    }
-}
-
-void clear_pixel(uint8_t x, uint8_t y)
-{
-    if(x < 64 && y < 64)
-    {
-        uint8_t& b = buf[(uint16_t(y << 3) & 0xffc0) | x];
-        b &= ~ymask(y);
-    }
-}
-
-void inv_pixel(uint8_t x, uint8_t y)
-{
-    if(x < 64 && y < 64)
-    {
-        uint8_t& b = buf[(uint16_t(y << 3) & 0xffc0) | x];
-        b ^= ymask(y);
-    }
-}
-
 void dig_tile(uint8_t x, uint8_t y)
 {
     uint16_t i = (uint16_t(y * (MAP_W / 8)) & 0xffc0) | x;

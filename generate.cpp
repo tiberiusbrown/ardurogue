@@ -380,27 +380,6 @@ bool room::inside_bb(uint8_t tx, uint8_t ty) const
     return (rx < w() && ry < h());
 }
 
-static FORCEINLINE uint8_t ymask(uint8_t y)
-{
-    uint8_t m;
-#if defined(__GNUC__) && defined(__AVR_ARCH__)
-    asm volatile(
-        "      ldi  %[m], 1  \n\t"
-        "      andi %[y], 7  \n\t"
-        "      breq L%=2     \n\t"
-        "L%=1: lsl  %[m]     \n\t"
-        "      dec  %[y]     \n\t"
-        "      brne L%=1     \n\t"
-        "L%=2:               \n\t"
-        : [m] "=&d" (m),
-          [y] "+d"  (y)
-    );
-#else
-    m = 1 << (y % 8);
-#endif
-    return m;
-}
-
 void dig_nonsecret_door_tiles()
 {
     for(int i = 0; i < num_doors; ++i)

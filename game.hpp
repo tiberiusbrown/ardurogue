@@ -684,9 +684,6 @@ extern char const* const UNID_WND_NAMES[] PROGMEM;
 extern char const* const INV_CATEGORIES[] PROGMEM;
 
 // game.cpp
-void set_pixel(uint8_t x, uint8_t y);
-void clear_pixel(uint8_t x, uint8_t y);
-void inv_pixel(uint8_t x, uint8_t y);
 void dig_tile(uint8_t x, uint8_t y);
 void fill_tile(uint8_t x, uint8_t y);
 void paint_left();  // draw to left half screen
@@ -741,6 +738,9 @@ extern int8_t const DDIRX[16] PROGMEM;
 static int8_t const* DDIRY = &DDIRX[8];
 static constexpr uint8_t SPACE_WIDTH = 1;
 void set_img_prog(uint8_t const* p, uint8_t w, uint8_t x, uint8_t y);
+void set_pixel(uint8_t x, uint8_t y);
+void clear_pixel(uint8_t x, uint8_t y);
+void inv_pixel(uint8_t x, uint8_t y);
 void set_hline(uint8_t x0, uint8_t x1, uint8_t y);
 void clear_hline(uint8_t x0, uint8_t x1, uint8_t y);
 void inv_hline(uint8_t x0, uint8_t x1, uint8_t y);
@@ -867,6 +867,27 @@ void save();
 void destroy_save();
 bool save_valid();
 void load();
+
+static FORCEINLINE uint8_t ymask(uint8_t y)
+{
+    uint8_t m;
+#if defined(__GNUC__) && defined(__AVR_ARCH__)
+    asm volatile(
+        "      ldi  %[m], 1  \n\t"
+        "      andi %[y], 7  \n\t"
+        "      breq L%=2     \n\t"
+        "L%=1: lsl  %[m]     \n\t"
+        "      dec  %[y]     \n\t"
+        "      brne L%=1     \n\t"
+        "L%=2:               \n\t"
+        : [m] "=&d" (m),
+          [y] "+d"  (y)
+    );
+#else
+    m = 1 << (y % 8);
+#endif
+    return m;
+}
 
 static constexpr uint16_t SAVE_FILE_BYTES = sizeof(saved_data);
 static constexpr uint16_t GAME_DATA_BYTES = sizeof(globals);

@@ -445,33 +445,41 @@ static void draw_player_info(uint8_t x)
         T0, T1, T2, T3, T4, T5, T6,
     };
 
-    uint8_t ta[14];
-    uint8_t* const tb = &ta[7];
-
-    ta[0] = tb[0] = plevel + 1;
-    ta[1] = entity_max_health(0), tb[1] = pstats.max_health;
-    ta[2] = entity_strength(0), tb[2] = pstats.strength;
-    ta[3] = entity_dexterity(0), tb[3] = pstats.dexterity;
-    ta[4] = entity_attack(0), tb[4] = ta[2];
-    ta[5] = entity_defense(0), tb[5] = pstats.defense;
-    ta[6] = entity_speed(0), tb[6] = pstats.speed;
-
-    for(uint8_t i = 0, y = 9; i < 7; ++i, y += 6)
     {
-        draw_text(x, y, pgmptr(&TS[i]));
-        draw_info_bonus(x + 40, y, ta[i], tb[i]);
+        uint8_t ta[14];
+        uint8_t* const tb = &ta[7];
+
+        ta[0] = tb[0] = plevel + 1;
+        ta[1] = entity_max_health(0), tb[1] = pstats.max_health;
+        ta[2] = entity_strength(0),   tb[2] = pstats.strength;
+        ta[3] = entity_dexterity(0),  tb[3] = pstats.dexterity;
+        ta[4] = entity_attack(0),     tb[4] = ta[2];
+        ta[5] = entity_defense(0),    tb[5] = pstats.defense;
+        ta[6] = entity_speed(0),      tb[6] = pstats.speed;
+
+        for(uint8_t i = 0, y = 9; i < 7; ++i, y += 6)
+        {
+            draw_text(x, y, pgmptr(&TS[i]));
+            draw_info_bonus(x + 40, y, ta[i], tb[i]);
+        }
     }
 
-    uint8_t y = 9;
-    draw_text(x + 70, y, PSTR("Effects:"));
-    x += 75;
-    if(ents[0].confused ) draw_text(x, y += 6, PSTR("confused"));
-    if(ents[0].paralyzed) draw_text(x, y += 6, PSTR("paralyzed"));
-    if(ents[0].weakened ) draw_text(x, y += 6, PSTR("weakened"));
-    if(ents[0].slowed   ) draw_text(x, y += 6, PSTR("slowed"));
-    if(ents[0].invis    ) draw_text(x, y += 6, PSTR("invisible"));
-    if(hunger == 255    ) draw_text(x, y += 6, PSTR("starving"));
-    if(y == 9) draw_text(x, 15, PSTR("none"));
+    {
+        char const* ts[6];
+        char const** tp = &ts[0];
+        uint8_t y = 9;
+        draw_text(x + 70, y, PSTR("Effects:"));
+        if(ents[0].confused)  *tp++ = PSTR("confused");
+        if(ents[0].paralyzed) *tp++ = PSTR("paralyzed");
+        if(ents[0].weakened)  *tp++ = PSTR("weakened");
+        if(ents[0].slowed)    *tp++ = PSTR("slowed");
+        if(ents[0].invis)     *tp++ = PSTR("invisible");
+        if(hunger == 255)     *tp++ = PSTR("starving");
+        x += 75;
+        while(tp > &ts[0])
+            draw_text(x, y += 6, *(--tp));
+        if(y == 9) draw_text(x, 15, PSTR("none"));
+    }
 }
 static void men_info()
 {

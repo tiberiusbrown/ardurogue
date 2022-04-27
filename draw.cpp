@@ -42,6 +42,38 @@ static uint16_t const ITEM_IMGS[] PROGMEM =
 
 static uint16_t const DOOR_IMGS[2] PROGMEM = { 0xefbe, 0xe11e };
 
+static void custom_pixel(uint8_t x, uint8_t y, uint8_t c)
+{
+    if(x < 64 && y < 64)
+    {
+        uint8_t& b = buf[(uint16_t(y << 3) & 0xffc0) | x];
+        uint8_t m = ymask(y);
+        uint8_t t = b;
+        if(c == 0)
+            t |= m;
+        if(c == 1)
+            t &= ~m;
+        if(c == 2)
+            t ^= m;
+        b = t;
+    }
+}
+
+void set_pixel(uint8_t x, uint8_t y)
+{
+    custom_pixel(x, y, 0);
+}
+
+void clear_pixel(uint8_t x, uint8_t y)
+{
+    custom_pixel(x, y, 1);
+}
+
+void inv_pixel(uint8_t x, uint8_t y)
+{
+    custom_pixel(x, y, 2);
+}
+
 void set_hline(uint8_t x0, uint8_t x1, uint8_t y)
 {
     ++x1;
