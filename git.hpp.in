@@ -12,3 +12,4 @@
 #define GIT_COMMIT_BODY    "@GIT_COMMIT_BODY@"
 #define GIT_DESCRIBE       "@GIT_DESCRIBE@"
 #define GIT_BRANCH         "@GIT_BRANCH@"
+#define GIT_COUNT          "@GIT_COUNT@"

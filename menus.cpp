@@ -44,7 +44,7 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
     {
 #if !ENABLE_DEBUG_MENU
         static char const VERSION[] PROGMEM =
-            GIT_COMMIT_DAY "  " GIT_DESCRIBE "  V" SAVE_VERSION_STR;
+            GIT_COUNT "  " GIT_COMMIT_DAY "  " GIT_DESCRIBE "  V" SAVE_VERSION_STR;
         draw_text(x, 59, VERSION);
 #endif
     }

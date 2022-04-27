@@ -106,6 +106,7 @@ set(_state_variable_names
     GIT_COMMIT_BODY
     GIT_DESCRIBE
     GIT_BRANCH
+	GIT_COUNT
     # >>>
     # 1. Add the name of the additional git variable you're interested in monitoring
     #    to this list.
@@ -195,6 +196,11 @@ function(GetGitState _working_dir)
 
     string(SUBSTRING "${output}" 0 10 GIT_COMMIT_DAY)
 	set(ENV{GIT_COMMIT_DAY} "${GIT_COMMIT_DAY}")
+	
+    RunGitCommand(rev-list --count ${object})
+    if(exit_code EQUAL 0)
+        set(ENV{GIT_COUNT} "${output}")
+    endif()
 
     RunGitCommand(show -s "--format=%s" ${object})
     if(exit_code EQUAL 0)
