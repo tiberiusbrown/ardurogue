@@ -52,7 +52,7 @@ bool save_valid()
 void destroy_save()
 {
     // set player type to NONE
-    update_persistent(EEPROM_START + offsetof(globals, saved.ents.d_[0].type), entity::NONE);
+    update_persistent(EEPROM_START + offsetof(saved_data, ents.d_[0].type), entity::NONE);
     update_checksum();
     flush_persistent();
 }

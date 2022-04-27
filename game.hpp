@@ -555,6 +555,7 @@ static constexpr uint8_t NUM_HIGH_SCORES = 4;
 struct saved_data
 {
     uint16_t                     game_seed;
+    uint16_t                     rand_seed;
     high_score                   hs;
     array<map_info, NUM_MAPS>    maps;
     array<item, INV_ITEMS>       inv;
@@ -580,7 +581,6 @@ struct saved_data
 
 struct globals
 {
-    uint16_t rand_seed;
     array<uint8_t, 64 * 64 / 8> buf;
     array<uint8_t, size_t(MAP_W) * MAP_H / 8> tmap; // 1: wall/door
     array<uint8_t, size_t(MAP_W) * MAP_H / 8> tfog; // 1: explored
@@ -594,7 +594,13 @@ struct globals
     array<uint8_t, NUM_RNG> perm_rng;
     array<uint8_t, NUM_AMU> perm_amu;
     array<uint8_t, NUM_WND> perm_wnd;
-    bool just_moved;
+    uint8_t gflags;
+};
+
+enum
+{
+    GFLAG_JUST_MOVED = (1 << 0),
+    GFLAG_JUST_SAVED = (1 << 1),
 };
 
 extern globals globals_;
@@ -620,7 +626,7 @@ static auto& inv = globals_.saved.inv;
 static auto& game_seed = globals_.saved.game_seed;
 static auto& pstats = globals_.saved.pstats;
 static auto& pinfo = globals_.saved.pinfo;
-static auto& rand_seed = globals_.rand_seed;
+static auto& rand_seed = globals_.saved.rand_seed;
 static auto& wall_style = globals_.saved.wall_style;
 static auto& statusbuf = globals_.statusbuf;
 static auto& statusn = globals_.statusn;
@@ -634,7 +640,7 @@ static auto& perm_wnd = globals_.perm_wnd;
 static auto& identified = globals_.saved.identified;
 static auto& prev_action = globals_.saved.prev_action;
 static auto& plevel = globals_.saved.plevel;
-static auto& just_moved = globals_.just_moved;
+static auto& gflags = globals_.gflags;
 static auto& hs = globals_.saved.hs;
 static auto& high_scores = globals_.saved.high_scores;
 static auto& hunger = globals_.saved.hunger;

@@ -42,8 +42,8 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
     }
     else
     {
-        static constexpr char HEXCHARS[] = "0123456789abcdef";
-        static auto const BLAH PROGMEM = concat(
+        static constexpr char HEXCHARS[] = "0123456789ABCDEF";
+        static auto const VERSION PROGMEM = concat(
             MAKE_NON_NULLED_CHAR_ARRAY(GIT_COMMIT_DAY "  " GIT_DESCRIBE "  "),
             char_array<5>{ {
                 HEXCHARS[(SAVE_VERSION >> 12) & 0xf],
@@ -53,7 +53,7 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
                 '\0'
             } }
         );
-        draw_text(x - 1, 59, BLAH.d_);
+        draw_text(x - 1, 59, VERSION.d_);
         draw_textf(x + 96, 59, PSTR("@X  @u"), game_seed, unused_stack());
     }
 }
@@ -313,7 +313,7 @@ static char const MEN_STATS[] PROGMEM = "Player Info";
 static char const MEN_HS[] PROGMEM = "High Scores";
 static char const MEN_SETTINGS[] PROGMEM = "Settings";
 static char const MEN_ABANDON[] PROGMEM = "Abandon Game";
-static char const MEN_SAVE[] PROGMEM = "Save Progress";
+static char const MEN_SAVE[] PROGMEM = "Save and Exit";
 
 static char const* const MEN_ITEMS[] PROGMEM =
 {
@@ -537,6 +537,7 @@ static void men_abandon()
 static void men_save()
 {
     save();
+    gflags |= GFLAG_JUST_SAVED;
 }
 
 #if ENABLE_DUNGEON_SCROLL

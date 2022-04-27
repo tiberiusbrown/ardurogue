@@ -51,14 +51,19 @@ It also provides the option to [save your game](#saving).
 
 ### Saving and Loading <a name="saving"></a>
 
-When starting up, ArduRogue will automatically continue from a saved game if it exists. If there is no saved game, the title screen will prompt you to begin a new game.
+After pressing A at the title screen, ArduRogue will either continue from a saved game, if it exists, or begin a new game.
 
-The game will only save (write to EEPROM) when
-- you select "Save Progress" from the game menu,
-- you die while there is an existing save file for your current game (it is then invalidated to enforce permadeath), or
+**Beware! ArduRogue enforces permadeath by deleting the saved game after it is loaded. Be sure to save every time when you're finished playing.**
+Saving a game returns you to the title screen.
+
+ArduRogue will only write to EEPROM when
+- you select "Save and Exit" from the game menu,
+- you continue playing from an existing saved game (it is then deleted), or
 - you consent to saving a high score after the end of a game.
 
-If you never save your progress or save a high score, ArduRogue will leave the EEPROM untouched.
+Settings are also stored with the saved game, but are not deleted when loading.
+
+The EEPROM is not written to when beginning a new game. If you never save your progress or save a high score then ArduRogue will never touch EEPROM.
 
 ## Game Reference <a name="gamereference"></a>
 

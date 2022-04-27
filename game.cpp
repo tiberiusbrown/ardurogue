@@ -361,7 +361,7 @@ void step()
     //
     // checks after the player moved
     //
-    if(just_moved)
+    if(gflags & GFLAG_JUST_MOVED)
     {
         uint8_t px = ents[0].x, py = ents[0].y;
         // loop through items in reverse order
@@ -455,7 +455,9 @@ void step()
         advance();
     }
 end:
-    just_moved = (px != ents[0].x || py != ents[0].y);
+    gflags &= ~GFLAG_JUST_MOVED;
+    if(px != ents[0].x || py != ents[0].y)
+        gflags |= GFLAG_JUST_MOVED;
 }
 
 static void init_all_perms()
@@ -513,55 +515,57 @@ void run()
         reset_status();
         memzero(&globals_, sizeof(globals_));
 
+        draw_text(7, 24, PSTR("ArduRogue"));
+        set_box(5, 42, 22, 30);
+        draw_text(0, 34, PSTR("Press A to play."));
+        paint_offset(40);
+        while(wait_btn() != BTN_A)
+            (void)0;
+
         bool saved = save_valid();
         if(saved) load();
-        else wall_style = 2;
-
-        char const* back = PSTR("");
         saved &= (ents[0].type == entity::PLAYER);
+        char const* back = PSTR("");
         if(saved)
         {
-            load_game();
+            rand_seed = game_seed;
             back = PSTR("back ");
+            init_all_perms();
+            generate_dungeon();
+            load();         // need another load to overwrite current map entities
+            destroy_save(); // NOW destroy save
+            status_simple(PSTR(
+                "Welcome back to ArduRogue. "
+                "The save file has been removed. "
+                "Don't forget to save again when you're done!"));
         }
         else
         {
-            draw_text(7, 24, PSTR("ArduRogue"));
-            set_box(5, 42, 22, 30);
-            draw_text(0, 34, PSTR("Press A to play."));
-            paint_offset(40);
-            while(wait_btn() != BTN_A)
-                (void)0;
+            wall_style = 2;
             new_game();
-        }
-
-        init_all_perms();
-        generate_dungeon();
-
-        if(saved)
-            load(); // need another load to overwrite current map entities
-        else
-        {
+            init_all_perms();
+            generate_dungeon();
             // initialize player for new game
             for(auto& i : pinfo.equipped) i = 255;
             pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
             new_entity(0, entity::PLAYER, xup, yup);
+            status_simple(PSTR("Welcome to ArduRogue."));
         }
-
-        statusx = 1;
-        statusy = STATUS_START_Y;
-        status(PSTR("Welcome @pto ArduRogue."), back);
 
         update_light();
 
         for(;;)
         {
             step();
-            if(ents[0].type == entity::NONE)
+            if(gflags & GFLAG_JUST_SAVED)
+            {
+                // go back to title screen
+                break;
+            }
+            else if(ents[0].type == entity::NONE)
             {
                 status_simple(PSTR("Press B to continue."));
                 render();
-                if(saved) destroy_save();
                 uint8_t hsi = process_high_score();
                 while(wait_btn() != BTN_B)
                     (void)0;

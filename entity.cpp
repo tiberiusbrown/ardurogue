@@ -197,7 +197,7 @@ void advance_entity(uint8_t i)
     // advance temporary effects
     if(u8rand() % 8 == 0) end_paralysis(i);
     if(u8rand() % 8 == 0) end_confusion(i);
-    if(u8rand() % 16 == 0) end_slow(i);
+    if(u8rand() % 32 == 0) end_slow(i);
     if(u8rand() % 32 == 0) e.scared = 0;
     if(e.invis && !info.invis) // temporary invis
     {
