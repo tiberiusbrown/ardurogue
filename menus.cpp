@@ -40,6 +40,14 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
         draw_text(x + 37, 48, PSTR("Save high score?"));
         draw_yesno(x + 39, 56);
     }
+    else
+    {
+#if !ENABLE_DEBUG_MENU
+        static char const VERSION[] PROGMEM =
+            GIT_COMMIT_DAY "  " GIT_DESCRIBE "  V" SAVE_VERSION_STR;
+        draw_text(x, 59, VERSION);
+#endif
+    }
 }
 
 void show_high_scores(uint8_t i)

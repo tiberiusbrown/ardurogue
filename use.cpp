@@ -258,7 +258,9 @@ bool unequip_item(uint8_t i)
         if(j == i)
         {
             status_si(PSTR("You @p the @i."), verb, it);
-            return j = 255, true;
+            j = 255;
+            adjust_health_to_max_health(0);
+            return true;
         }
     return false;
 }

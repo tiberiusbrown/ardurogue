@@ -21,6 +21,9 @@
 #define PLAYER_INVULNERABLE 0
 #endif
 
+static constexpr uint8_t SAVE_VERSION = 1;
+#define SAVE_VERSION_STR "1"
+
 // platform functionality
 void wait();        // wait about 50 ms
 uint8_t wait_btn(); // wait for button press

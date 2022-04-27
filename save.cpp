@@ -2,8 +2,6 @@
 
 #include <stddef.h>
 
-static constexpr uint8_t SAVE_VERSION = 1;
-
 static constexpr int EEPROM_END = 1024;
 static constexpr int EEPROM_START = EEPROM_END - SAVE_FILE_BYTES - 3;
 static constexpr int CHECKSUM_ADDR = EEPROM_END - 2;
