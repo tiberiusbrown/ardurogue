@@ -3,9 +3,12 @@
 #include <stddef.h>
 
 static constexpr int EEPROM_END = 1024;
-static constexpr int EEPROM_START = EEPROM_END - SAVE_FILE_BYTES - 3;
+static constexpr int EEPROM_START = EEPROM_END - SAVE_FILE_BYTES - 4;
 static constexpr int CHECKSUM_ADDR = EEPROM_END - 2;
-static constexpr int VERSION_ADDR = EEPROM_END - 3;
+static constexpr int VERSION_ADDR = EEPROM_END - 4;
+
+static constexpr uint8_t SAVE_VERSION_LO = uint8_t(SAVE_VERSION);
+static constexpr uint8_t SAVE_VERSION_HI = uint8_t(SAVE_VERSION >> 8);
 
 static uint16_t get_save_checksum()
 {
@@ -50,6 +53,7 @@ void destroy_save()
 {
     // set player type to NONE
     update_persistent(EEPROM_START + offsetof(globals, saved.ents.d_[0].type), entity::NONE);
+    update_checksum();
     flush_persistent();
 }
 
@@ -57,7 +61,8 @@ void save()
 {
     for(uint16_t i = 0; i < SAVE_FILE_BYTES; ++i)
         update_persistent(EEPROM_START + i, ((uint8_t*)&globals_.saved)[i]);
-    update_persistent(VERSION_ADDR, SAVE_VERSION);
+    update_persistent(VERSION_ADDR + 0, SAVE_VERSION_LO);
+    update_persistent(VERSION_ADDR + 1, SAVE_VERSION_HI);
     update_checksum();
     flush_persistent();
 }

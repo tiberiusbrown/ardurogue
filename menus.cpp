@@ -507,7 +507,8 @@ static void men_settings()
         wall_style &= 3;
         draw_dungeon_at_player();
         paint_left();
-        draw_text(20, 1, MEN_SETTINGS);
+        draw_text(20, 0, MEN_SETTINGS);
+        set_hline(1, 63, 6);
         draw_textf(3, 9, PSTR("Wall Style: { @u }"), wall_style);
         paint_right();
         uint8_t b = wait_btn();
