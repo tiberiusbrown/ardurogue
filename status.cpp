@@ -33,7 +33,7 @@ void draw_status()
 
 void status_cursed_amulet()
 {
-    status(PSTR("Your cursed amulet burns at you."));
+    status_simple(PSTR("Your cursed amulet burns at you."));
 }
 
 void reset_status()
@@ -53,6 +53,32 @@ void status_more()
     while(wait_btn() != BTN_A)
         ;
     reset_status();
+}
+
+NOINLINE void status_simple(char const* s)
+{
+    status(s);
+}
+
+NOINLINE void status_i(char const* fmt, item it)
+{
+    status(fmt, it);
+}
+
+NOINLINE void status_si(char const* s, char const* p, item i)
+{
+    status(s, p, i);
+}
+
+
+NOINLINE void status_u(char const* fmt, uint8_t a)
+{
+    status(fmt, a);
+}
+
+NOINLINE void status_usu(char const* fmt, uint8_t a, char const* b, uint8_t c)
+{
+    status(fmt, a, b, c);
 }
 
 void status(char const* fmt, ...)

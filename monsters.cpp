@@ -134,7 +134,7 @@ void monster_ai(uint8_t i, action& a)
         }
         if(sr.i == 0 && u8rand() % 2)
         {
-            status(PSTR("@S breathes fire!"), i);
+            status_u(PSTR("@S breathes fire!"), i);
             render();
             wand_effect(i, dir, WND_FIRE);
             return;

@@ -39,10 +39,13 @@ void run();
 
 #if defined(__GNUC__)
 #define FORCEINLINE __attribute__((always_inline))
+#define NOINLINE __attribute__((noinline))
 #elif defined(_MSC_VER)
 #define FORCEINLINE __forceinline
+#define NOINLINE __declspec(noinline)
 #else
 #define FORCEINLINE inline
+#define NOINLINE
 #endif
 
 #ifdef ARDUINO
@@ -77,27 +80,27 @@ inline void const* pgm_read_ptr(void const* p) { return *(void const**)p; }
 
 // useful when T is a pointer type, like function pointer or char const*
 template<class T>
-inline T pgmptr(T const* p) { return (T)pgm_read_ptr(p); }
+FORCEINLINE T pgmptr(T const* p) { return (T)pgm_read_ptr(p); }
 
 template<class T, size_t N>
 struct array
 {
     T d_[N];
-    T* data() { return d_; }
-    constexpr T const* data() const { return d_; }
-    T& operator[](size_t i) { verify(i); return d_[i]; }
-    constexpr T const& operator[](size_t i) const
+    FORCEINLINE T* data() { return d_; }
+    FORCEINLINE constexpr T const* data() const { return d_; }
+    FORCEINLINE T& operator[](size_t i) { verify(i); return d_[i]; }
+    FORCEINLINE constexpr T const& operator[](size_t i) const
     {
 #if defined(_MSC_VER) && !defined(NDEBUG)
         verify(i);
 #endif
         return d_[i];
     }
-    constexpr size_t size() const { return N; }
-    T* begin() { return d_; }
-    constexpr T const* begin() const { return d_; }
-    T* end() { return d_ + N; }
-    constexpr T const* end() const { return d_ + N; }
+    FORCEINLINE constexpr size_t size() const { return N; }
+    FORCEINLINE T* begin() { return d_; }
+    FORCEINLINE constexpr T const* begin() const { return d_; }
+    FORCEINLINE T* end() { return d_ + N; }
+    FORCEINLINE constexpr T const* end() const { return d_ + N; }
 private:
     void verify(size_t i) const
     {
@@ -132,34 +135,35 @@ template<size_t B, size_t N = 1> struct u8bitfield
 
     // assign from other bitfield
     template<size_t B2>
-    void assign(u8bitfield<B2, N> t)
+    FORCEINLINE void assign(u8bitfield<B2, N> t)
     {
         raw_ = (raw_ & INV_MASK) | (((t.raw_ >> B2) << B) & MASK);
     }
 
-    constexpr operator uint8_t() const
+    FORCEINLINE constexpr operator uint8_t() const
     {
         return (raw_ & MASK) >> B;
     }
 
     template<class T>
-    u8bitfield& operator=(T const& t)
+    FORCEINLINE u8bitfield& operator=(T const& t)
     {
         return raw_ = (raw_ & INV_MASK) | ((uint8_t(t) << B) & MASK), *this;
     }
     template<class T>
-    u8bitfield& operator+=(T const& t)
+    FORCEINLINE u8bitfield& operator+=(T const& t)
     {
         return *this = uint8_t(*this) + uint8_t(t);
     }
     template<class T>
-    u8bitfield& operator-=(T const& t)
+    FORCEINLINE u8bitfield& operator-=(T const& t)
     {
         return *this = uint8_t(*this) - uint8_t(t);
     }
 };
 
-template<class T> void swap(T& a, T& b)
+template<class T>
+FORCEINLINE void swap(T& a, T& b)
 {
     T c = a;
     a = b;
@@ -793,6 +797,11 @@ static constexpr uint8_t STATUS_START_Y = 65 - 6 * NUM_STATUS_ROWS;
 uint8_t advance_white(char* b, uint8_t i);
 void draw_status();
 void status(char const* fmt, ...);
+void status_simple(char const* s);
+void status_i(char const* fmt, item it);
+void status_si(char const* s, char const* a, item i);
+void status_u(char const* fmt, uint8_t a);
+void status_usu(char const* fmt, uint8_t a, char const* b, uint8_t c);
 void status_more();
 void reset_status();
 void status_cursed_amulet();

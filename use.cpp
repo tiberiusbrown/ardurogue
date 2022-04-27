@@ -138,10 +138,10 @@ static void use_scroll(uint8_t subtype)
         if(i < INV_ITEMS)
         {
             identify_item(i);
-            status(PSTR("You identified: @i."), inv[i]);
+            status_i(PSTR("You identified: @i."), inv[i]);
         }
         else
-            status(PSTR("Nothing happens."));
+            status_simple(PSTR("Nothing happens."));
         break;
     case SCR_ENCHANT:
         i = inventory_menu(PSTR("Enchant which item?"));
@@ -149,7 +149,7 @@ static void use_scroll(uint8_t subtype)
         {
             auto& it = inv[i];
             if(it.stackable())
-                status(PSTR("Nothing happens."));
+                status_simple(PSTR("Nothing happens."));
             else
             {
                 uint8_t n = 1;
@@ -157,11 +157,11 @@ static void use_scroll(uint8_t subtype)
                 it.level += n;
                 if(it.level > ENCHANT_LEVEL_MAX)
                     it.level = ENCHANT_LEVEL_MAX;
-                status(PSTR("The @i glows blue for a moment."), it);
+                status_i(PSTR("The @i glows blue for a moment."), it);
             }
         }
         else
-            status(PSTR("Nothing happens."));
+            status_simple(PSTR("Nothing happens."));
         break;
     case SCR_REMOVE_CURSE:
         i = inventory_menu(PSTR("Uncurse which item?"));
@@ -169,15 +169,15 @@ static void use_scroll(uint8_t subtype)
         {
             auto& it = inv[i];
             if(it.type <= item::WAND || !it.cursed)
-                status(PSTR("Nothing happens."));
+                status_simple(PSTR("Nothing happens."));
             else
             {
                 it.cursed = 0;
-                status(PSTR("The @i glows white for a moment."), it);
+                status_i(PSTR("The @i glows white for a moment."), it);
             }
         }
         else
-            status(PSTR("Nothing happens."));
+            status_simple(PSTR("Nothing happens."));
         break;
     case SCR_TELEPORT:
         teleport_entity(0);
@@ -185,7 +185,7 @@ static void use_scroll(uint8_t subtype)
     case SCR_MAPPING:
         for(auto& t : tfog)
             t = 0xff;
-        status(PSTR("You become aware of your surroundings."));
+        status_simple(PSTR("You become aware of your surroundings."));
         break;
     case SCR_FEAR:
     case SCR_TORMENT:
@@ -201,12 +201,12 @@ static void use_scroll(uint8_t subtype)
             {
                 e.scared = 1;
                 if(i != 0)
-                    status(PSTR("@S flees!"), i);
+                    status_u(PSTR("@S flees!"), i);
             }
             else if(subtype == SCR_TORMENT)
             {
                 healths[i] /= 2;
-                status(PSTR("@U stricken!"), i);
+                status_u(PSTR("@U stricken!"), i);
             }
             else if(subtype == SCR_MASS_CONFUSE)
                 confuse_entity(i);
@@ -244,11 +244,6 @@ uint8_t slot_of_item(uint8_t type)
     return 255;
 }
 
-static void status_pi(char const* s, char const* p, item i)
-{
-    status(s, p, i);
-}
-
 bool unequip_item(uint8_t i)
 {
     auto it = inv[i];
@@ -256,13 +251,13 @@ bool unequip_item(uint8_t i)
         PSTR("stop using") : PSTR("take off");
     if(it.cursed)
     {
-        status_pi(PSTR("You are unable to @p the @i."), verb, it);
+        status_si(PSTR("You are unable to @p the @i."), verb, it);
         return false;
     }
     for(auto& j : pinfo.equipped)
         if(j == i)
         {
-            status_pi(PSTR("You @p the @i."), verb, it);
+            status_si(PSTR("You @p the @i."), verb, it);
             return j = 255, true;
         }
     return false;
@@ -312,7 +307,7 @@ bool use_item(uint8_t i)
     case item::FOOD:
     {
         hunger = 0;
-        status(PSTR("You feel full."));
+        status_simple(PSTR("You feel full."));
         return true;
     }
     case item::POTION:
@@ -327,7 +322,7 @@ bool use_item(uint8_t i)
         if(n <= 1)
         {
             player_remove_item(i);
-            status(PSTR("The @i crumbles to dust."), it);
+            status_i(PSTR("The @i crumbles to dust."), it);
         }
         else
             inv[i].quant = n - 1;
@@ -373,7 +368,7 @@ void entity_apply_potion(uint8_t subtype, uint8_t i)
             entity_restore_strength(i);
         else if(i == 0)
         {
-            status(PSTR("You feel stronger!"));
+            status_simple(PSTR("You feel stronger!"));
             pstats.strength += 1;
         }
         break;
@@ -383,7 +378,7 @@ void entity_apply_potion(uint8_t subtype, uint8_t i)
             if(ring_bonus(RNG_INVIS) < 0)
                 break;
             pinfo.invis_rem = u8rand() % 16 + 12;
-            status(PSTR("You turn invisible."));
+            status_simple(PSTR("You turn invisible."));
         }
         ents[i].invis = 1;
         break;

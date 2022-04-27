@@ -255,7 +255,7 @@ void entity_restore_strength(uint8_t i)
     if(ents[i].weakened)
     {
         ents[i].weakened = 0;
-        if(i == 0) status(PSTR("Your strength returns."));
+        if(i == 0) status_simple(PSTR("Your strength returns."));
     }
 }
 
@@ -313,7 +313,7 @@ void entity_take_fire_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam
         // TODO: monster immune to fire
     }
     if(dam == 0)
-        status(PSTR("The flames do not affect @O."), defi);
+        status_u(PSTR("The flames do not affect @O."), defi);
     entity_take_damage_from_entity(atti, defi, dam);
 }
 
@@ -323,7 +323,7 @@ void entity_take_melee_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t da
     entity_get_info(atti, info);
     if(info.vampire || (atti == 0 && wearing_uncursed_amulet(AMU_VAMPIRE)))
     {
-        status(PSTR("@W @P health!"), atti, PSTR("drain"), defi);
+        status_usu(PSTR("@W @P health!"), atti, PSTR("drain"), defi);
         if(defi == 0)
         {
             uint8_t mhp = entity_max_health(0);
@@ -383,9 +383,11 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
 
 void teleport_entity(uint8_t i)
 {
-    find_unoccupied_guaranteed(ents[i].x, ents[i].y);
     if(i == 0)
-        status(PSTR("You find yourself in another location."));
+        status_simple(PSTR("You find yourself in another location."));
+    else if(player_can_see_entity(i))
+        status_u(PSTR("@S disappears!"), i);
+    find_unoccupied_guaranteed(ents[i].x, ents[i].y);
     confuse_entity(i);
 }
 
@@ -474,7 +476,7 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
     bool hit = test_attack_hit(atti, defi);
     bool cansee = (uint8_t)player_can_see_entity(atti) | (uint8_t)player_can_see_entity(defi);
     if(!hit && cansee)
-        status(PSTR("@W @O."), atti, atti == 0 ? PSTR("miss") : PSTR("misse"), defi);
+        status_usu(PSTR("@W @O."), atti, atti == 0 ? PSTR("miss") : PSTR("misse"), defi);
     if(atti == 0)
         aggro_monster(defi);
     if(hit)
@@ -483,9 +485,9 @@ static void entity_attack_entity(uint8_t atti, uint8_t defi)
         if(cansee)
         {
             if(dam > 0)
-                status(PSTR("@W @O."), atti, PSTR("hit"), defi);
+                status_usu(PSTR("@W @O."), atti, PSTR("hit"), defi);
             else
-                status(PSTR("@W @P attack."), defi, PSTR("block"), atti);
+                status_usu(PSTR("@W @P attack."), defi, PSTR("block"), atti);
         }
         entity_take_melee_damage_from_entity(atti, defi, dam);
     }
@@ -526,9 +528,9 @@ bool entity_perform_action(uint8_t i, action a)
         if(d && !d->secret)
         {
             if(!d->open)
-                status(PSTR("The door is already closed."));
+                status_simple(PSTR("The door is already closed."));
             else if(te)
-                status(PSTR("The door is blocked."));
+                status_simple(PSTR("The door is blocked."));
             else
             {
                 d->open = 0;
@@ -536,7 +538,7 @@ bool entity_perform_action(uint8_t i, action a)
             }
         }
         else
-            status(PSTR("You see no door there."));
+            status_simple(PSTR("You see no door there."));
         return false;
     }
     case action::MOVE:
@@ -567,13 +569,11 @@ bool entity_perform_action(uint8_t i, action a)
             for(uint8_t j = 0; j < 8; ++j)
             {
                 auto c = ddircoord(j);
-                uint8_t tx = e.x + c.x;
-                uint8_t ty = e.y + c.y;
-                door* d = get_door(tx, ty);
+                door* d = get_door(e.x + c.x, e.y + c.y);
                 if(!d) continue;
                 if(d->secret)
                 {
-                    status(PSTR("You found a hidden door!"));
+                    status_simple(PSTR("You found a hidden door!"));
                     d->secret = 0;
                 }
             }
@@ -584,7 +584,7 @@ bool entity_perform_action(uint8_t i, action a)
         item it = inv[a.data];
         if(it.is_type(item::AMULET, AMU_YENDOR))
         {
-            status(PSTR("You are unable to drop the @i."), it);
+            status_i(PSTR("You are unable to drop the @i."), it);
             return false;
         }
         else if(item_is_equipped(a.data))
@@ -592,7 +592,7 @@ bool entity_perform_action(uint8_t i, action a)
             if(!unequip_item(a.data))
                 return false;
         }
-        status(PSTR("You drop the @i."), it);
+        status_i(PSTR("You drop the @i."), it);
         player_remove_item(a.data);
         put_item_on_ground(e.x, e.y, it);
         inv[a.data].reset();
@@ -614,7 +614,7 @@ bool entity_perform_action(uint8_t i, action a)
             status(PSTR("The @i hits @O!"), it, sr.i);
             entity_apply_potion(it.subtype, sr.i);
         }
-        status(PSTR("The @i shatters."), it);
+        status_i(PSTR("The @i shatters."), it);
         return true;
     }
     case action::SHOOT:

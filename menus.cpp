@@ -344,7 +344,7 @@ static bool act_shoot(action& a)
     uint8_t i = pinfo.equipped[SLOT_WEAPON];
     if(!(i < INV_ITEMS && inv[i].is_type(item::BOW)))
     {
-        status(PSTR("You're not holding a bow."));
+        status_simple(PSTR("You're not holding a bow."));
         return false;
     }
     bool have_arrow = false;
@@ -352,7 +352,7 @@ static bool act_shoot(action& a)
         have_arrow |= inv[j].is_type(item::ARROW);
     if(!have_arrow)
     {
-        status(PSTR("You have no arrows."));
+        status_simple(PSTR("You have no arrows."));
         return false;
     }
     if(!direction_menu(a.data))
@@ -517,7 +517,7 @@ static void men_abandon()
 {
     if(yesno_menu(PSTR("Are you sure you want to end this game?")))
     {
-        status(PSTR("You have abandoned this game."));
+        status_simple(PSTR("You have abandoned this game."));
         hs.type = HS_ABANDONED;
         ents[0].type = entity::NONE;
     }

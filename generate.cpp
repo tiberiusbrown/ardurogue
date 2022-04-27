@@ -535,28 +535,31 @@ static void try_add_random_door()
     if(!tile_is_solid(x, y)) return;
     for(uint8_t i = 0; i < num_rooms; ++i)
         if(rooms[i].inside_bb(x, y)) return;
+    // verify not adjacent to another door
+    uint8_t m = 0;
+    for(uint8_t i = 0; i < 4; ++i)
+    {
+        auto c = dircoord(i);
+        uint8_t tx = x + c.x;
+        uint8_t ty = y + c.y;
+        if(get_door(tx, ty))
+            return;
+        m <<= 1;
+        m |= (uint8_t)tile_is_solid(tx, ty);
+    }
     if(d < 2) // north/south
     {
-        if(tile_is_solid(x, y - 1) || tile_is_solid(x, y + 1))
-            return;
+        if(m & 0xc) return;
         for(uint8_t i = 0; i < RANDOM_DOOR_SPACE; ++i)
             if(!tile_is_solid(x - i, y) || !tile_is_solid(x + i, y))
                 return;
     }
     else // west/east
     {
-        if(tile_is_solid(x - 1, y) || tile_is_solid(x + 1, y))
-            return;
+        if(m & 0x3) return;
         for(uint8_t i = 0; i < RANDOM_DOOR_SPACE; ++i)
             if(!tile_is_solid(x, y - i) || !tile_is_solid(x, y + i))
                 return;
-    }
-    // verify not adjacent to another door
-    for(uint8_t i = 0; i < 4; ++i)
-    {
-        auto c = dircoord(i);
-        if(get_door(x + c.x, y + c.y))
-            return;
     }
     add_door(x, y);
 }

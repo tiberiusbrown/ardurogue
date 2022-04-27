@@ -142,16 +142,16 @@ void player_gain_xp(uint8_t xp)
     if(txp - xp < pstats.xp)
     {
         ++plevel;
-        status(PSTR("You advance to level @u!"), plevel + 1);
+        status_u(PSTR("You advance to level @u!"), plevel + 1);
         pstats.max_health += 4;
         if(plevel % 4 == 2)
         {
-            status(PSTR("You feel stronger."));
+            status_simple(PSTR("You feel stronger."));
             pstats.strength += 1;
         }
         if(plevel % 4 == 0)
         {
-            status(PSTR("You feel more agile."));
+            status_simple(PSTR("You feel more agile."));
             pstats.dexterity += 1;
         }
         healths[0] = entity_max_health(0);
@@ -172,7 +172,7 @@ bool player_pickup_item(uint8_t i)
             {
                 if(inv[j].quant >= MAX_ITEM_QUANT)
                 {
-                    status(PSTR("You can't hold any more of those."));
+                    status_simple(PSTR("You can't hold any more of those."));
                     return false;
                 }
                 break;
@@ -186,7 +186,7 @@ bool player_pickup_item(uint8_t i)
     }
     if(j >= INV_ITEMS)
     {
-        status(PSTR("You can't hold any more items."));
+        status_simple(PSTR("You can't hold any more items."));
         return false;
     }
     if(!inv[j].is_nothing())
@@ -206,13 +206,13 @@ bool player_pickup_item(uint8_t i)
             it.reset();
         }
         inv[j].quant += tt.quant + 1;
-        status(PSTR("You now have @i."), inv[j]);
+        status_i(PSTR("You now have @i."), inv[j]);
         return true;
     }
     else
         inv[j] = it;
     it.reset();
-    status(PSTR("You got the @i."), inv[j]);
+    status_i(PSTR("You got the @i."), inv[j]);
     return true;
 }
 
@@ -251,7 +251,7 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it)
             t.it = it;
             return;
         }
-    status(PSTR("The @i breaks."), it);
+    status_i(PSTR("The @i breaks."), it);
 }
 
 void render()
@@ -283,7 +283,7 @@ void advance_hunger()
     }
     else if(healths[0] > 0)
     {
-        status(PSTR("You are starving!"));
+        status_simple(PSTR("You are starving!"));
         hs.type = HS_STARVED;
         entity_take_damage(0, u8rand() % 2 + 1);
     }
@@ -401,12 +401,12 @@ void step()
                 if(have_amulet)
                 {
                     hs.type = HS_ESCAPED;
-                    status(PSTR("You have escaped with the amulet of Yendor!"));
+                    status_simple(PSTR("You have escaped with the amulet of Yendor!"));
                 }
                 else
                 {
                     hs.type = HS_RETURNED;
-                    status(PSTR("You have left without the amulet of Yendor."));
+                    status_simple(PSTR("You have left without the amulet of Yendor."));
                 }
                 ents[0].type = entity::NONE;
                 return;
@@ -559,7 +559,7 @@ void run()
             step();
             if(ents[0].type == entity::NONE)
             {
-                status(PSTR("Press B to continue."));
+                status_simple(PSTR("Press B to continue."));
                 render();
                 if(saved) destroy_save();
                 uint8_t hsi = process_high_score();

@@ -463,9 +463,8 @@ void draw_dungeon(uint8_t mx, uint8_t my)
             }
             else
             {
-                // TODO: fix this somehow
-                //set_hline(px + 1, px + 2, py - 2);
-                //set_hline(px + 1, px + 2, py + 5);
+                set_hline(px + 1, px + 2, py - 2);
+                set_hline(px + 1, px + 2, py + 5);
             }
         }
     }
