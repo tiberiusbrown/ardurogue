@@ -42,10 +42,9 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
     }
     else
     {
-#if !ENABLE_DEBUG_MENU
         static constexpr char HEXCHARS[] = "0123456789abcdef";
         static auto const BLAH PROGMEM = concat(
-            MAKE_NON_NULLED_CHAR_ARRAY(GIT_COUNT "  " GIT_DESCRIBE "  "),
+            MAKE_NON_NULLED_CHAR_ARRAY(GIT_COMMIT_DAY "  " GIT_DESCRIBE "  "),
             char_array<5>{ {
                 HEXCHARS[(SAVE_VERSION >> 12) & 0xf],
                 HEXCHARS[(SAVE_VERSION >>  8) & 0xf],
@@ -56,7 +55,6 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
         );
         draw_text(x - 1, 59, BLAH.d_);
         draw_textf(x + 96, 59, PSTR("@X  @u"), game_seed, unused_stack());
-#endif
     }
 }
 
