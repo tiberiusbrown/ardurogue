@@ -24,6 +24,9 @@ Read the guide [here](guide.md).
 
 If enough prog bytes could be freed up...
 
+- True permadeath (prevents save scumming):
+  - invalidate save after pressing A on title screen, and
+  - return to title screen after saving.
 - Floor traps
 - Spawn new monsters on occasion
 - Different map types (cave style?)

@@ -162,10 +162,10 @@ static char const NRNG_SEE_INVIS[] PROGMEM = "see invisible";
 static char const NRNG_STRENGTH[] PROGMEM = "strength";
 static char const NRNG_DEXTERITY[] PROGMEM = "dexterity";
 static char const NRNG_PROTECTION[] PROGMEM = "protection";
-static char const NRNG_INVIS[] PROGMEM = "invisibility";
 static char const NRNG_FIRE_PROTECT[] PROGMEM = "fire protection";
 static char const NRNG_ATTACK[] PROGMEM = "attack";
 static char const NRNG_SUSTENANCE[] PROGMEM = "sustenance";
+static char const NRNG_INVIS[] PROGMEM = "invisibility";
 
 char const* const RNG_NAMES[NUM_RNG] PROGMEM =
 {
@@ -173,10 +173,10 @@ char const* const RNG_NAMES[NUM_RNG] PROGMEM =
     NRNG_STRENGTH,
     NRNG_DEXTERITY,
     NRNG_PROTECTION,
-    NRNG_INVIS,
     NRNG_FIRE_PROTECT,
     NRNG_ATTACK,
     NRNG_SUSTENANCE,
+    NRNG_INVIS,
 };
 
 static char const NAMU_SPEED[] PROGMEM = "speed";

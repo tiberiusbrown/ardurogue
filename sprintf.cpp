@@ -236,10 +236,12 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         case 'c': // char
             *b++ = (char)u16;
             break;
-        case 'x': // hex byte
-            u = (uint8_t)u16;
-            *b++ = pgm_read_byte(&HEX_CHARS[u >> 4]);
-            *b++ = pgm_read_byte(&HEX_CHARS[u & 15]);
+        case 'X': // hex word
+            *b++ = pgm_read_byte(&HEX_CHARS[(u16 >> 12) & 0xf]);
+            *b++ = pgm_read_byte(&HEX_CHARS[(u16 >>  8) & 0xf]);
+        //case 'x': // hex byte
+            *b++ = pgm_read_byte(&HEX_CHARS[(u16 >>  4) & 0xf]);
+            *b++ = pgm_read_byte(&HEX_CHARS[(u16 >>  0) & 0xf]);
             break;
         case 's': // ram string
             s = (char const*)u16;

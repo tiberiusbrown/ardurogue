@@ -4,9 +4,6 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-// stack canary, git info: costs about 300 bytes
-#define ENABLE_DEBUG_MENU 0
-
 // costs about 600 bytes
 #define ENABLE_MINIMAP 1
 
@@ -22,7 +19,6 @@
 #endif
 
 static constexpr uint16_t SAVE_VERSION = 1;
-#define SAVE_VERSION_STR "1"
 
 // platform functionality
 void wait();        // wait about 50 ms
@@ -113,6 +109,44 @@ private:
 #endif
     }
 };
+
+template<unsigned... Is> struct seq {};
+template<unsigned N, unsigned... Is>
+struct gen_seq : gen_seq<N - 1, N - 1, Is...> {};
+template<unsigned... Is>
+struct gen_seq<0, Is...> : seq<Is...> {};
+template<class T, size_t N1, size_t... I1, size_t N2, size_t... I2>
+constexpr array<T, N1 + N2> concat(
+    array<T, N1> const& a,
+    array<T, N2> const& b,
+    seq<I1...>,
+    seq<I2...>)
+{
+    return { { a[I1]..., b[I2]... } };
+}
+template<class T, size_t N1, size_t N2>
+constexpr array<T, N1 + N2> concat(array<T, N1> const& a, array<T, N2> const& b)
+{
+    return concat(a, b, gen_seq<N1>{}, gen_seq<N2>{});
+}
+template<class T, size_t N, size_t... I>
+constexpr array<T, N> construct_array(T const* d, seq<I...>)
+{
+    return { { d[I]... } };
+}
+template<class T, size_t N>
+constexpr array<T, N> construct_array(T const(&d)[N])
+{
+    return construct_array(d, gen_seq<N>{});
+}
+template<class T, size_t N>
+constexpr array<T, N> construct_array(T const* d)
+{
+    return construct_array<T, N>(d, gen_seq<N>{});
+}
+
+template<size_t N> using char_array = array<char, N>;
+#define MAKE_NON_NULLED_CHAR_ARRAY(s__) construct_array<char, sizeof(s__) - 1>(s__)
 
 template<size_t N> struct bitset
 {
@@ -307,10 +341,10 @@ enum
     POT_CONFUSION,
     POT_POISON,
     POT_STRENGTH,
-    POT_INVIS,
     POT_PARALYSIS,
     POT_SLOWING,
     POT_EXPERIENCE,
+    POT_INVIS,
     NUM_POT,
 };
 
@@ -865,7 +899,7 @@ bool action_menu(action& a);
 
 // stack.cpp
 void stack_canary_init();
-uint8_t unused_stack();
+uint16_t unused_stack();
 
 // use.cpp
 bool equip_item(uint8_t i);

@@ -261,8 +261,6 @@ void entity_restore_strength(uint8_t i)
 
 void entity_heal(uint8_t i, uint8_t amount)
 {
-    uint8_t mhp = entity_max_health(i);
-    if(healths[i] >= mhp) return;
     char const* s = (amount < 3 ? PSTR("slightly ") : PSTR(""));
     if(i == 0)
     {
@@ -272,6 +270,7 @@ void entity_heal(uint8_t i, uint8_t amount)
     }
     else if(player_can_see_entity(i))
         status(PSTR("@S looks @pbetter."), i, s);
+    uint8_t mhp = entity_max_health(i);
     if(mhp - healths[i] <= amount)
         healths[i] = mhp;
     else

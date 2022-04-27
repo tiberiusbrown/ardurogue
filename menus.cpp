@@ -43,9 +43,19 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
     else
     {
 #if !ENABLE_DEBUG_MENU
-        static char const VERSION[] PROGMEM =
-            GIT_COUNT "  " GIT_COMMIT_DAY "  " GIT_DESCRIBE "  V" SAVE_VERSION_STR;
-        draw_text(x, 59, VERSION);
+        static constexpr char HEXCHARS[] = "0123456789abcdef";
+        static auto const BLAH PROGMEM = concat(
+            MAKE_NON_NULLED_CHAR_ARRAY(GIT_COUNT "  " GIT_DESCRIBE "  "),
+            char_array<5>{ {
+                HEXCHARS[(SAVE_VERSION >> 12) & 0xf],
+                HEXCHARS[(SAVE_VERSION >>  8) & 0xf],
+                HEXCHARS[(SAVE_VERSION >>  4) & 0xf],
+                HEXCHARS[(SAVE_VERSION >>  0) & 0xf],
+                '\0'
+            } }
+        );
+        draw_text(x - 1, 59, BLAH.d_);
+        draw_textf(x + 96, 59, PSTR("@X  @u"), game_seed, unused_stack());
 #endif
     }
 }
@@ -306,9 +316,6 @@ static char const MEN_HS[] PROGMEM = "High Scores";
 static char const MEN_SETTINGS[] PROGMEM = "Settings";
 static char const MEN_ABANDON[] PROGMEM = "Abandon Game";
 static char const MEN_SAVE[] PROGMEM = "Save Progress";
-#if ENABLE_DEBUG_MENU
-static char const MEN_DEBUG[] PROGMEM = "Debug Info";
-#endif
 
 static char const* const MEN_ITEMS[] PROGMEM =
 {
@@ -324,9 +331,6 @@ static char const* const MEN_ITEMS[] PROGMEM =
     MEN_SETTINGS,
     MEN_ABANDON,
     MEN_SAVE,
-#if ENABLE_DEBUG_MENU
-    MEN_DEBUG,
-#endif
 };
 
 static bool act_wait(action& a)
@@ -537,28 +541,6 @@ static void men_save()
     save();
 }
 
-#if ENABLE_DEBUG_MENU
-static void men_debug_offset(uint8_t x)
-{
-    static char const GIT_STUFF[] PROGMEM =
-        GIT_BRANCH " " GIT_DESCRIBE " " GIT_COMMIT_DAY;
-    draw_text(x, 0, GIT_STUFF);
-    draw_textf(x, 6, PSTR("Rand: @x@x/@x@x"),
-        game_seed >> 8, game_seed & 0xff,
-        rand_seed >> 8, rand_seed & 0xff);
-    draw_textf(x, 12, PSTR("Stack: @u"), unused_stack());
-}
-static void men_debug()
-{
-    men_debug_offset(0);
-    paint_left();
-    men_debug_offset(uint8_t(-64));
-    paint_right();
-    while(wait_btn() != BTN_B)
-        (void)0;
-}
-#endif
-
 #if ENABLE_DUNGEON_SCROLL
 static void men_scroll()
 {
@@ -601,9 +583,6 @@ static men_method const MEN_METHODS[] PROGMEM =
     men_settings,
     men_abandon,
     men_save,
-#if ENABLE_DEBUG_MENU
-    men_debug,
-#endif
 };
 
 bool repeat_action(action& a)
@@ -635,7 +614,7 @@ bool action_menu(action& a)
             if(act)
             {
                 text = MEN_ITEMS;
-                n = 5 + ENABLE_MINIMAP + ENABLE_DUNGEON_SCROLL + ENABLE_DEBUG_MENU;
+                n = 5 + ENABLE_MINIMAP + ENABLE_DUNGEON_SCROLL;
                 i = 0;
             }
             else

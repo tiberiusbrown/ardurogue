@@ -195,6 +195,7 @@ function(GetGitState _working_dir)
     endif()
 
     string(SUBSTRING "${output}" 0 10 GIT_COMMIT_DAY)
+    #string(REPLACE "-" "" GIT_COMMIT_DAY "${GIT_COMMIT_DAY}")
 	set(ENV{GIT_COMMIT_DAY} "${GIT_COMMIT_DAY}")
 	
     RunGitCommand(rev-list --count ${object})
