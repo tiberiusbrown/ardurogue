@@ -561,8 +561,9 @@ static void men_scroll()
         uint8_t d;
         if(!direction_menu(d, PSTR("Scroll Dungeon")))
             break;
-        x += (int8_t)pgm_read_byte(&DIRX[d]) * 4;
-        y += (int8_t)pgm_read_byte(&DIRY[d]) * 4;
+        auto c = dircoord(d);
+        x += (int8_t)c.x * 4;
+        y += (int8_t)c.y * 4;
         if(x & 0x80) x = 0;
         if(y & 0x80) y = 0;
         if(x >= MAP_W) x = MAP_W - 1;

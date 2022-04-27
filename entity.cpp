@@ -510,10 +510,9 @@ bool entity_perform_action(uint8_t i, action a)
                 status_you_are(PSTR("confused"), 0);
         }
     }
-    int8_t dx = (int8_t)pgm_read_byte(&DIRX[dir]);
-    int8_t dy = (int8_t)pgm_read_byte(&DIRY[dir]);
-    uint8_t nx = e.x + dx;
-    uint8_t ny = e.y + dy;
+    auto c = dircoord(dir);
+    uint8_t nx = e.x + c.x;
+    uint8_t ny = e.y + c.y;
     entity* te = get_entity(nx, ny);
     entity_info info;
     entity_get_info(i, info);
@@ -567,8 +566,9 @@ bool entity_perform_action(uint8_t i, action a)
             // search
             for(uint8_t j = 0; j < 8; ++j)
             {
-                uint8_t tx = e.x + pgm_read_byte(&DDIRX[j]);
-                uint8_t ty = e.y + pgm_read_byte(&DDIRY[j]);
+                auto c = ddircoord(j);
+                uint8_t tx = e.x + c.x;
+                uint8_t ty = e.y + c.y;
                 door* d = get_door(tx, ty);
                 if(!d) continue;
                 if(d->secret)
@@ -603,8 +603,6 @@ bool entity_perform_action(uint8_t i, action a)
         if(!direction_menu(dir))
             return false;
         // TODO: confused corrupts direction?
-        dx = (int8_t)pgm_read_byte(&DIRX[dir]);
-        dy = (int8_t)pgm_read_byte(&DIRY[dir]);
         item it = inv[a.data];
         player_remove_item(a.data);
         it.quant = 0;

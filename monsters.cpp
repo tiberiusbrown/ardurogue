@@ -111,8 +111,9 @@ void monster_ai(uint8_t i, action& a)
     if(!mean || (player_is_invisible() && !info.see_invis) || dp >= 10)
     {
         a.data = u8rand() & 3;
-        uint8_t nx = ex + pgm_read_byte(&DIRX[a.data]);
-        uint8_t ny = ey + pgm_read_byte(&DIRY[a.data]);
+        auto c = dircoord(a.data);
+        uint8_t nx = ex + c.x;
+        uint8_t ny = ey + c.y;
         entity* e = get_entity(nx, ny);
         if(e && (!mean || e->type != entity::PLAYER))
             return;
@@ -142,8 +143,9 @@ void monster_ai(uint8_t i, action& a)
 
     for(uint8_t i = 0; i < 4; ++i)
     {
-        uint8_t nx = ex + pgm_read_byte(&DIRX[i]);
-        uint8_t ny = ey + pgm_read_byte(&DIRY[i]);
+        auto c = dircoord(i);
+        uint8_t nx = ex + c.x;
+        uint8_t ny = ey + c.y;
         if(tile_is_solid(nx, ny)) continue;
         if(entity* te = get_entity(nx, ny))
             if(te->type != entity::PLAYER)

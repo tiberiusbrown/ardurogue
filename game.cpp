@@ -331,15 +331,14 @@ void scan_dir(uint8_t i, uint8_t d, uint8_t n, scan_result& r)
 
 void scan_dir_pos(uint8_t x, uint8_t y, uint8_t d, uint8_t n, scan_result& r)
 {
-    uint8_t dx = pgm_read_byte(&DIRX[d]);
-    uint8_t dy = pgm_read_byte(&DIRY[d]);
+    auto c = dircoord(d);
     uint8_t k = 0;
     r.i = 255;
     while(k < n)
     {
-        if(tile_is_solid(x + dx, y + dy))
+        if(tile_is_solid(x + c.x, y + c.y))
             break;
-        x += dx, y += dy;
+        x += c.x, y += c.y;
         ++k;
         if(entity* e = get_entity(x, y))
         {
@@ -350,8 +349,8 @@ void scan_dir_pos(uint8_t x, uint8_t y, uint8_t d, uint8_t n, scan_result& r)
     r.n = k;
     r.x = x;
     r.y = y;
-    r.px = x - dx;
-    r.py = y - dy;
+    r.px = x - c.x;
+    r.py = y - c.y;
 }
 
 void step()

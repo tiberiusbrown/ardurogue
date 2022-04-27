@@ -44,12 +44,11 @@ void wand_effect(uint8_t i, uint8_t d, uint8_t subtype)
     if(subtype == WND_DIGGING)
     {
         uint8_t x = ents[i].x, y = ents[i].y;
-        uint8_t dx = pgm_read_byte(&DIRX[d]);
-        uint8_t dy = pgm_read_byte(&DIRY[d]);
+        auto c = dircoord(d);
         for(uint8_t i = 0; i < WAND_RANGE; ++i)
         {
-            x += dx;
-            y += dy;
+            x += c.x;
+            y += c.y;
             if(x >= MAP_W || y >= MAP_H) break;
             dig_tile(x, y);
             if(door* d = get_door(x, y))

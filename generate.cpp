@@ -423,9 +423,8 @@ static bool dig_room(
                 continue;
             for(uint8_t i = 0; i < 8; ++i)
             {
-                if(!tile_is_solid(
-                    tx + pgm_read_byte(&DDIRX[i]),
-                    ty + pgm_read_byte(&DDIRY[i])))
+                auto c = ddircoord(i);
+                if(!tile_is_solid(tx + c.x, ty + c.y))
                     return false;
             }
         }
@@ -511,12 +510,11 @@ static bool try_generate_room()
     uint8_t xr, yr; // new room
     random_room_edge(d, pr.type, x0, y0);
     random_room_edge(d ^ 1, t, x1, y1);
-    int8_t dx = (int8_t)pgm_read_byte(&DIRX[d]);
-    int8_t dy = (int8_t)pgm_read_byte(&DIRY[d]);
-    xd = pr.x + x0 + dx;
-    yd = pr.y + y0 + dy;
-    xr = xd - x1 + dx;
-    yr = yd - y1 + dy;
+    auto c = dircoord(d);
+    xd = pr.x + x0 + c.x;
+    yd = pr.y + y0 + c.y;
+    xr = xd - x1 + c.x;
+    yr = yd - y1 + c.y;
     if(!dig_room(t, xr, yr))
         return false;
     add_door(xd, yd);
@@ -529,8 +527,11 @@ static void try_add_random_door()
     uint8_t d = u8rand() % 4;
     uint8_t x, y;
     random_room_edge(d, r.type, x, y);
-    x += r.x + (int8_t)pgm_read_byte(&DIRX[d]);
-    y += r.y + (int8_t)pgm_read_byte(&DIRY[d]);
+    {
+        auto c = dircoord(d);
+        x += r.x + c.x;
+        y += r.y + c.y;
+    }
     if(!tile_is_solid(x, y)) return;
     for(uint8_t i = 0; i < num_rooms; ++i)
         if(rooms[i].inside_bb(x, y)) return;
@@ -553,7 +554,8 @@ static void try_add_random_door()
     // verify not adjacent to another door
     for(uint8_t i = 0; i < 4; ++i)
     {
-        if(get_door(x + pgm_read_byte(&DIRX[i]), y + pgm_read_byte(&DIRY[i])))
+        auto c = dircoord(i);
+        if(get_door(x + c.x, y + c.y))
             return;
     }
     add_door(x, y);
@@ -761,12 +763,27 @@ static void generate_random_item(uint8_t i)
     generate_item(i, it);
 }
 
+coord dircoord(uint8_t d)
+{
+    coord r;
+    r.x = pgm_read_byte(&DIRX[d]);
+    r.y = pgm_read_byte(&DIRY[d]);
+    return r;
+}
+
+coord ddircoord(uint8_t d)
+{
+    coord r;
+    r.x = pgm_read_byte(&DDIRX[d]);
+    r.y = pgm_read_byte(&DDIRY[d]);
+    return r;
+}
+
 void generate_dungeon()
 {
     rand_seed = game_seed;
     for(uint8_t i = 0; i < map_index; ++i)
-        for(uint8_t j = 0; j < 217; ++j)
-            u8rand();
+        u8rand();
 
     for(auto& t : tmap) t = 0xff;
     memzero(&tfog, sizeof(tfog));

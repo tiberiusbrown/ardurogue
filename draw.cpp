@@ -203,7 +203,10 @@ static void draw_sprite_precise_nonprog(
     tt[2] = (tp >> 4) & 0xf;
     tt[3] = (tp >> 0) & 0xf;
     for(uint8_t i = 0; i < 8; ++i)
-        clear_img(tt, 4, x + pgm_read_byte(&DDIRX[i]), y + pgm_read_byte(&DDIRY[i]));
+    {
+        auto c = ddircoord(i);
+        clear_img(tt, 4, x + c.x, y + c.y);
+    }
     set_img(tt, 4, x, y);
 }
 
@@ -263,9 +266,8 @@ static uint8_t ddir_mask(uint8_t tx, uint8_t ty)
     for(uint8_t j = 0; j < 8; ++j)
     {
         i <<= 1;
-        int8_t dx = (int8_t)pgm_read_byte(&DDIRX[j]);
-        int8_t dy = (int8_t)pgm_read_byte(&DDIRY[j]);
-        i |= (uint8_t)tile_is_solid_or_unknown(tx + dx, ty + dy);
+        auto c = ddircoord(j);
+        i |= (uint8_t)tile_is_solid_or_unknown(tx + c.x, ty + c.y);
     }
     return i;
 }
@@ -535,13 +537,12 @@ void draw_sprite_nonprog_rel_and_wait(uint16_t tp, uint8_t x, uint8_t y)
 
 void draw_ray_anim(uint8_t x, uint8_t y, uint8_t d, uint8_t n)
 {
-    uint8_t dx = pgm_read_byte(&DIRX[d]);
-    uint8_t dy = pgm_read_byte(&DIRY[d]);
+    auto c = dircoord(d);
     draw_dungeon_at_player();
     while(n-- > 0)
     {
-        x += dx;
-        y += dy;
+        x += c.x;
+        y += c.y;
         draw_sprite_nonprog_rel_and_wait(0x0eae, x, y);
     }
     paint_left();

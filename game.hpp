@@ -768,6 +768,8 @@ bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
 bool find_unoccupied(uint8_t& x, uint8_t& y); // returns true if found
 void find_unoccupied_guaranteed(uint8_t& x, uint8_t& y);
 coord find_unoccupied_guaranteed();
+coord dircoord(uint8_t d);
+coord ddircoord(uint8_t d);
 extern int8_t const DIRX[8] PROGMEM;
 static int8_t const* DIRY = &DIRX[4];
 
@@ -871,6 +873,8 @@ void load();
 static FORCEINLINE uint8_t ymask(uint8_t y)
 {
     uint8_t m;
+    // really reaching with the size optimizations now...
+    // this saves a whole 16 bytes!!! :(
 #if defined(__GNUC__) && defined(__AVR_ARCH__)
     asm volatile(
         "      ldi  %[m], 1  \n\t"
