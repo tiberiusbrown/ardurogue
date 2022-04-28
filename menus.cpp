@@ -1,6 +1,7 @@
 #include "game.hpp"
 
 #include "git.hpp"
+#include "ctstr.hpp"
 
 static char const HS_MSG_ESCAPED[] PROGMEM = "Escaped with the amulet";
 static char const HS_MSG_RETURNED[] PROGMEM = "Returned to the surface";
@@ -42,18 +43,10 @@ static void show_high_scores_offset(uint8_t x, uint8_t ti)
     }
     else
     {
-        static constexpr char HEXCHARS[] = "0123456789ABCDEF";
-        static auto const VERSION PROGMEM = concat(
-            MAKE_NON_NULLED_CHAR_ARRAY(GIT_COMMIT_DAY "  " GIT_DESCRIBE "  "),
-            char_array<5>{ {
-                HEXCHARS[(SAVE_VERSION >> 12) & 0xf],
-                HEXCHARS[(SAVE_VERSION >>  8) & 0xf],
-                HEXCHARS[(SAVE_VERSION >>  4) & 0xf],
-                HEXCHARS[(SAVE_VERSION >>  0) & 0xf],
-                '\0'
-            } }
-        );
-        draw_text(x - 1, 59, VERSION.d_);
+        static constexpr auto VERSION PROGMEM =
+            ctstr(GIT_COMMIT_DAY "  " GIT_DESCRIBE "  ") +
+            ctstr_hex<decltype(SAVE_VERSION), SAVE_VERSION>();
+        draw_text(x - 1, 59, VERSION.data);
         draw_textf(x + 96, 59, PSTR("@X  @u"), game_seed, unused_stack());
     }
 }

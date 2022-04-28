@@ -49,6 +49,7 @@ add_executable(
     main_emscripten.cpp
     main_win32.cpp
     game.hpp
+    ctstr.hpp
     draw.cpp
     entity.cpp
     font.cpp
