@@ -120,9 +120,9 @@ uint8_t armor_item_defense(item it)
 
 uint8_t weapon_item_attack(item it)
 {
-    // assumes item is sword
+    // assumes item is sword or bow
     uint8_t level = it.level - ENCHANT_LEVEL_ZERO;
-    return level + 2;
+    return level + (uint8_t(it.type - item::BOW) * 4) - 2;
 }
 
 void add_to_score(uint8_t amount)
@@ -363,6 +363,10 @@ void step()
     //
     if(gflags & GFLAG_JUST_MOVED)
     {
+        // spawn monster
+        if(u8rand() < 8)
+            try_spawn_monster();
+
         uint8_t px = ents[0].x, py = ents[0].y;
         // loop through items in reverse order
         // so that rendered item is first

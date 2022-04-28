@@ -814,6 +814,7 @@ void generate_dungeon();
 bool occupied(uint8_t x, uint8_t y); // door/stairs/item/entitity
 bool find_unoccupied(uint8_t& x, uint8_t& y); // returns true if found
 void find_unoccupied_guaranteed(uint8_t& x, uint8_t& y);
+void try_spawn_monster();
 coord find_unoccupied_guaranteed();
 coord dircoord(uint8_t d);
 coord ddircoord(uint8_t d);

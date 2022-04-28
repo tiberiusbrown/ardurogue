@@ -252,6 +252,13 @@ void draw_info_without_status()
         draw_text(1, 12, s);
         set_hline(1, 63, 20);
     }
+    {
+        uint8_t n = 0;
+        for(uint8_t i = 1; i < MAP_ENTITIES; ++i)
+            if(ents[i].type != entity::NONE)
+                ++n;
+        draw_textf(56, 12, PSTR("@u"), n);
+    }
 }
 
 int8_t const DDIRX[16] PROGMEM =

@@ -782,6 +782,38 @@ coord ddircoord(uint8_t d)
     return r;
 }
 
+static void add_random_monster(uint8_t i)
+{
+    auto& e = ents[i];
+    if(!find_unoccupied(e.x, e.y))
+        return;
+    for(;;)
+    {
+        uint8_t j = u8rand(6);
+        j = pgm_read_byte(&MAP_GEN_INFOS[map_index].monster_types[j]);
+        if(j != 0)
+        {
+            e.type = j;
+            if(j == entity::MIMIC)
+                healths[i] = u8rand(item::NUM_ITEM_TYPES - 1) + 1;
+#if ENABLE_GOT_ENTS
+            if(maps[map_index].got_ents.test(i))
+                e.type = entity::NONE;
+#endif
+            break;
+        }
+    }
+}
+
+void try_spawn_monster()
+{
+    uint8_t j = u8rand(MAP_ENTITIES);
+    if(ents[j].type != entity::NONE) return;
+    add_random_monster(j);
+    if(player_can_see_entity(j))
+        ents[j].type = entity::NONE;
+}
+
 void generate_dungeon()
 {
     rand_seed = game_seed;
@@ -849,26 +881,8 @@ void generate_dungeon()
 
     for(uint8_t i = 2; i < MAP_ENTITIES; ++i)
     {
-        auto& e = ents[i];
-        e.type = entity::NONE;
-        if(!find_unoccupied(e.x, e.y))
-            continue;
-        for(;;)
-        {
-            uint8_t j = u8rand(6);
-            j = pgm_read_byte(&MAP_GEN_INFOS[map_index].monster_types[j]);
-            if(j != 0)
-            {
-                e.type = j;
-                if(j == entity::MIMIC)
-                    healths[i] = u8rand(item::NUM_ITEM_TYPES - 1) + 1;
-#if ENABLE_GOT_ENTS
-                if(maps[map_index].got_ents.test(i))
-                    e.type = entity::NONE;
-#endif
-                break;
-            }
-        }
+        ents[i].type = entity::NONE;
+        add_random_monster(i);
     }
 
     //

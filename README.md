@@ -25,7 +25,6 @@ Read the guide [here](guide.md).
 If enough prog bytes could be freed up...
 
 - Floor traps
-- Spawn new monsters on occasion
 - Different map types (cave style?)
 - Wands
   - Lightning (arcs between monsters)
