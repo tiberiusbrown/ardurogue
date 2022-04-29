@@ -15,7 +15,7 @@ int main()
 {
     {
         int max_att = 20;
-        int max_def = 8;
+        int max_def = 20;
         printf("<table>\n");
         printf("<tr><td /><td colspan=\"%d\" style=\"text-align:center\"><b>Defense</b></td></tr>\n", max_def + 1);
         printf("<tr style=\"text-align:right\"><td><b>Attack</b></td>");
