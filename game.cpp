@@ -540,7 +540,7 @@ void run()
             destroy_save(); // NOW destroy save
             status_simple(PSTR(
                 "Welcome back to ArduRogue. "
-                "The save file has been removed. "
+                "The save file has been deleted. "
                 "Don't forget to save again when you're done!"));
         }
         else
