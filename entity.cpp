@@ -249,9 +249,8 @@ uint8_t calculate_arrow_damage(uint8_t defi)
     if(u8rand(ta + td + 1) < td)
         return 0;
     uint8_t dam = u8rand(ta) + ta / 4 + entity_strength(0) / 8 + 1;
-    td = entity_defense(defi);
-    dam -= u8rand(td / 2 + 1);
-    if(dam == 0) dam = 1;
+    td = att_def_mod(entity_defense(defi));
+    dam = calc_hit_dam_post_mod(dam, td);
     return dam;
 }
 
