@@ -519,21 +519,21 @@ void run()
         reset_status();
         memzero(&globals_, sizeof(globals_));
 
+        bool saved = save_valid();
+        if(saved) load();
+        saved &= (ents[0].type == entity::PLAYER);
+
         draw_text(7, 24, PSTR("ArduRogue"));
         set_box(5, 42, 22, 30);
-        draw_text(0, 34, PSTR("Press A to play."));
+        draw_text(0, 34, PSTR("Press A to"));
+        draw_text(35, 34, saved ? PSTR("load.") : PSTR("play."));
         paint_offset(40);
         while(wait_btn() != BTN_A)
             (void)0;
 
-        bool saved = save_valid();
-        if(saved) load();
-        saved &= (ents[0].type == entity::PLAYER);
-        char const* back = PSTR("");
         if(saved)
         {
             rand_seed = game_seed;
-            back = PSTR("back ");
             init_all_perms();
             generate_dungeon();
             load();         // need another load to overwrite current map entities
