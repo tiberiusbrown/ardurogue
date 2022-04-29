@@ -365,13 +365,29 @@ void entity_apply_potion(uint8_t subtype, uint8_t i)
     case POT_POISON:
         poison_entity(i);
         break;
+    case POT_HARMING:
+    {
+        uint8_t dam = entity_max_health(i) / 8 + 1;
+        dam += u8rand(dam * 2);
+        if(dam > 10) dam = 10;
+        status_u(PSTR("@U harmed by the potion!"), i);
+        entity_take_damage_from_entity(0, i, dam);
+        break;
+    }
     case POT_STRENGTH:
         if(ents[i].weakened)
             entity_restore_strength(i);
         else if(i == 0)
         {
-            status_simple(PSTR("You feel stronger!"));
+            status_simple(STR_YOU_FEEL_STRONGER);
             pstats.strength += 1;
+        }
+        break;
+    case POT_DEXTERITY:
+        if(i == 0)
+        {
+            status_simple(STR_YOU_FEEL_MORE_AGILE);
+            pstats.dexterity += 1;
         }
         break;
     case POT_INVIS:

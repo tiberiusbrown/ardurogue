@@ -1,5 +1,8 @@
 #include "game.hpp"
 
+char const STR_YOU_FEEL_STRONGER[] PROGMEM = "You feel stronger.";
+char const STR_YOU_FEEL_MORE_AGILE[] PROGMEM = "You feel more agile.";
+
 static char const MON_BAT        [] PROGMEM = "bat";
 static char const MON_SNAKE      [] PROGMEM = "snake";
 static char const MON_RATTLESNAKE[] PROGMEM = "rattlesnake";
@@ -73,7 +76,9 @@ char const* const ITEM_NAMES[] PROGMEM =
 static char const NPOT_HEALING[] PROGMEM = "healing";
 static char const NPOT_CONFUSION[] PROGMEM = "confusion";
 static char const NPOT_POISON[] PROGMEM = "poison";
+static char const NPOT_HARMING[] PROGMEM = "harming";
 static char const NPOT_STRENGTH[] PROGMEM = "strength";
+static char const NPOT_DEXTERITY[] PROGMEM = "dexterity";
 static char const NPOT_PARALYSIS[] PROGMEM = "paralysis";
 static char const NPOT_SLOWING[] PROGMEM = "slowing";
 static char const NPOT_EXPERIENCE[] PROGMEM = "experience";
@@ -84,7 +89,9 @@ char const* const POT_NAMES[NUM_POT] PROGMEM =
     NPOT_HEALING,
     NPOT_CONFUSION,
     NPOT_POISON,
+    NPOT_HARMING,
     NPOT_STRENGTH,
+    NPOT_DEXTERITY,
     NPOT_PARALYSIS,
     NPOT_SLOWING,
     NPOT_EXPERIENCE,
@@ -99,6 +106,8 @@ static char const UNID_POT_4[] PROGMEM = "blue";
 static char const UNID_POT_5[] PROGMEM = "white";
 static char const UNID_POT_6[] PROGMEM = "yellow";
 static char const UNID_POT_7[] PROGMEM = "violet";
+static char const UNID_POT_8[] PROGMEM = "black";
+static char const UNID_POT_9[] PROGMEM = "pink";
 
 char const* const UNID_POT_NAMES[NUM_POT] PROGMEM =
 {
@@ -110,6 +119,8 @@ char const* const UNID_POT_NAMES[NUM_POT] PROGMEM =
     UNID_POT_5,
     UNID_POT_6,
     UNID_POT_7,
+    UNID_POT_8,
+    UNID_POT_9,
 };
 
 static char const NSCR_IDENTIFY[] PROGMEM = "identify";

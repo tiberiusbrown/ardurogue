@@ -302,7 +302,9 @@ enum
     POT_HEALING,
     POT_CONFUSION,
     POT_POISON,
+    POT_HARMING,
     POT_STRENGTH,
+    POT_DEXTERITY,
     POT_PARALYSIS,
     POT_SLOWING,
     POT_EXPERIENCE,
@@ -691,6 +693,8 @@ extern char const* const UNID_SCR_NAMES[] PROGMEM;
 extern char const* const UNID_RNG_AMU_NAMES[] PROGMEM;
 extern char const* const UNID_WND_NAMES[] PROGMEM;
 extern char const* const INV_CATEGORIES[] PROGMEM;
+extern char const STR_YOU_FEEL_STRONGER[] PROGMEM;
+extern char const STR_YOU_FEEL_MORE_AGILE[] PROGMEM;
 
 // game.cpp
 void dig_tile(uint8_t x, uint8_t y);

@@ -146,12 +146,12 @@ void player_gain_xp(uint8_t xp)
         pstats.max_health += 4;
         if(plevel % 4 == 2)
         {
-            status_simple(PSTR("You feel stronger."));
+            status_simple(STR_YOU_FEEL_STRONGER);
             pstats.strength += 1;
         }
         if(plevel % 4 == 0)
         {
-            status_simple(PSTR("You feel more agile."));
+            status_simple(STR_YOU_FEEL_MORE_AGILE);
             pstats.dexterity += 1;
         }
         healths[0] = entity_max_health(0);
