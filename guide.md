@@ -183,11 +183,12 @@ The following table shows the chance to successfully land a hit for different st
 </table>
 
 
-When a melee attack successfully hits, the attacker's attack stat and the defender's defense stat are each used as the base for random rolls.
+When a melee attack successfully hits, the hit damage is calculated.
+First, the attacker's attack stat and the defender's defense stat are each used as the base for random rolls.
 For a base stat value N, the roll will be in the inclusive range from floor(N/4) to N.
 For example, if you have an attack stat of 13, the attack roll will be a random value from 3 to 13.
 
-After the attack roll and defense roll are determined, the damage is calculated by mixing the two values.
+After the attack roll and defense roll are determined, the final hit damage is then calculated by mixing the two values.
 The following table shows the final damage dealt for different combinations of attack and defense rolls.
 
 <table>
