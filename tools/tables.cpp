@@ -14,8 +14,8 @@ void flush_persistent() {}
 int main()
 {
     {
-        int max_att = 20;
-        int max_def = 20;
+        int max_att = 19;
+        int max_def = 19;
         printf("<table>\n");
         printf("<tr><td /><td colspan=\"%d\" align=\"center\"><b>Defense Roll</b></td></tr>\n", max_def + 1);
         printf("<tr align=\"center\"><td><b>Damage Roll</b></td>");
@@ -38,7 +38,7 @@ int main()
     printf("\n\n");
 
     {
-        int max_dex = 15;
+        int max_dex = 14;
         printf("<table>\n");
         printf("<tr><td /><td colspan=\"%d\" align=\"center\"><b>Defender Dexterity</b></td></tr>\n", max_dex + 1);
         printf("<tr align=\"center\"><td><b>Attacker Dexterity</b></td>");
@@ -63,7 +63,7 @@ int main()
     printf("\n\n");
 
     {
-        int max_dex = 15;
+        int max_dex = 14;
         printf("<table>\n");
         printf("<tr><td /><td colspan=\"%d\" align=\"center\"><b>Defender Dexterity</b></td></tr>\n", max_dex + 1);
         printf("<tr align=\"center\"><td><b>Attacker Dexterity</b></td>");
