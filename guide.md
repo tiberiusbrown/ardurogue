@@ -163,6 +163,26 @@ The EEPROM is not written to when beginning a new game. If you never save your p
 
 ## Combat Formulas <a name="combatformulas"></a>
 
+When attempting a melee attack, the chance to hit depends on both the attacker's and defender's dexterity stats.
+The following table shows the chance to successfully land a hit for different stat combinations.
+
+<table>
+<tr><td /><td colspan="11" align="center"><b>Defender Dexterity</b></td></tr>
+<tr align="center"><td><b>Attacker Dexterity</b></td><td><b>0</b></td><td><b>1</b></td><td><b>2</b></td><td><b>3</b></td><td><b>4</b></td><td><b>5</b></td><td><b>6</b></td><td><b>7</b></td><td><b>8</b></td><td><b>9</b></td><td><b>10</b></td></tr>
+<tr align="right"><td><b>0</b></td><td>100%</td><td>50%</td><td>33%</td><td>25%</td><td>20%</td><td>17%</td><td>14%</td><td>13%</td><td>11%</td><td>10%</td><td>9%</td></tr>
+<tr align="right"><td><b>1</b></td><td>100%</td><td>75%</td><td>60%</td><td>50%</td><td>43%</td><td>38%</td><td>33%</td><td>30%</td><td>27%</td><td>25%</td><td>23%</td></tr>
+<tr align="right"><td><b>2</b></td><td>100%</td><td>83%</td><td>71%</td><td>63%</td><td>56%</td><td>50%</td><td>45%</td><td>42%</td><td>38%</td><td>36%</td><td>33%</td></tr>
+<tr align="right"><td><b>3</b></td><td>100%</td><td>88%</td><td>78%</td><td>70%</td><td>64%</td><td>58%</td><td>54%</td><td>50%</td><td>47%</td><td>44%</td><td>41%</td></tr>
+<tr align="right"><td><b>4</b></td><td>100%</td><td>90%</td><td>82%</td><td>75%</td><td>69%</td><td>64%</td><td>60%</td><td>56%</td><td>53%</td><td>50%</td><td>47%</td></tr>
+<tr align="right"><td><b>5</b></td><td>100%</td><td>92%</td><td>85%</td><td>79%</td><td>73%</td><td>69%</td><td>65%</td><td>61%</td><td>58%</td><td>55%</td><td>52%</td></tr>
+<tr align="right"><td><b>6</b></td><td>100%</td><td>93%</td><td>87%</td><td>81%</td><td>76%</td><td>72%</td><td>68%</td><td>65%</td><td>62%</td><td>59%</td><td>57%</td></tr>
+<tr align="right"><td><b>7</b></td><td>100%</td><td>94%</td><td>88%</td><td>83%</td><td>79%</td><td>75%</td><td>71%</td><td>68%</td><td>65%</td><td>63%</td><td>60%</td></tr>
+<tr align="right"><td><b>8</b></td><td>100%</td><td>94%</td><td>89%</td><td>85%</td><td>81%</td><td>77%</td><td>74%</td><td>71%</td><td>68%</td><td>65%</td><td>63%</td></tr>
+<tr align="right"><td><b>9</b></td><td>100%</td><td>95%</td><td>90%</td><td>86%</td><td>83%</td><td>79%</td><td>76%</td><td>73%</td><td>70%</td><td>68%</td><td>66%</td></tr>
+<tr align="right"><td><b>10</b></td><td>100%</td><td>95%</td><td>91%</td><td>88%</td><td>84%</td><td>81%</td><td>78%</td><td>75%</td><td>72%</td><td>70%</td><td>68%</td></tr>
+</table>
+
+
 When a melee attack successfully hits, the attacker's attack stat and the defender's defense stat are each used as the base for random rolls.
 For a base stat value N, the roll will be in the inclusive range from floor(N/4) to N.
 For example, if you have an attack stat of 13, the attack roll will be a random value from 3 to 13.
@@ -171,8 +191,8 @@ After the attack roll and defense roll are determined, the damage is calculated 
 The following table shows the final damage dealt for different combinations of attack and defense rolls.
 
 <table>
-<tr><td /><td colspan="21" align="center"><b>Defense</b></td></tr>
-<tr align="right"><td><b>Attack</b></td><td><b>0</b></td><td><b>1</b></td><td><b>2</b></td><td><b>3</b></td><td><b>4</b></td><td><b>5</b></td><td><b>6</b></td><td><b>7</b></td><td><b>8</b></td><td><b>9</b></td><td><b>10</b></td><td><b>11</b></td><td><b>12</b></td><td><b>13</b></td><td><b>14</b></td><td><b>15</b></td><td><b>16</b></td><td><b>17</b></td><td><b>18</b></td><td><b>19</b></td><td><b>20</b></td></tr>
+<tr><td /><td colspan="21" align="center"><b>Defense Roll</b></td></tr>
+<tr align="center"><td><b>Attack Roll</b></td><td><b>0</b></td><td><b>1</b></td><td><b>2</b></td><td><b>3</b></td><td><b>4</b></td><td><b>5</b></td><td><b>6</b></td><td><b>7</b></td><td><b>8</b></td><td><b>9</b></td><td><b>10</b></td><td><b>11</b></td><td><b>12</b></td><td><b>13</b></td><td><b>14</b></td><td><b>15</b></td><td><b>16</b></td><td><b>17</b></td><td><b>18</b></td><td><b>19</b></td><td><b>20</b></td></tr>
 <tr align="right"><td><b>0</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
 <tr align="right"><td><b>1</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
 <tr align="right"><td><b>2</b></td><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
@@ -195,3 +215,4 @@ The following table shows the final damage dealt for different combinations of a
 <tr align="right"><td><b>19</b></td><td>19</td><td>18</td><td>17</td><td>16</td><td>16</td><td>15</td><td>14</td><td>14</td><td>13</td><td>13</td><td>12</td><td>12</td><td>12</td><td>11</td><td>11</td><td>11</td><td>10</td><td>10</td><td>10</td><td>9</td><td>9</td></tr>
 <tr align="right"><td><b>20</b></td><td>20</td><td>19</td><td>18</td><td>17</td><td>17</td><td>16</td><td>15</td><td>15</td><td>14</td><td>14</td><td>13</td><td>13</td><td>13</td><td>12</td><td>12</td><td>11</td><td>11</td><td>11</td><td>11</td><td>10</td><td>10</td></tr>
 </table>
+

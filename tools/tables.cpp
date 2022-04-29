@@ -17,8 +17,8 @@ int main()
         int max_att = 20;
         int max_def = 20;
         printf("<table>\n");
-        printf("<tr><td /><td colspan=\"%d\" align=\"center\"><b>Defense</b></td></tr>\n", max_def + 1);
-        printf("<tr align=\"right\"><td><b>Attack</b></td>");
+        printf("<tr><td /><td colspan=\"%d\" align=\"center\"><b>Defense Roll</b></td></tr>\n", max_def + 1);
+        printf("<tr align=\"center\"><td><b>Attack Roll</b></td>");
         for(int def = 0; def <= max_def; ++def)
             printf("<td><b>%d</b></td>", def);
         printf("</tr>\n");
@@ -29,6 +29,31 @@ int main()
             {
                 int dam = calc_hit_dam_post_mod((uint8_t)att, (uint8_t)def);
                 printf("<td>%d</td>", dam);
+            }
+            printf("</tr>\n");
+        }
+        printf("</table>\n");
+    }
+
+    printf("\n\n");
+
+    {
+        int max_dex = 10;
+        printf("<table>\n");
+        printf("<tr><td /><td colspan=\"%d\" align=\"center\"><b>Defender Dexterity</b></td></tr>\n", max_dex + 1);
+        printf("<tr align=\"center\"><td><b>Attacker Dexterity</b></td>");
+        for(int dex = 0; dex <= max_dex; ++dex)
+            printf("<td><b>%d</b></td>", dex);
+        printf("</tr>\n");
+        for(int att = 0; att <= max_dex; ++att)
+        {
+            printf("<tr align=\"right\"><td><b>%d</b></td>", att);
+            for(int def = 0; def <= max_dex; ++def)
+            {
+                double fd = double(def);
+                double fa = double(att) * 2 + fd + 1;
+                int f = int((1.0 - fd / fa) * 100.0 + 0.5);
+                printf("<td>%d%%</td>", f);
             }
             printf("</tr>\n");
         }

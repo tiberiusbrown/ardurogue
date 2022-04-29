@@ -216,7 +216,7 @@ bool test_attack_hit(uint8_t atti, uint8_t defi) // 0 for miss
 {
     uint8_t ta = entity_dexterity(atti);
     uint8_t td = entity_dexterity(defi);
-    return u8rand(ta * 2 + td) >= td;
+    return u8rand(ta * 2 + td + 1) >= td;
 }
 
 static uint8_t att_def_mod(uint8_t x)
