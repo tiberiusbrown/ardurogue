@@ -18,7 +18,7 @@ int main()
         int max_def = 20;
         printf("<table>\n");
         printf("<tr><td /><td colspan=\"%d\" align=\"center\"><b>Defense Roll</b></td></tr>\n", max_def + 1);
-        printf("<tr align=\"center\"><td><b>Attack Roll</b></td>");
+        printf("<tr align=\"center\"><td><b>Damage Roll</b></td>");
         for(int def = 0; def <= max_def; ++def)
             printf("<td><b>%d</b></td>", def);
         printf("</tr>\n");
@@ -38,7 +38,7 @@ int main()
     printf("\n\n");
 
     {
-        int max_dex = 10;
+        int max_dex = 15;
         printf("<table>\n");
         printf("<tr><td /><td colspan=\"%d\" align=\"center\"><b>Defender Dexterity</b></td></tr>\n", max_dex + 1);
         printf("<tr align=\"center\"><td><b>Attacker Dexterity</b></td>");

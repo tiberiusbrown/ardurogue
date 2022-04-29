@@ -17,6 +17,9 @@ Jump to Section:
         - [Wands](#wands)
     - [Enemies](#enemytypes)
     - [Combat Formulas](#combatformulas)
+      - [Melee Combat](#meleecombat)
+      - [Ranged Combat](#rangedcombat)
+      - [Magic Damage](#magicdamage)
 
 ## How to Play <a name="howtoplay"></a>
 
@@ -140,6 +143,16 @@ The EEPROM is not written to when beginning a new game. If you never save your p
 
 #### Wands <a name="wands"></a>
 
+| Wand of... | Effect |
+| ---------- | ------ |
+| force      | Pushes the target back. |
+| teleport   | Teleports the target. |
+| digging    | Digs through walls in the given direction. |
+| fire       | Target and all others nearby take fire damage. |
+| striking   | Target takes strong magic damage. |
+| ice        | Target takes magic damage and is slowed. |
+| polymorph  | Target is transormed into another creature: 75% chance to be a weaker creature, 25% chance to be stronger. |
+
 ### Enemies <a name="enemytypes"></a>
 
 | Symbol                   | Name             | Str | Dex | Spd | Def | Health | Notes |
@@ -161,39 +174,19 @@ The EEPROM is not written to when beginning a new game. If you never save your p
 | ![](img/angel.png)       | fallen angel     |  10 |   6 |   6 |   3 |     24 | Chance to confuse or paralyze on hit. |
 | ![](img/darkness.png)    | Lord of Darkness |  16 |   6 |   8 |   8 |    128 | Regenerates. Chance to poison, confuse, or paralyze on hit. |
 
-## Combat Formulas <a name="combatformulas"></a>
+### Combat Formulas <a name="combatformulas"></a>
 
-When attempting a melee attack, the chance to hit depends on both the attacker's and defender's dexterity stats.
-The following table shows the chance to successfully land a hit for different stat combinations.
+When a physical attack (melee or ranged) lands, two random values are calculated:
+- the damage roll for the attacker and
+- the defense roll for the defender.
 
-<table>
-<tr><td /><td colspan="11" align="center"><b>Defender Dexterity</b></td></tr>
-<tr align="center"><td><b>Attacker Dexterity</b></td><td><b>0</b></td><td><b>1</b></td><td><b>2</b></td><td><b>3</b></td><td><b>4</b></td><td><b>5</b></td><td><b>6</b></td><td><b>7</b></td><td><b>8</b></td><td><b>9</b></td><td><b>10</b></td></tr>
-<tr align="right"><td><b>0</b></td><td>100%</td><td>50%</td><td>33%</td><td>25%</td><td>20%</td><td>17%</td><td>14%</td><td>13%</td><td>11%</td><td>10%</td><td>9%</td></tr>
-<tr align="right"><td><b>1</b></td><td>100%</td><td>75%</td><td>60%</td><td>50%</td><td>43%</td><td>38%</td><td>33%</td><td>30%</td><td>27%</td><td>25%</td><td>23%</td></tr>
-<tr align="right"><td><b>2</b></td><td>100%</td><td>83%</td><td>71%</td><td>63%</td><td>56%</td><td>50%</td><td>45%</td><td>42%</td><td>38%</td><td>36%</td><td>33%</td></tr>
-<tr align="right"><td><b>3</b></td><td>100%</td><td>88%</td><td>78%</td><td>70%</td><td>64%</td><td>58%</td><td>54%</td><td>50%</td><td>47%</td><td>44%</td><td>41%</td></tr>
-<tr align="right"><td><b>4</b></td><td>100%</td><td>90%</td><td>82%</td><td>75%</td><td>69%</td><td>64%</td><td>60%</td><td>56%</td><td>53%</td><td>50%</td><td>47%</td></tr>
-<tr align="right"><td><b>5</b></td><td>100%</td><td>92%</td><td>85%</td><td>79%</td><td>73%</td><td>69%</td><td>65%</td><td>61%</td><td>58%</td><td>55%</td><td>52%</td></tr>
-<tr align="right"><td><b>6</b></td><td>100%</td><td>93%</td><td>87%</td><td>81%</td><td>76%</td><td>72%</td><td>68%</td><td>65%</td><td>62%</td><td>59%</td><td>57%</td></tr>
-<tr align="right"><td><b>7</b></td><td>100%</td><td>94%</td><td>88%</td><td>83%</td><td>79%</td><td>75%</td><td>71%</td><td>68%</td><td>65%</td><td>63%</td><td>60%</td></tr>
-<tr align="right"><td><b>8</b></td><td>100%</td><td>94%</td><td>89%</td><td>85%</td><td>81%</td><td>77%</td><td>74%</td><td>71%</td><td>68%</td><td>65%</td><td>63%</td></tr>
-<tr align="right"><td><b>9</b></td><td>100%</td><td>95%</td><td>90%</td><td>86%</td><td>83%</td><td>79%</td><td>76%</td><td>73%</td><td>70%</td><td>68%</td><td>66%</td></tr>
-<tr align="right"><td><b>10</b></td><td>100%</td><td>95%</td><td>91%</td><td>88%</td><td>84%</td><td>81%</td><td>78%</td><td>75%</td><td>72%</td><td>70%</td><td>68%</td></tr>
-</table>
-
-
-When a melee attack successfully hits, the hit damage is calculated.
-First, the attacker's attack stat and the defender's defense stat are each used as the base for random rolls.
-For a base stat value N, the roll will be in the inclusive range from floor(N/4) to N.
-For example, if you have an attack stat of 13, the attack roll will be a random value from 3 to 13.
-
-After the attack roll and defense roll are determined, the final hit damage is then calculated by mixing the two values.
-The following table shows the final damage dealt for different combinations of attack and defense rolls.
+How the damage roll is calculated differs between melee and ranged combat.
+The defense roll depends only on the defense stat, and is a random value from floor(Def/4) to Def, inclusive.
+The following table shows the damage dealt for different values of damage and defense rolls.
 
 <table>
 <tr><td /><td colspan="21" align="center"><b>Defense Roll</b></td></tr>
-<tr align="center"><td><b>Attack Roll</b></td><td><b>0</b></td><td><b>1</b></td><td><b>2</b></td><td><b>3</b></td><td><b>4</b></td><td><b>5</b></td><td><b>6</b></td><td><b>7</b></td><td><b>8</b></td><td><b>9</b></td><td><b>10</b></td><td><b>11</b></td><td><b>12</b></td><td><b>13</b></td><td><b>14</b></td><td><b>15</b></td><td><b>16</b></td><td><b>17</b></td><td><b>18</b></td><td><b>19</b></td><td><b>20</b></td></tr>
+<tr align="center"><td><b>Damage Roll</b></td><td><b>0</b></td><td><b>1</b></td><td><b>2</b></td><td><b>3</b></td><td><b>4</b></td><td><b>5</b></td><td><b>6</b></td><td><b>7</b></td><td><b>8</b></td><td><b>9</b></td><td><b>10</b></td><td><b>11</b></td><td><b>12</b></td><td><b>13</b></td><td><b>14</b></td><td><b>15</b></td><td><b>16</b></td><td><b>17</b></td><td><b>18</b></td><td><b>19</b></td><td><b>20</b></td></tr>
 <tr align="right"><td><b>0</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
 <tr align="right"><td><b>1</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
 <tr align="right"><td><b>2</b></td><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
@@ -217,3 +210,36 @@ The following table shows the final damage dealt for different combinations of a
 <tr align="right"><td><b>20</b></td><td>20</td><td>19</td><td>18</td><td>17</td><td>17</td><td>16</td><td>15</td><td>15</td><td>14</td><td>14</td><td>13</td><td>13</td><td>13</td><td>12</td><td>12</td><td>11</td><td>11</td><td>11</td><td>11</td><td>10</td><td>10</td></tr>
 </table>
 
+#### Melee Combat <a name="meleecombat"></a>
+
+The chance to land a melee attack depends on both the attacker's and defender's dexterity stats.
+The following table shows the chance to successfully land a hit for different stat combinations.
+
+<table>
+<tr><td /><td colspan="16" align="center"><b>Defender Dexterity</b></td></tr>
+<tr align="center"><td><b>Attacker Dexterity</b></td><td><b>0</b></td><td><b>1</b></td><td><b>2</b></td><td><b>3</b></td><td><b>4</b></td><td><b>5</b></td><td><b>6</b></td><td><b>7</b></td><td><b>8</b></td><td><b>9</b></td><td><b>10</b></td><td><b>11</b></td><td><b>12</b></td><td><b>13</b></td><td><b>14</b></td><td><b>15</b></td></tr>
+<tr align="right"><td><b>0</b></td><td>100%</td><td>50%</td><td>33%</td><td>25%</td><td>20%</td><td>17%</td><td>14%</td><td>13%</td><td>11%</td><td>10%</td><td>9%</td><td>8%</td><td>8%</td><td>7%</td><td>7%</td><td>6%</td></tr>
+<tr align="right"><td><b>1</b></td><td>100%</td><td>75%</td><td>60%</td><td>50%</td><td>43%</td><td>38%</td><td>33%</td><td>30%</td><td>27%</td><td>25%</td><td>23%</td><td>21%</td><td>20%</td><td>19%</td><td>18%</td><td>17%</td></tr>
+<tr align="right"><td><b>2</b></td><td>100%</td><td>83%</td><td>71%</td><td>63%</td><td>56%</td><td>50%</td><td>45%</td><td>42%</td><td>38%</td><td>36%</td><td>33%</td><td>31%</td><td>29%</td><td>28%</td><td>26%</td><td>25%</td></tr>
+<tr align="right"><td><b>3</b></td><td>100%</td><td>88%</td><td>78%</td><td>70%</td><td>64%</td><td>58%</td><td>54%</td><td>50%</td><td>47%</td><td>44%</td><td>41%</td><td>39%</td><td>37%</td><td>35%</td><td>33%</td><td>32%</td></tr>
+<tr align="right"><td><b>4</b></td><td>100%</td><td>90%</td><td>82%</td><td>75%</td><td>69%</td><td>64%</td><td>60%</td><td>56%</td><td>53%</td><td>50%</td><td>47%</td><td>45%</td><td>43%</td><td>41%</td><td>39%</td><td>38%</td></tr>
+<tr align="right"><td><b>5</b></td><td>100%</td><td>92%</td><td>85%</td><td>79%</td><td>73%</td><td>69%</td><td>65%</td><td>61%</td><td>58%</td><td>55%</td><td>52%</td><td>50%</td><td>48%</td><td>46%</td><td>44%</td><td>42%</td></tr>
+<tr align="right"><td><b>6</b></td><td>100%</td><td>93%</td><td>87%</td><td>81%</td><td>76%</td><td>72%</td><td>68%</td><td>65%</td><td>62%</td><td>59%</td><td>57%</td><td>54%</td><td>52%</td><td>50%</td><td>48%</td><td>46%</td></tr>
+<tr align="right"><td><b>7</b></td><td>100%</td><td>94%</td><td>88%</td><td>83%</td><td>79%</td><td>75%</td><td>71%</td><td>68%</td><td>65%</td><td>63%</td><td>60%</td><td>58%</td><td>56%</td><td>54%</td><td>52%</td><td>50%</td></tr>
+<tr align="right"><td><b>8</b></td><td>100%</td><td>94%</td><td>89%</td><td>85%</td><td>81%</td><td>77%</td><td>74%</td><td>71%</td><td>68%</td><td>65%</td><td>63%</td><td>61%</td><td>59%</td><td>57%</td><td>55%</td><td>53%</td></tr>
+<tr align="right"><td><b>9</b></td><td>100%</td><td>95%</td><td>90%</td><td>86%</td><td>83%</td><td>79%</td><td>76%</td><td>73%</td><td>70%</td><td>68%</td><td>66%</td><td>63%</td><td>61%</td><td>59%</td><td>58%</td><td>56%</td></tr>
+<tr align="right"><td><b>10</b></td><td>100%</td><td>95%</td><td>91%</td><td>88%</td><td>84%</td><td>81%</td><td>78%</td><td>75%</td><td>72%</td><td>70%</td><td>68%</td><td>66%</td><td>64%</td><td>62%</td><td>60%</td><td>58%</td></tr>
+<tr align="right"><td><b>11</b></td><td>100%</td><td>96%</td><td>92%</td><td>88%</td><td>85%</td><td>82%</td><td>79%</td><td>77%</td><td>74%</td><td>72%</td><td>70%</td><td>68%</td><td>66%</td><td>64%</td><td>62%</td><td>61%</td></tr>
+<tr align="right"><td><b>12</b></td><td>100%</td><td>96%</td><td>93%</td><td>89%</td><td>86%</td><td>83%</td><td>81%</td><td>78%</td><td>76%</td><td>74%</td><td>71%</td><td>69%</td><td>68%</td><td>66%</td><td>64%</td><td>63%</td></tr>
+<tr align="right"><td><b>13</b></td><td>100%</td><td>96%</td><td>93%</td><td>90%</td><td>87%</td><td>84%</td><td>82%</td><td>79%</td><td>77%</td><td>75%</td><td>73%</td><td>71%</td><td>69%</td><td>68%</td><td>66%</td><td>64%</td></tr>
+<tr align="right"><td><b>14</b></td><td>100%</td><td>97%</td><td>94%</td><td>91%</td><td>88%</td><td>85%</td><td>83%</td><td>81%</td><td>78%</td><td>76%</td><td>74%</td><td>73%</td><td>71%</td><td>69%</td><td>67%</td><td>66%</td></tr>
+<tr align="right"><td><b>15</b></td><td>100%</td><td>97%</td><td>94%</td><td>91%</td><td>89%</td><td>86%</td><td>84%</td><td>82%</td><td>79%</td><td>78%</td><td>76%</td><td>74%</td><td>72%</td><td>70%</td><td>69%</td><td>67%</td></tr>
+</table>
+
+The damage roll for a melee hit depends on the attacker's attack stat.
+For an attack stat value N, the damage roll will be in the inclusive range from floor(N/4) to N.
+For example, if you have an attack stat of 13, the damage roll will be a random value from 3 to 13.
+
+#### Ranged Combat <a name="rangedcombat"></a>
+
+#### Magic Damage <a name="magicdamage"></a>
