@@ -221,9 +221,16 @@ bool test_attack_hit(uint8_t atti, uint8_t defi) // 0 for miss
 
 static uint8_t att_def_mod(uint8_t x)
 {
-    uint8_t a = ((x + 1) * 3 + 1) / 4;
-    uint8_t b = x - a;
-    return u8rand(a) + b + 1;
+    uint8_t b = x / 4;
+    uint8_t a = x - b + 1;
+    return u8rand(a) + b;
+}
+
+uint8_t calc_hit_dam_post_mod(uint8_t ta, uint8_t td)
+{
+    uint8_t dam = uint8_t((uint16_t(ta) * ta + ta + ta / 2) / (ta + td + 1));
+    if(dam == 0) dam = 1;
+    return dam;
 }
 
 uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi) // 0 for block
@@ -232,9 +239,7 @@ uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi) // 0 for block
     uint8_t td = entity_defense(defi);
     ta = att_def_mod(ta);
     td = att_def_mod(td);
-    uint8_t dam = (ta * ta + ta / 2 + 1) / (ta + td + 1);
-    if(dam == 0) dam = 1;
-    return dam;
+    return calc_hit_dam_post_mod(ta, td);
 }
 
 uint8_t calculate_arrow_damage(uint8_t defi)

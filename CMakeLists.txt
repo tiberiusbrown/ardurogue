@@ -41,13 +41,7 @@ if(WIN32)
     set(WINFLAG WIN32)
 endif()
 
-add_executable(
-    ${PROJECT_NAME} ${WINFLAG}
-    README.md
-    guide.md
-    .editorconfig
-    main_emscripten.cpp
-    main_win32.cpp
+set(ARDUROGUE_SOURCES
     game.hpp
     ctstr.hpp
     draw.cpp
@@ -64,7 +58,17 @@ add_executable(
     status.cpp
     strings.cpp
     use.cpp
-    )
+)
+
+add_executable(
+    ${PROJECT_NAME} ${WINFLAG}
+    README.md
+    guide.md
+    .editorconfig
+    main_emscripten.cpp
+    main_win32.cpp
+    ${ARDUROGUE_SOURCES}
+)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC git)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 11)
@@ -72,6 +76,9 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 11)
 if(PLAYER_INVULNERABLE)
     target_compile_definitions(${PROJECT_NAME} PUBLIC -DPLAYER_INVULNERABLE=1)
 endif()
+
+add_executable(tables tools/tables.cpp ${ARDUROGUE_SOURCES})
+set_property(TARGET tables PROPERTY CXX_STANDARD_REQUIRED 11)
 
 if(MSVC)
     set_property(TARGET ${PROJECT_NAME} PROPERTY

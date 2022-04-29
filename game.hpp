@@ -821,6 +821,7 @@ uint8_t entity_dexterity(uint8_t i);
 uint8_t entity_attack(uint8_t i);
 uint8_t entity_defense(uint8_t i);
 bool test_attack_hit(uint8_t atti, uint8_t defi); // 0 for miss
+uint8_t calc_hit_dam_post_mod(uint8_t ta, uint8_t td);
 uint8_t calculate_hit_damage(uint8_t atti, uint8_t defi);
 uint8_t calculate_arrow_damage(uint8_t defi); // 0 for miss
 void entity_restore_strength(uint8_t i);

@@ -16,6 +16,7 @@ Jump to Section:
         - [Amulets](#amulets)
         - [Wands](#wands)
     - [Enemies](#enemytypes)
+    - [Combat Formulas](#combatformulas)
 
 ## How to Play <a name="howtoplay"></a>
 
@@ -159,3 +160,38 @@ The EEPROM is not written to when beginning a new game. If you never save your p
 | ![](img/dragon.png)      | dragon           |  12 |   4 |   4 |   8 |     48 | Breathes fire. |
 | ![](img/angel.png)       | fallen angel     |  10 |   6 |   6 |   3 |     24 | Chance to confuse or paralyze on hit. |
 | ![](img/darkness.png)    | Lord of Darkness |  16 |   6 |   8 |   8 |    128 | Regenerates. Chance to poison, confuse, or paralyze on hit. |
+
+## Combat Formulas <a name="combatformulas"></a>
+
+When a melee attack occurs, the attacker's attack stat and the defender's defense stat are each used as the base for random rolls.
+For a base stat value N, the roll will be in the inclusive range from floor(N/4) to N.
+For example, if you have an attack stat of 13, the attack roll will be a random value from 3 to 13.
+
+After the attack roll and defense roll are determined, the damage is calculated by mixing the two values.
+The following table shows the final damage dealt for different combinations of attack and defense rolls.
+
+<table>
+<tr><td /><td colspan="9" style="text-align:center"><b>Defense</b></td></tr>
+<tr style="text-align:right"><td><b>Attack</b></td><td><b>0</b></td><td><b>1</b></td><td><b>2</b></td><td><b>3</b></td><td><b>4</b></td><td><b>5</b></td><td><b>6</b></td><td><b>7</b></td><td><b>8</b></td></tr>
+<tr style="text-align:right"><td><b>0</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr style="text-align:right"><td><b>1</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr style="text-align:right"><td><b>2</b></td><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr style="text-align:right"><td><b>3</b></td><td>3</td><td>2</td><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr style="text-align:right"><td><b>4</b></td><td>4</td><td>3</td><td>3</td><td>2</td><td>2</td><td>2</td><td>2</td><td>1</td><td>1</td></tr>
+<tr style="text-align:right"><td><b>5</b></td><td>5</td><td>4</td><td>4</td><td>3</td><td>3</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+<tr style="text-align:right"><td><b>6</b></td><td>6</td><td>5</td><td>5</td><td>4</td><td>4</td><td>3</td><td>3</td><td>3</td><td>3</td></tr>
+<tr style="text-align:right"><td><b>7</b></td><td>7</td><td>6</td><td>5</td><td>5</td><td>4</td><td>4</td><td>4</td><td>3</td><td>3</td></tr>
+<tr style="text-align:right"><td><b>8</b></td><td>8</td><td>7</td><td>6</td><td>6</td><td>5</td><td>5</td><td>5</td><td>4</td><td>4</td></tr>
+<tr style="text-align:right"><td><b>9</b></td><td>9</td><td>8</td><td>7</td><td>7</td><td>6</td><td>6</td><td>5</td><td>5</td><td>5</td></tr>
+<tr style="text-align:right"><td><b>10</b></td><td>10</td><td>9</td><td>8</td><td>8</td><td>7</td><td>7</td><td>6</td><td>6</td><td>6</td></tr>
+<tr style="text-align:right"><td><b>11</b></td><td>11</td><td>10</td><td>9</td><td>9</td><td>8</td><td>8</td><td>7</td><td>7</td><td>6</td></tr>
+<tr style="text-align:right"><td><b>12</b></td><td>12</td><td>11</td><td>10</td><td>10</td><td>9</td><td>9</td><td>8</td><td>8</td><td>7</td></tr>
+<tr style="text-align:right"><td><b>13</b></td><td>13</td><td>12</td><td>11</td><td>11</td><td>10</td><td>9</td><td>9</td><td>8</td><td>8</td></tr>
+<tr style="text-align:right"><td><b>14</b></td><td>14</td><td>13</td><td>12</td><td>12</td><td>11</td><td>10</td><td>10</td><td>9</td><td>9</td></tr>
+<tr style="text-align:right"><td><b>15</b></td><td>15</td><td>14</td><td>13</td><td>13</td><td>12</td><td>11</td><td>11</td><td>10</td><td>10</td></tr>
+<tr style="text-align:right"><td><b>16</b></td><td>16</td><td>15</td><td>14</td><td>14</td><td>13</td><td>12</td><td>12</td><td>11</td><td>11</td></tr>
+<tr style="text-align:right"><td><b>17</b></td><td>17</td><td>16</td><td>15</td><td>14</td><td>14</td><td>13</td><td>13</td><td>12</td><td>12</td></tr>
+<tr style="text-align:right"><td><b>18</b></td><td>18</td><td>17</td><td>16</td><td>15</td><td>15</td><td>14</td><td>14</td><td>13</td><td>13</td></tr>
+<tr style="text-align:right"><td><b>19</b></td><td>19</td><td>18</td><td>17</td><td>16</td><td>16</td><td>15</td><td>14</td><td>14</td><td>13</td></tr>
+<tr style="text-align:right"><td><b>20</b></td><td>20</td><td>19</td><td>18</td><td>17</td><td>17</td><td>16</td><td>15</td><td>15</td><td>14</td></tr>
+</table>

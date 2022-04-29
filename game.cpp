@@ -122,7 +122,7 @@ uint8_t weapon_item_attack(item it)
 {
     // assumes item is sword or bow
     uint8_t level = it.level - ENCHANT_LEVEL_ZERO;
-    return level + (uint8_t(it.type - item::BOW) * 4) - 2;
+    return level + (uint8_t(it.type - item::BOW) * 8) - 5;
 }
 
 void add_to_score(uint8_t amount)
