@@ -61,10 +61,10 @@ static char* item_name(char* dst, item it)
     if(it.cursed && it.identified)
         dst = tstrcpy_prog(dst, PSTR("cursed "));
 
-    static char const STR_SPACE_OF_SPACE[] = " of ";
-    static char const STR_POTION[] = "potion";
-    static char const STR_SCROLL[] = "scroll";
-    static char const STR_DEF_BONUS[] = " [@d def]";
+    static char const STR_SPACE_OF_SPACE[] PROGMEM = " of ";
+    static char const STR_POTION[] PROGMEM = "potion";
+    static char const STR_SCROLL[] PROGMEM = "scroll";
+    static char const STR_DEF_BONUS[] PROGMEM = " [@d def]";
     switch(it.type)
     {
     case item::FOOD:
@@ -112,7 +112,7 @@ static char* item_name(char* dst, item it)
             dst = tstrcpy_prog(dst, pgmptr(&RNG_NAMES[st]));
             if(it.identified)
             {
-                char const* s = PSTR("");
+                char const* s = STR_EMPTY;
                 switch(st)
                 {
                 case RNG_STRENGTH:

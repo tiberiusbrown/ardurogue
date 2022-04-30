@@ -265,7 +265,7 @@ void entity_restore_strength(uint8_t i)
 
 void entity_heal(uint8_t i, uint8_t amount)
 {
-    char const* s = (amount < 3 ? PSTR("slightly ") : PSTR(""));
+    char const* s = (amount < 3 ? PSTR("slightly ") : STR_EMPTY);
     if(i == 0)
     {
         if(amulet_bonus(AMU_REGENERATION) < 0)

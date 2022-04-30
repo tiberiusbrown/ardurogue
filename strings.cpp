@@ -1,5 +1,6 @@
 #include "game.hpp"
 
+char const STR_EMPTY[] PROGMEM = "";
 char const STR_YOU_FEEL_STRONGER[] PROGMEM = "You feel stronger.";
 char const STR_YOU_FEEL_MORE_AGILE[] PROGMEM = "You feel more agile.";
 char const STR_NOTHING_HAPPENS[] PROGMEM = "Nothing happens.";

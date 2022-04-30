@@ -58,7 +58,7 @@ void run();
     PGM_P ptr;  \
     asm volatile \
     ( \
-      ".pushsection .progmem.data, \"SM\", @progbits, 1" "\n\t" \
+      ".pushsection .progmem.pstrs, \"SM\", @progbits, 1" "\n\t" \
       "PSTR%=: .string " #str                            "\n\t" \
       ".popsection"                                      "\n\t" \
       "ldi %A0, lo8(PSTR%=)"                             "\n\t" \
@@ -681,6 +681,7 @@ inline uint8_t light_radius2()
 inline bool player_is_dead() { return ents[0].type == entity::NONE; }
 
 // strings.cpp
+extern char const STR_EMPTY[] PROGMEM;
 extern char const* const MONSTER_NAMES[] PROGMEM;
 extern char const* const POT_NAMES[] PROGMEM;
 extern char const* const SCR_NAMES[] PROGMEM;

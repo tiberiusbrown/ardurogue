@@ -275,7 +275,7 @@ bool direction_menu(uint8_t& d, char const* s)
 
 bool direction_menu(uint8_t& d)
 {
-    return direction_menu_ex(d, PSTR(""), true);
+    return direction_menu_ex(d, STR_EMPTY, true);
 }
 
 static char const ACT_WAIT[] PROGMEM = "Wait / Search";

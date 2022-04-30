@@ -244,7 +244,7 @@ void draw_info_without_status()
     if(num_rooms == 0) return;
     draw_textf(1, 6, PSTR("LV @u   HP: @u/@u"), plevel + 1, healths[0], entity_max_health(0));
     {
-        char const* s = PSTR("");
+        char const* s = STR_EMPTY;
         if(hunger == 255)
             s = STR_STARVING;
         else if(hunger > 200)
