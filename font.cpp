@@ -131,12 +131,12 @@ uint8_t draw_char(uint8_t x, uint8_t y, char c)
     return n;
 }
 
-static void draw_text_ex(uint8_t x, uint8_t y, char const* t, bool prog)
+static uint8_t draw_text_ex(uint8_t x, uint8_t y, char const* t)
 {
     for(;;)
     {
-        char c = prog ? pgm_read_byte(t++) : *t++;
-        if(c < 32) return;
+        char c = *t++;
+        if(c == '\0') return x;
         if(c == ' ')
         {
             x += SPACE_WIDTH + 1;
@@ -144,16 +144,26 @@ static void draw_text_ex(uint8_t x, uint8_t y, char const* t, bool prog)
         }
         x += draw_char(x, y, c) + 1;
     }
+    return x;
 }
 
 void draw_text(uint8_t x, uint8_t y, const char* p)
 {
-    draw_text_ex(x, y, p, true);
+    char buf[64];
+    va_list undefined_args;
+#if defined(__GNUC__) && defined(__AVR_ARCH__)
+    asm("" : "=w"(undefined_args));
+#else
+    // who cares about non avr
+    undefined_args = {};
+#endif
+    tvsprintf(buf, p, undefined_args);
+    draw_text_ex(x, y, buf);
 }
 
 void draw_text_nonprog(uint8_t x, uint8_t y, const char* p)
 {
-    draw_text_ex(x, y, p, false);
+    draw_text_ex(x, y, p);
 }
 
 void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...)
@@ -177,12 +187,12 @@ uint8_t char_width(char c)
     return n;
 }
 
-uint8_t text_width(char const* s, bool prog)
+uint8_t text_width_nonprog(char const* s)
 {
     uint8_t r = 1;
     for(;;)
     {
-        char c = prog ? pgm_read_byte(s) : *s;
+        char c = *s;
         ++r;
         if(c == '\0') break;
         ++s;

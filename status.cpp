@@ -21,7 +21,7 @@ void draw_status()
     uint8_t n = 0;
     while(n < statusn)
     {
-        uint8_t w = text_width(&statusbuf[n], false);
+        uint8_t w = text_width_nonprog(&statusbuf[n]);
         if(sx + w > 64)
             sx = 1, sy += 6;
         draw_text_nonprog(sx, sy, &statusbuf[n]);
@@ -81,6 +81,13 @@ NOINLINE void status_usu(char const* fmt, uint8_t a, char const* b, uint8_t c)
     status(fmt, a, b, c);
 }
 
+NOINLINE void status_you_are_no_longer(char const* s)
+{
+    static char const MSG[] PROGMEM = STRI_YOU_ARE "no longer @p.";
+    status(MSG, s);
+}
+
+
 void status(char const* fmt, ...)
 {
     char buf[128];
@@ -94,7 +101,7 @@ void status(char const* fmt, ...)
     {
         if(uint8_t(statusn + b - a) > sizeof(statusbuf))
             status_more();
-        uint8_t n = text_width(&buf[a], false);
+        uint8_t n = text_width_nonprog(&buf[a]);
         if(statusy >= 59 && statusx + n > 64 - MORE_WIDTH)
             status_more();
         for(uint8_t i = a; i < b; ++i)

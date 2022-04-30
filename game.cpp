@@ -283,7 +283,8 @@ void advance_hunger()
     }
     else if(healths[0] > 0)
     {
-        status_simple(PSTR("You are starving!"));
+        static char const MSG[] PROGMEM = "@U " STRI_STARVING "!";
+        status_u(MSG, 0);
         hs.type = HS_STARVED;
         entity_take_damage(0, u8rand() % 2 + 1);
     }

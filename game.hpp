@@ -683,6 +683,16 @@ inline uint8_t light_radius2()
 inline bool player_is_dead() { return ents[0].type == entity::NONE; }
 
 // strings.cpp
+#define STRI_WHICH_ITEM_Q      "\x80" /* " which item?"       */
+#define STRI_FOR_A_MOMENT_P    "\x81" /* " for a moment."     */
+#define STRI_THE_I_GLOWS       "\x82" /* "The @i glows "      */
+#define STRI_STARVING          "\x83" /* "starving"           */
+#define STRI_TRENGTH           "\x84" /* "trength"            */
+#define STRI_YOU_ARE           "\x85" /* "You are "           */
+#define STRI_YOU_ARE_UNABLE_TO "\x86" /* "You are unable to " */
+#define STRI_P_THE_I           "\x87" /* "@p the @i."         */
+#define STRI_ARROW             "\x88" /* "arrow"              */
+extern char const* const STRI_STRS[] PROGMEM;
 extern char const STR_EMPTY[] PROGMEM;
 extern char const* const MONSTER_NAMES[] PROGMEM;
 extern char const* const POT_NAMES[] PROGMEM;
@@ -702,9 +712,11 @@ extern char const STR_CONFUSED[] PROGMEM;
 extern char const STR_PARALYZED[] PROGMEM;
 extern char const STR_SLOWED[] PROGMEM;
 extern char const STR_WEAKENED[] PROGMEM;
-extern char const* const STR_INVISIBLE; // merged with "see invisible"
+extern char const* const STR_INVISIBLE;      // merged with "see invisible"
 extern char const STR_HUNGRY[] PROGMEM;
-extern char const STR_STARVING[] PROGMEM;
+extern char const* const STR_STARVING;       // same as STRI_STARVING
+extern char const STR_YOU_P_THE_I[] PROGMEM; // "You @p the @i."
+extern char const STR_ARROW[] PROGMEM;       // "arrow"
 
 // game.cpp
 void dig_tile(uint8_t x, uint8_t y);
@@ -754,7 +766,7 @@ void draw_text_nonprog(uint8_t x, uint8_t y, const char* p);
 void draw_textf(uint8_t x, uint8_t y, const char* fmt, ...); // max 64
 
 uint8_t char_width(char c);
-uint8_t text_width(char const* s, bool prog = true);
+uint8_t text_width_nonprog(char const* s);
 
 // draw.cpp
 extern int8_t const DDIRX[16] PROGMEM;
@@ -806,7 +818,7 @@ bool path_clear(
 void set_tile_explored(uint8_t x, uint8_t y);
 void update_light();
 
-// sprintf.cpp: expects fmt to be PROGMEM
+// sprintf.cpp
 uint8_t tsprintf(char* b, char const* fmt, ...);
 uint8_t tvsprintf(char* b, char const* fmt, va_list ap);
 uint8_t tstrlen(char const* s); // s not progmem
@@ -822,6 +834,7 @@ void status_i(char const* fmt, item it);
 void status_si(char const* s, char const* a, item i);
 void status_u(char const* fmt, uint8_t a);
 void status_usu(char const* fmt, uint8_t a, char const* b, uint8_t c);
+void status_you_are_no_longer(char const* s);
 void status_more();
 void reset_status();
 void status_cursed_amulet();

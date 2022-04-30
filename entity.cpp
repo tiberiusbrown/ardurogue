@@ -33,7 +33,7 @@ uint8_t entity_speed(uint8_t i)
         r += int8_t((n + 1) & 0xfe) / 2;
         // boots of speed
         uint8_t j = pinfo.equipped[SLOT_BOOTS];
-        if(j < INV_ITEMS && inv[i].is_type(item::BOOTS, BOOTS_SPEED))
+        if(j < INV_ITEMS && inv[j].is_type(item::BOOTS, BOOTS_SPEED))
             r += 2;
     }
     else
@@ -130,18 +130,13 @@ uint8_t entity_defense(uint8_t i)
     return r;
 }
 
-static void status_you_are_no_longer(char const* s)
-{
-    status(PSTR("You are no longer @p."), s);
-}
-
 void end_paralysis(uint8_t i)
 {
     auto& e = ents[i];
     if(e.paralyzed)
     {
         e.paralyzed = 0;
-        if(i == 0) status_you_are_no_longer(PSTR("paralyzed"));
+        if(i == 0) status_you_are_no_longer(STR_PARALYZED);
     }
 }
 
@@ -151,7 +146,7 @@ void end_confusion(uint8_t i)
     if(e.confused)
     {
         e.confused = 0;
-        if(i == 0) status_you_are_no_longer(PSTR("confused"));
+        if(i == 0) status_you_are_no_longer(STR_CONFUSED);
     }
 }
 
@@ -161,7 +156,7 @@ void end_slow(uint8_t i)
     if(e.slowed)
     {
         e.slowed = 0;
-        if(i == 0) status_you_are_no_longer(PSTR("slowed"));
+        if(i == 0) status_you_are_no_longer(STR_SLOWED);
     }
 }
 
@@ -259,7 +254,8 @@ void entity_restore_strength(uint8_t i)
     if(ents[i].weakened)
     {
         ents[i].weakened = 0;
-        if(i == 0) status_simple(PSTR("Your strength returns."));
+        static char const MSG[] PROGMEM = "Your s" STRI_TRENGTH " returns.";
+        if(i == 0) status_simple(MSG);
     }
 }
 
@@ -587,7 +583,8 @@ bool entity_perform_action(uint8_t i, action a)
         item it = inv[a.data];
         if(it.is_type(item::AMULET, AMU_YENDOR))
         {
-            status_i(PSTR("You are unable to drop the @i."), it);
+            static char const MSG[] PROGMEM = STRI_YOU_ARE_UNABLE_TO "drop the @i.";
+            status_i(MSG, it);
             return false;
         }
         else if(item_is_equipped(a.data))
@@ -637,8 +634,8 @@ bool entity_perform_action(uint8_t i, action a)
         if(sr.i < MAP_ENTITIES)
         {
             uint8_t dam = calculate_arrow_damage(sr.i);
-            status(PSTR("Your arrow @ps @O."),
-                dam == 0 ? PSTR("misse") : PSTR("hit"), sr.i);
+            static char const MSG[] PROGMEM = "Your " STRI_ARROW " @ps @O.";
+            status(MSG, dam == 0 ? PSTR("misse") : PSTR("hit"), sr.i);
             entity_take_damage_from_entity(0, sr.i, dam);
         }
         if(u8rand() >= ARROW_BREAK_CHANCE)

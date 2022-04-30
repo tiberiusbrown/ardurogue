@@ -251,7 +251,7 @@ bool yesno_menui(char const* fmt, item it)
         n = 0;
         while(n < len)
         {
-            uint8_t w = text_width(&t[n], false);
+            uint8_t w = text_width_nonprog(&t[n]);
             if(x + w > 64)
             {
                 x = 1;
@@ -332,7 +332,8 @@ static bool act_wait(action& a)
 
 static bool act_use(action& a)
 {
-    uint8_t i = inventory_menu(PSTR("Use which item?"));
+    static char const MSG[] PROGMEM = "Use" STRI_WHICH_ITEM_Q;
+    uint8_t i = inventory_menu(MSG);
     if(i < INV_ITEMS)
     {
         a.type = action::USE;
@@ -347,7 +348,8 @@ static bool act_shoot(action& a)
     uint8_t i = pinfo.equipped[SLOT_WEAPON];
     if(!(i < INV_ITEMS && inv[i].is_type(item::BOW)))
     {
-        status_simple(PSTR("You're not holding a bow."));
+        static char const MSG[] PROGMEM = STRI_YOU_ARE "not holding a bow.";
+        status_simple(MSG);
         return false;
     }
     bool have_arrow = false;
@@ -355,7 +357,8 @@ static bool act_shoot(action& a)
         have_arrow |= inv[j].is_type(item::ARROW);
     if(!have_arrow)
     {
-        status_simple(PSTR("You have no arrows."));
+        static char const MSG[] PROGMEM = "You have no " STRI_ARROW "s.";
+        status_simple(MSG);
         return false;
     }
     if(!direction_menu(a.data))
@@ -366,7 +369,8 @@ static bool act_shoot(action& a)
 
 static bool act_drop(action& a)
 {
-    uint8_t i = inventory_menu(PSTR("Drop which item?"));
+    static char const MSG[] PROGMEM = "Drop" STRI_WHICH_ITEM_Q;
+    uint8_t i = inventory_menu(MSG);
     if(i < INV_ITEMS)
     {
         a.type = action::DROP;
@@ -438,7 +442,7 @@ static void draw_player_info(uint8_t x)
 
     static char const T0[] PROGMEM = "Level:";
     static char const T1[] PROGMEM = "Max Health:";
-    static char const T2[] PROGMEM = "Strength:";
+    static char const T2[] PROGMEM = "S" STRI_TRENGTH ":";
     static char const T3[] PROGMEM = "Dexterity:";
     static char const T4[] PROGMEM = "Attack:";
     static char const T5[] PROGMEM = "Defense:";
@@ -472,10 +476,10 @@ static void draw_player_info(uint8_t x)
         char const** tp = &ts[0];
         uint8_t y = 9;
         draw_text(x + 70, y, PSTR("Effects:"));
-        if(ents[0].confused)  *tp++ = PSTR("confused");
-        if(ents[0].paralyzed) *tp++ = PSTR("paralyzed");
-        if(ents[0].weakened)  *tp++ = PSTR("weakened");
-        if(ents[0].slowed)    *tp++ = PSTR("slowed");
+        if(ents[0].confused)  *tp++ = STR_CONFUSED;
+        if(ents[0].paralyzed) *tp++ = STR_PARALYZED;
+        if(ents[0].weakened)  *tp++ = STR_WEAKENED;
+        if(ents[0].slowed)    *tp++ = STR_SLOWED;
         if(ents[0].invis)     *tp++ = STR_INVISIBLE;
         if(hunger == 255)     *tp++ = STR_STARVING;
         x += 75;

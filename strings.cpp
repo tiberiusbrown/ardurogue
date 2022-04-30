@@ -1,5 +1,31 @@
 #include "game.hpp"
 
+char const STR_YOU_P_THE_I[] PROGMEM = "You @p the @i.";
+char const STR_ARROW[] PROGMEM = "arrow";
+
+static char const STR_STRI_WHICH_ITEM_Q[] PROGMEM = " which item?";
+static char const STR_STRI_FOR_A_MOMENT_P[] PROGMEM = " for a moment.";
+static char const STR_STRI_THE_I_GLOWS[] PROGMEM = "The @i glows ";
+static char const STR_STRI_STARVING[] PROGMEM = "starving";
+static char const STR_STRI_TRENGTH[] PROGMEM = "trength";
+static char const STR_STRI_YOU_ARE[] PROGMEM = "You are ";
+static char const STR_STRI_YOU_ARE_UNABLE_TO[] PROGMEM = STRI_YOU_ARE "unable to ";
+static constexpr char const* STR_STRI_P_THE_I = STR_YOU_P_THE_I + 4;
+static constexpr char const* STR_STRI_ARROW = STR_ARROW;
+
+char const* const STRI_STRS[] PROGMEM =
+{
+    STR_STRI_WHICH_ITEM_Q,
+    STR_STRI_FOR_A_MOMENT_P,
+    STR_STRI_THE_I_GLOWS,
+    STR_STRI_STARVING,
+    STR_STRI_TRENGTH,
+    STR_STRI_YOU_ARE,
+    STR_STRI_YOU_ARE_UNABLE_TO,
+    STR_STRI_P_THE_I,
+    STR_STRI_ARROW,
+};
+
 char const STR_EMPTY[] PROGMEM = "";
 char const STR_YOU_FEEL_STRONGER[] PROGMEM = "You feel stronger.";
 char const STR_YOU_FEEL_MORE_AGILE[] PROGMEM = "You feel more agile.";
@@ -8,9 +34,8 @@ char const STR_CONFUSED[] PROGMEM = "confused";
 char const STR_PARALYZED[] PROGMEM = "paralyzed";
 char const STR_SLOWED[] PROGMEM = "slowed";
 char const STR_WEAKENED[] PROGMEM = "weakened";
-//char const STR_INVISIBLE[] PROGMEM = "invisible";
 char const STR_HUNGRY[] PROGMEM = "hungry";
-char const STR_STARVING[] PROGMEM = "starving";
+char const* const STR_STARVING = STR_STRI_STARVING;
 
 static char const MON_BAT        [] PROGMEM = "bat";
 static char const MON_SNAKE      [] PROGMEM = "snake";
@@ -55,7 +80,7 @@ static char const NPOT_HEALING[] PROGMEM = "healing";
 static char const NPOT_CONFUSION[] PROGMEM = "confusion";
 static char const NPOT_POISON[] PROGMEM = "poison";
 static char const NPOT_HARMING[] PROGMEM = "harming";
-static char const NPOT_STRENGTH[] PROGMEM = "strength";
+static char const NPOT_STRENGTH[] PROGMEM = "s" STRI_TRENGTH;
 static char const NPOT_DEXTERITY[] PROGMEM = "dexterity";
 static char const NPOT_PARALYSIS[] PROGMEM = "paralysis";
 static char const NPOT_SLOWING[] PROGMEM = "slowing";

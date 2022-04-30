@@ -134,7 +134,9 @@ static void use_scroll(uint8_t subtype)
     switch(subtype)
     {
     case SCR_IDENTIFY:
-        i = inventory_menu(PSTR("Identify which item?"));
+    {
+        static char const MSG[] PROGMEM = "Identify" STRI_WHICH_ITEM_Q;
+        i = inventory_menu(MSG);
         if(i < INV_ITEMS)
         {
             identify_item(i);
@@ -143,8 +145,11 @@ static void use_scroll(uint8_t subtype)
         else
             status_simple(STR_NOTHING_HAPPENS);
         break;
+    }
     case SCR_ENCHANT:
-        i = inventory_menu(PSTR("Enchant which item?"));
+    {
+        static char const MSG[] PROGMEM = "Enchant" STRI_WHICH_ITEM_Q;
+        i = inventory_menu(MSG);
         if(i < INV_ITEMS)
         {
             auto& it = inv[i];
@@ -157,14 +162,18 @@ static void use_scroll(uint8_t subtype)
                 it.level += n;
                 if(it.level > ENCHANT_LEVEL_MAX)
                     it.level = ENCHANT_LEVEL_MAX;
-                status_i(PSTR("The @i glows blue for a moment."), it);
+                static char const MSG2[] PROGMEM = STRI_THE_I_GLOWS "blue" STRI_FOR_A_MOMENT_P;
+                status_i(MSG2, it);
             }
         }
         else
             status_simple(STR_NOTHING_HAPPENS);
         break;
+    }
     case SCR_REMOVE_CURSE:
-        i = inventory_menu(PSTR("Uncurse which item?"));
+    {
+        static char const MSG[] PROGMEM = "Uncurse" STRI_WHICH_ITEM_Q;
+        i = inventory_menu(MSG);
         if(i < INV_ITEMS)
         {
             auto& it = inv[i];
@@ -173,12 +182,14 @@ static void use_scroll(uint8_t subtype)
             else
             {
                 it.cursed = 0;
-                status_i(PSTR("The @i glows white for a moment."), it);
+                static char const MSG2[] PROGMEM = STRI_THE_I_GLOWS "white" STRI_FOR_A_MOMENT_P;
+                status_i(MSG2, it);
             }
         }
         else
             status_simple(STR_NOTHING_HAPPENS);
         break;
+    }
     case SCR_TELEPORT:
         teleport_entity(0);
         break;
@@ -251,13 +262,14 @@ bool unequip_item(uint8_t i)
         PSTR("stop using") : PSTR("take off");
     if(it.cursed)
     {
-        status_si(PSTR("You are unable to @p the @i."), verb, it);
+        static char const MSG[] PROGMEM = STRI_YOU_ARE_UNABLE_TO STRI_P_THE_I;
+        status_si(MSG, verb, it);
         return false;
     }
     for(auto& j : pinfo.equipped)
         if(j == i)
         {
-            status_si(PSTR("You @p the @i."), verb, it);
+            status_si(STR_YOU_P_THE_I, verb, it);
             j = 255;
             adjust_health_to_max_health(0);
             return true;
@@ -275,7 +287,7 @@ bool equip_item(uint8_t i)
         return false;
     bool weap = type <= item::SWORD;
     identify_item(i);
-    status(PSTR("You @p the @i."),
+    status(STR_YOU_P_THE_I,
         weap ? PSTR("ready") : PSTR("put on"),
         inv[i]);
     if(it.is_type(item::AMULET, AMU_CLARITY))
@@ -304,7 +316,7 @@ bool use_item(uint8_t i)
     case item::FOOD:
     {
         hunger = 0;
-        status_simple(PSTR("You feel full."));
+        status_you_are_no_longer(STR_HUNGRY);
         return true;
     }
     case item::POTION:

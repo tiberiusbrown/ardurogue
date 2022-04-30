@@ -71,7 +71,7 @@ static char* item_name(char* dst, item it)
         dst = quantify_item(dst, it.quant, PSTR("food ration"));
         return dst;
     case item::ARROW:
-        dst = quantify_item(dst, it.quant, PSTR("arrow"));
+        dst = quantify_item(dst, it.quant, STR_ARROW);
         return dst;
     case item::BOW:
     case item::SWORD:
@@ -223,6 +223,11 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
     for(;;)
     {
         c = (char)pgm_read_byte(fmt++);
+        if((uint8_t)c >= 0x80)
+        {
+            b += tvsprintf(b, pgmptr(&STRI_STRS[uint8_t(c & 0x7f)]), ap);
+            continue;
+        }
         if(c != '@')
         {
             *b++ = c;
