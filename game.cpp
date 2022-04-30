@@ -539,9 +539,7 @@ void run()
             load();         // need another load to overwrite current map entities
             destroy_save(); // NOW destroy save
             status_simple(PSTR(
-                "Welcome back to ArduRogue. "
-                "The save file has been deleted. "
-                "Don't forget to save again when you're done!"));
+                "Welcome back to ArduRogue. The save file has been deleted. Don't forget to save again when you're done!"));
         }
         else
         {

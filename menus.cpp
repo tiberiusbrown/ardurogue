@@ -7,7 +7,7 @@ static char const HS_MSG_ESCAPED[] PROGMEM = "Escaped with the amulet";
 static char const HS_MSG_RETURNED[] PROGMEM = "Returned to the surface";
 static char const HS_MSG_ABANDONED[] PROGMEM = "Abandoned the game";
 static char const HS_MSG_ENTITY[] PROGMEM = "Death by @M";
-static char const HS_MSG_SUICIDE[] PROGMEM = "Committed suicide... somehow";
+static char const HS_MSG_SUICIDE[] PROGMEM = "Committed suicide";
 //static char const HS_MSG_TRAP[] PROGMEM = "";
 static char const HS_MSG_STARVED[] PROGMEM = "Starved to death";
 static char const* const HS_MSGS[6] PROGMEM =
@@ -21,9 +21,55 @@ static char const* const HS_MSGS[6] PROGMEM =
     HS_MSG_STARVED,
 };
 
+static char const ACT_WAIT[] PROGMEM = "Wait / Search";
+static char const ACT_USE[] PROGMEM = "Use / [Un]equip";
+static char const ACT_SHOOT[] PROGMEM = "Shoot";
+static char const ACT_DROP[] PROGMEM = "Drop Item";
+static char const ACT_THROW[] PROGMEM = "Throw Potion";
+static char const ACT_CLOSE[] PROGMEM = "Close Door";
+
+static char const* const ACT_ITEMS[] PROGMEM =
+{
+    ACT_WAIT,
+    ACT_USE,
+    ACT_SHOOT,
+    ACT_DROP,
+    ACT_THROW,
+    ACT_CLOSE,
+};
+
+#if ENABLE_MINIMAP
+static char const MEN_MAP[] PROGMEM = "View Minimap";
+#endif
+#if ENABLE_DUNGEON_SCROLL
+static char const MEN_SCROLL[] PROGMEM = "Scroll Dungeon";
+#endif
+static char const MEN_INV[] PROGMEM = "Inventory";
+static char const MEN_STATS[] PROGMEM = "Player Stats";
+static char const MEN_HS[] PROGMEM = "High Scores";
+static char const MEN_SETTINGS[] PROGMEM = "Settings";
+static char const MEN_ABANDON[] PROGMEM = "Abandon Game";
+static char const MEN_SAVE[] PROGMEM = "Save and Exit";
+
+static char const* const MEN_ITEMS[] PROGMEM =
+{
+#if ENABLE_MINIMAP
+    MEN_MAP,
+#endif
+#if ENABLE_DUNGEON_SCROLL
+    MEN_SCROLL,
+#endif
+    MEN_INV,
+    MEN_STATS,
+    MEN_HS,
+    MEN_SETTINGS,
+    MEN_ABANDON,
+    MEN_SAVE,
+};
+
 static void show_high_scores_offset(uint8_t x, uint8_t ti)
 {
-    draw_text(x + 46, 0, PSTR("High Scores"));
+    draw_text(x + 46, 0, MEN_HS);
     set_hline(0, 63, 6);
     for(uint8_t i = 0, y = 11; i < NUM_HIGH_SCORES; ++i, y += 7)
     {
@@ -275,54 +321,8 @@ bool direction_menu(uint8_t& d, char const* s)
 
 bool direction_menu(uint8_t& d)
 {
-    return direction_menu_ex(d, STR_EMPTY, true);
+    return direction_menu_ex(d, PSTR(""), true);
 }
-
-static char const ACT_WAIT[] PROGMEM = "Wait / Search";
-static char const ACT_USE[] PROGMEM = "Use / [Un]equip";
-static char const ACT_SHOOT[] PROGMEM = "Shoot";
-static char const ACT_DROP[] PROGMEM = "Drop Item";
-static char const ACT_THROW[] PROGMEM = "Throw Potion";
-static char const ACT_CLOSE[] PROGMEM = "Close Door";
-
-static char const* const ACT_ITEMS[] PROGMEM =
-{
-    ACT_WAIT,
-    ACT_USE,
-    ACT_SHOOT,
-    ACT_DROP,
-    ACT_THROW,
-    ACT_CLOSE,
-};
-
-#if ENABLE_MINIMAP
-static char const MEN_MAP[] PROGMEM = "View Minimap";
-#endif
-#if ENABLE_DUNGEON_SCROLL
-static char const MEN_SCROLL[] PROGMEM = "Scroll Dungeon";
-#endif
-static char const MEN_INV[] PROGMEM = "Inventory";
-static char const MEN_STATS[] PROGMEM = "Player Info";
-static char const MEN_HS[] PROGMEM = "High Scores";
-static char const MEN_SETTINGS[] PROGMEM = "Settings";
-static char const MEN_ABANDON[] PROGMEM = "Abandon Game";
-static char const MEN_SAVE[] PROGMEM = "Save and Exit";
-
-static char const* const MEN_ITEMS[] PROGMEM =
-{
-#if ENABLE_MINIMAP
-    MEN_MAP,
-#endif
-#if ENABLE_DUNGEON_SCROLL
-    MEN_SCROLL,
-#endif
-    MEN_INV,
-    MEN_STATS,
-    MEN_HS,
-    MEN_SETTINGS,
-    MEN_ABANDON,
-    MEN_SAVE,
-};
 
 static bool act_wait(action& a)
 {
@@ -422,7 +422,7 @@ static void men_map()
 
 static void men_inv()
 {
-    (void)inventory_menu(PSTR("Inventory"));
+    (void)inventory_menu(MEN_INV);
 }
 
 static void draw_info_bonus(uint8_t x, uint8_t y, uint8_t val, uint8_t base)
@@ -433,7 +433,7 @@ static void draw_info_bonus(uint8_t x, uint8_t y, uint8_t val, uint8_t base)
 }
 static void draw_player_info(uint8_t x)
 {
-    draw_text(x + 30, 0, PSTR("Player Information"));
+    draw_text(x + 43, 0, MEN_STATS);
     set_hline(0, 63, 6);
 
     static char const T0[] PROGMEM = "Level:";
@@ -472,10 +472,10 @@ static void draw_player_info(uint8_t x)
         char const** tp = &ts[0];
         uint8_t y = 9;
         draw_text(x + 70, y, PSTR("Effects:"));
-        if(ents[0].confused)  *tp++ = STR_CONFUSED;
-        if(ents[0].paralyzed) *tp++ = STR_PARALYZED;
-        if(ents[0].weakened)  *tp++ = STR_WEAKENED;
-        if(ents[0].slowed)    *tp++ = STR_SLOWED;
+        if(ents[0].confused)  *tp++ = PSTR("confused");
+        if(ents[0].paralyzed) *tp++ = PSTR("paralyzed");
+        if(ents[0].weakened)  *tp++ = PSTR("weakened");
+        if(ents[0].slowed)    *tp++ = PSTR("slowed");
         if(ents[0].invis)     *tp++ = STR_INVISIBLE;
         if(hunger == 255)     *tp++ = STR_STARVING;
         x += 75;
@@ -542,7 +542,7 @@ static void men_scroll()
         draw_dungeon(x, y);
         paint_left();
         uint8_t d;
-        if(!direction_menu(d, PSTR("Scroll Dungeon")))
+        if(!direction_menu(d, MEN_SCROLL))
             break;
         auto c = dircoord(d);
         x += (int8_t)c.x * 4;

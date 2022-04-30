@@ -8,7 +8,7 @@ char const STR_CONFUSED[] PROGMEM = "confused";
 char const STR_PARALYZED[] PROGMEM = "paralyzed";
 char const STR_SLOWED[] PROGMEM = "slowed";
 char const STR_WEAKENED[] PROGMEM = "weakened";
-char const STR_INVISIBLE[] PROGMEM = "invisible";
+//char const STR_INVISIBLE[] PROGMEM = "invisible";
 char const STR_HUNGRY[] PROGMEM = "hungry";
 char const STR_STARVING[] PROGMEM = "starving";
 
@@ -155,6 +155,8 @@ static char const NRNG_FIRE_PROTECT[] PROGMEM = "fire immunity";
 static char const NRNG_ATTACK[] PROGMEM = "attack";
 static char const NRNG_SUSTENANCE[] PROGMEM = "sustenance";
 static constexpr char const* NRNG_INVIS = NPOT_INVIS;
+
+char const* const STR_INVISIBLE = NRNG_SEE_INVIS + 4; // merged with "see invisible"
 
 char const* const RNG_NAMES[NUM_RNG] PROGMEM =
 {

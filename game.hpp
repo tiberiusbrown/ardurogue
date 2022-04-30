@@ -52,21 +52,23 @@ void run();
 
 #if 1
 // http://michael-buschbeck.github.io/arduino/2013/10/20/string-merging-pstr/
+// limitation: cannot use string literal concatenation: PSTR("hi " "there")
 #undef PSTR
 #define PSTR(str) \
-  (__extension__({ \
-    PGM_P ptr;  \
-    asm volatile \
-    ( \
-      ".pushsection .progmem.pstrs, \"SM\", @progbits, 1" "\n\t" \
-      "PSTR%=: .string " #str                            "\n\t" \
-      ".popsection"                                      "\n\t" \
-      "ldi %A0, lo8(PSTR%=)"                             "\n\t" \
-      "ldi %B0, hi8(PSTR%=)"                             "\n\t" \
-      : "=d" (ptr) \
-    ); \
-    ptr; \
-  }))
+    (__extension__({ \
+        PGM_P ptr;  \
+        asm volatile \
+        ( \
+            ".pushsection .progmem.pstrs, \"SM\", @progbits, 1" "\n\t" \
+            "PSTR%=: .string " #str                             "\n\t" \
+            ".type PSTR%= STT_OBJECT"                           "\n\t" \
+            ".popsection"                                       "\n\t" \
+            "ldi %A0, lo8(PSTR%=)"                              "\n\t" \
+            "ldi %B0, hi8(PSTR%=)"                              "\n\t" \
+            : "=d" (ptr) \
+        ); \
+        ptr; \
+    }))
 #endif
 
 #else
@@ -700,7 +702,7 @@ extern char const STR_CONFUSED[] PROGMEM;
 extern char const STR_PARALYZED[] PROGMEM;
 extern char const STR_SLOWED[] PROGMEM;
 extern char const STR_WEAKENED[] PROGMEM;
-extern char const STR_INVISIBLE[] PROGMEM;
+extern char const* const STR_INVISIBLE; // merged with "see invisible"
 extern char const STR_HUNGRY[] PROGMEM;
 extern char const STR_STARVING[] PROGMEM;
 
