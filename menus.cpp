@@ -472,12 +472,12 @@ static void draw_player_info(uint8_t x)
         char const** tp = &ts[0];
         uint8_t y = 9;
         draw_text(x + 70, y, PSTR("Effects:"));
-        if(ents[0].confused)  *tp++ = PSTR("confused");
-        if(ents[0].paralyzed) *tp++ = PSTR("paralyzed");
-        if(ents[0].weakened)  *tp++ = PSTR("weakened");
-        if(ents[0].slowed)    *tp++ = PSTR("slowed");
-        if(ents[0].invis)     *tp++ = PSTR("invisible");
-        if(hunger == 255)     *tp++ = PSTR("starving");
+        if(ents[0].confused)  *tp++ = STR_CONFUSED;
+        if(ents[0].paralyzed) *tp++ = STR_PARALYZED;
+        if(ents[0].weakened)  *tp++ = STR_WEAKENED;
+        if(ents[0].slowed)    *tp++ = STR_SLOWED;
+        if(ents[0].invis)     *tp++ = STR_INVISIBLE;
+        if(hunger == 255)     *tp++ = STR_STARVING;
         x += 75;
         while(tp > &ts[0])
             draw_text(x, y += 6, *(--tp));

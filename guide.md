@@ -119,16 +119,16 @@ The EEPROM is not written to when beginning a new game. If you never save your p
 
 #### Rings <a name="rings"></a>
 
-| Ring of...      | Effect | Cursed Effect |
-| --------------- | ------ | ------------- |
-| see invisible   | Allows the wearer to see invisible beings. | The wearer has a 50% chance to be unable to see an enemy, whether or not it is invisible. |
-| strength        | Grants a bonus to the wearer's strength. | Gives a penalty to the wearer's strength. |
-| dexterity       | Grants a bonus to the wearer's dexterity. | Gives a penalty to the wearer's dexterity. |
-| protection      | Grants a bonus to the wearer's defense, as if wearing better armor. | Gives a penalty to the wearer's defense. |
-| fire protection | The wearer is immune to fire. | Fire damages the wearer twice as much. |
-| attack          | Grants a bonus to the wearer's attack, as if holding a stronger weapon. | Gives a penalty to the wearer's attack. |
-| sustenance      | Slows down the advance of hunger. | Hastens the advance of hunger. |
-| invisibility    | The wearer is permanently invisible. | The wearer cannot become invisible, even temporarily. |
+| Ring of...    | Effect | Cursed Effect |
+| ------------- | ------ | ------------- |
+| see invisible | Allows the wearer to see invisible beings. | The wearer has a 50% chance to be unable to see an enemy, whether or not it is invisible. |
+| strength      | Grants a bonus to the wearer's strength. | Gives a penalty to the wearer's strength. |
+| dexterity     | Grants a bonus to the wearer's dexterity. | Gives a penalty to the wearer's dexterity. |
+| protection    | Grants a bonus to the wearer's defense, as if wearing better armor. | Gives a penalty to the wearer's defense. |
+| fire immunity | The wearer is immune to fire. | Fire damages the wearer twice as much. |
+| attack        | Grants a bonus to the wearer's attack, as if holding a stronger weapon. | Gives a penalty to the wearer's attack. |
+| sustenance    | Slows down the advance of hunger. | Hastens the advance of hunger. |
+| invisibility  | The wearer is permanently invisible. | The wearer cannot become invisible, even temporarily. |
 
 #### Amulets <a name="amulets"></a>
 

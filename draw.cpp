@@ -246,9 +246,9 @@ void draw_info_without_status()
     {
         char const* s = PSTR("");
         if(hunger == 255)
-            s = PSTR("Starving");
+            s = STR_STARVING;
         else if(hunger > 200)
-            s = PSTR("Hungry");
+            s = STR_HUNGRY;
         draw_text(1, 12, s);
         set_hline(1, 63, 20);
     }

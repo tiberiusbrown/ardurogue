@@ -2,6 +2,14 @@
 
 char const STR_YOU_FEEL_STRONGER[] PROGMEM = "You feel stronger.";
 char const STR_YOU_FEEL_MORE_AGILE[] PROGMEM = "You feel more agile.";
+char const STR_NOTHING_HAPPENS[] PROGMEM = "Nothing happens.";
+char const STR_CONFUSED[] PROGMEM = "confused";
+char const STR_PARALYZED[] PROGMEM = "paralyzed";
+char const STR_SLOWED[] PROGMEM = "slowed";
+char const STR_WEAKENED[] PROGMEM = "weakened";
+char const STR_INVISIBLE[] PROGMEM = "invisible";
+char const STR_HUNGRY[] PROGMEM = "hungry";
+char const STR_STARVING[] PROGMEM = "starving";
 
 static char const MON_BAT        [] PROGMEM = "bat";
 static char const MON_SNAKE      [] PROGMEM = "snake";
@@ -41,37 +49,6 @@ char const* const MONSTER_NAMES[] PROGMEM =
     MON_ANGEL,
     MON_DARKNESS,
 };
-
-#if 0
-static char const ITM_NONE   [] PROGMEM = "";
-static char const ITM_FOOD   [] PROGMEM = "food ration";
-static char const ITM_POTION [] PROGMEM = "potion";
-static char const ITM_SCROLL [] PROGMEM = "scroll";
-static char const ITM_ARROW  [] PROGMEM = "arrow";
-static char const ITM_BOW    [] PROGMEM = "bow";
-static char const ITM_SWORD  [] PROGMEM = "sword";
-static char const ITM_RING   [] PROGMEM = "ring";
-static char const ITM_AMULET [] PROGMEM = "amulet";
-static char const ITM_ARMOR  [] PROGMEM = "armor";
-static char const ITM_HELM   [] PROGMEM = "helm";
-static char const ITM_BOOTS  [] PROGMEM = "boots";
-
-char const* const ITEM_NAMES[] PROGMEM =
-{
-    ITM_NONE  ,
-    ITM_FOOD  ,
-    ITM_POTION,
-    ITM_SCROLL,
-    ITM_ARROW ,
-    ITM_BOW   ,
-    ITM_SWORD ,
-    ITM_RING  ,
-    ITM_AMULET,
-    ITM_ARMOR ,
-    ITM_HELM  ,
-    ITM_BOOTS ,
-};
-#endif
 
 static char const NPOT_HEALING[] PROGMEM = "healing";
 static char const NPOT_CONFUSION[] PROGMEM = "confusion";
@@ -170,13 +147,13 @@ char const* const UNID_SCR_NAMES[NUM_SCR] PROGMEM =
 };
 
 static char const NRNG_SEE_INVIS[] PROGMEM = "see invisible";
-static char const NRNG_STRENGTH[] PROGMEM = "strength";
-static char const NRNG_DEXTERITY[] PROGMEM = "dexterity";
+static constexpr char const* NRNG_STRENGTH = NPOT_STRENGTH;
+static constexpr char const* NRNG_DEXTERITY = NPOT_DEXTERITY;
 static char const NRNG_PROTECTION[] PROGMEM = "protection";
-static char const NRNG_FIRE_PROTECT[] PROGMEM = "fire protection";
+static char const NRNG_FIRE_PROTECT[] PROGMEM = "fire immunity";
 static char const NRNG_ATTACK[] PROGMEM = "attack";
 static char const NRNG_SUSTENANCE[] PROGMEM = "sustenance";
-static char const NRNG_INVIS[] PROGMEM = "invisibility";
+static constexpr char const* NRNG_INVIS = NPOT_INVIS;
 
 char const* const RNG_NAMES[NUM_RNG] PROGMEM =
 {
@@ -235,6 +212,7 @@ char const* const UNID_RNG_AMU_NAMES[NUM_RNG < NUM_AMU ? NUM_AMU : NUM_RNG] PROG
 };
 
 static char const  NWND_FORCE[] PROGMEM = "force";
+static constexpr char const*  NWND_TELEPORT = NSCR_TELEPORT;
 static char const  NWND_DIGGING[] PROGMEM = "digging";
 static char const  NWND_FIRE[] PROGMEM = "fire";
 static char const  NWND_STRIKING[] PROGMEM = "striking";
@@ -244,7 +222,7 @@ static char const  NWND_POLYMORPH[] PROGMEM = "polymorph";
 char const* const WND_NAMES[NUM_WND] PROGMEM =
 {
     NWND_FORCE,
-    NSCR_TELEPORT, // reuse string from scroll
+    NWND_TELEPORT,
     NWND_DIGGING,
     NWND_FIRE,
     NWND_STRIKING,

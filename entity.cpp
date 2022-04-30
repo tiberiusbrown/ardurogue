@@ -207,7 +207,7 @@ void advance_entity(uint8_t i)
         if(end)
         {
             e.invis = 0;
-            if(i == 0) status_you_are_no_longer(PSTR("invisible"));
+            if(i == 0) status_you_are_no_longer(STR_INVISIBLE);
         }
     }
 }
@@ -441,7 +441,7 @@ void confuse_entity(uint8_t i)
     if(i == 0 && wearing_uncursed_amulet(AMU_CLARITY))
         return;
     if(player_can_see_entity(i))
-        status_you_are(PSTR("confused"), i);
+        status_you_are(STR_CONFUSED, i);
     ents[i].confused = 1;
 }
 
@@ -450,7 +450,7 @@ void poison_entity(uint8_t i)
     auto& te = ents[i];
     if(te.weakened) return;
     if(player_can_see_entity(i))
-        status_you_are(PSTR("weakened"), i);
+        status_you_are(STR_WEAKENED, i);
     te.weakened = 1;
 }
 
@@ -461,7 +461,7 @@ void paralyze_entity(uint8_t i)
     auto& te = ents[i];
     if(te.paralyzed) return;
     if(player_can_see_entity(i))
-        status_you_are(PSTR("paralyzed"), i);
+        status_you_are(STR_PARALYZED, i);
     te.paralyzed = 1;
 }
 
@@ -470,7 +470,7 @@ void slow_entity(uint8_t i)
     auto& te = ents[i];
     if(te.slowed) return;
     if(player_can_see_entity(i))
-        status_you_are(PSTR("slowed"), i);
+        status_you_are(STR_SLOWED, i);
     te.slowed = 1;
 }
 
@@ -505,14 +505,14 @@ bool entity_perform_action(uint8_t i, action a)
         if(e.paralyzed)
         {
             if(i == 0)
-                status_you_are(PSTR("paralyzed"), 0);
+                status_you_are(STR_PARALYZED, 0);
             return true; // absorb action
         }
         if(e.confused)
         {
             dir = u8rand() & 3;
             if(i == 0)
-                status_you_are(PSTR("confused"), 0);
+                status_you_are(STR_CONFUSED, 0);
         }
     }
     auto c = dircoord(dir);

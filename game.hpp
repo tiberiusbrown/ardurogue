@@ -682,7 +682,6 @@ inline bool player_is_dead() { return ents[0].type == entity::NONE; }
 
 // strings.cpp
 extern char const* const MONSTER_NAMES[] PROGMEM;
-//extern char const* const ITEM_NAMES[] PROGMEM;
 extern char const* const POT_NAMES[] PROGMEM;
 extern char const* const SCR_NAMES[] PROGMEM;
 extern char const* const RNG_NAMES[] PROGMEM;
@@ -695,6 +694,14 @@ extern char const* const UNID_WND_NAMES[] PROGMEM;
 extern char const* const INV_CATEGORIES[] PROGMEM;
 extern char const STR_YOU_FEEL_STRONGER[] PROGMEM;
 extern char const STR_YOU_FEEL_MORE_AGILE[] PROGMEM;
+extern char const STR_NOTHING_HAPPENS[] PROGMEM;
+extern char const STR_CONFUSED[] PROGMEM;
+extern char const STR_PARALYZED[] PROGMEM;
+extern char const STR_SLOWED[] PROGMEM;
+extern char const STR_WEAKENED[] PROGMEM;
+extern char const STR_INVISIBLE[] PROGMEM;
+extern char const STR_HUNGRY[] PROGMEM;
+extern char const STR_STARVING[] PROGMEM;
 
 // game.cpp
 void dig_tile(uint8_t x, uint8_t y);

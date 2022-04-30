@@ -61,6 +61,10 @@ static char* item_name(char* dst, item it)
     if(it.cursed && it.identified)
         dst = tstrcpy_prog(dst, PSTR("cursed "));
 
+    static char const STR_SPACE_OF_SPACE[] = " of ";
+    static char const STR_POTION[] = "potion";
+    static char const STR_SCROLL[] = "scroll";
+    static char const STR_DEF_BONUS[] = " [@d def]";
     switch(it.type)
     {
     case item::FOOD:
@@ -81,7 +85,7 @@ static char* item_name(char* dst, item it)
         dst = tstrcpy_prog(dst, pgmptr(&ITEM_NAME_ARMORS[it.type - item::ARMOR]));
         if(it.identified)
         {
-            char const* s = PSTR(" [@d def]");
+            char const* s = STR_DEF_BONUS;
             if(it.is_type(item::BOOTS, BOOTS_SPEED))
                 s = PSTR(" of speed [+2 spd @d def]");
             dst += tsprintf_d(dst, s, armor_item_defense(it));
@@ -108,7 +112,7 @@ static char* item_name(char* dst, item it)
             dst = tstrcpy_prog(dst, pgmptr(&RNG_NAMES[st]));
             if(it.identified)
             {
-                char const* s = PSTR(" [@d]");
+                char const* s = PSTR("");
                 switch(st)
                 {
                 case RNG_STRENGTH:
@@ -118,7 +122,7 @@ static char* item_name(char* dst, item it)
                     s = PSTR(" [@d dex]");
                     break;
                 case RNG_PROTECTION:
-                    s = PSTR(" [@d def]");
+                    s = STR_DEF_BONUS;
                     break;
                 case RNG_ATTACK:
                     s = PSTR(" [@d atk]");
@@ -174,8 +178,8 @@ static char* item_name(char* dst, item it)
     case item::POTION:
         if(potion_is_identified(st))
         {
-            dst = quantify_item(dst, it.quant, PSTR("potion"));
-            dst = tstrcpy_prog(dst, PSTR(" of "));
+            dst = quantify_item(dst, it.quant, STR_POTION);
+            dst = tstrcpy_prog(dst, STR_SPACE_OF_SPACE);
             dst = tstrcpy_prog(dst, pgmptr(&POT_NAMES[st]));
             return dst;
         }
@@ -183,13 +187,13 @@ static char* item_name(char* dst, item it)
         {
             return quantify_item(dst, it.quant,
                 pgmptr(&UNID_POT_NAMES[perm_pot[st]]),
-                PSTR("potion"));
+                STR_POTION);
         }
     case item::SCROLL:
         if(scroll_is_identified(st))
         {
-            dst = quantify_item(dst, it.quant, PSTR("scroll"));
-            dst = tstrcpy_prog(dst, PSTR(" of "));
+            dst = quantify_item(dst, it.quant, STR_SCROLL);
+            dst = tstrcpy_prog(dst, STR_SPACE_OF_SPACE);
             dst = tstrcpy_prog(dst, pgmptr(&SCR_NAMES[st]));
             return dst;
         }
@@ -197,7 +201,7 @@ static char* item_name(char* dst, item it)
         {
             return quantify_item(dst, it.quant,
                 pgmptr(&UNID_SCR_NAMES[perm_scr[st]]),
-                PSTR("scroll"));
+                STR_SCROLL);
         }
 
     default:

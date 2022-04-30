@@ -141,7 +141,7 @@ static void use_scroll(uint8_t subtype)
             status_i(PSTR("You identified: @i."), inv[i]);
         }
         else
-            status_simple(PSTR("Nothing happens."));
+            status_simple(STR_NOTHING_HAPPENS);
         break;
     case SCR_ENCHANT:
         i = inventory_menu(PSTR("Enchant which item?"));
@@ -149,7 +149,7 @@ static void use_scroll(uint8_t subtype)
         {
             auto& it = inv[i];
             if(it.stackable())
-                status_simple(PSTR("Nothing happens."));
+                status_simple(STR_NOTHING_HAPPENS);
             else
             {
                 uint8_t n = 1;
@@ -161,7 +161,7 @@ static void use_scroll(uint8_t subtype)
             }
         }
         else
-            status_simple(PSTR("Nothing happens."));
+            status_simple(STR_NOTHING_HAPPENS);
         break;
     case SCR_REMOVE_CURSE:
         i = inventory_menu(PSTR("Uncurse which item?"));
@@ -169,7 +169,7 @@ static void use_scroll(uint8_t subtype)
         {
             auto& it = inv[i];
             if(it.type <= item::WAND || !it.cursed)
-                status_simple(PSTR("Nothing happens."));
+                status_simple(STR_NOTHING_HAPPENS);
             else
             {
                 it.cursed = 0;
@@ -177,7 +177,7 @@ static void use_scroll(uint8_t subtype)
             }
         }
         else
-            status_simple(PSTR("Nothing happens."));
+            status_simple(STR_NOTHING_HAPPENS);
         break;
     case SCR_TELEPORT:
         teleport_entity(0);
@@ -278,11 +278,6 @@ bool equip_item(uint8_t i)
     status(PSTR("You @p the @i."),
         weap ? PSTR("ready") : PSTR("put on"),
         inv[i]);
-    if(it.is_type(item::AMULET, AMU_IRONBLOOD))
-    {
-        entity_restore_strength(0);
-        end_paralysis(0);
-    }
     if(it.is_type(item::AMULET, AMU_CLARITY))
         end_confusion(0);
     adjust_health_to_max_health(0);
