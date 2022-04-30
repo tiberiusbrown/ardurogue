@@ -148,7 +148,7 @@ static char* item_name(char* dst, item it)
                 case AMU_SPEED:
                 {
                     dst += tsprintf_d(dst, PSTR(" [@d spd]"),
-                        uint8_t(t + 1) / 2);
+                        uint8_t(int8_t((t + 1) & 0xfe) / 2));
                     break;
                 }
                 case AMU_VITALITY:
