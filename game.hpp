@@ -50,9 +50,8 @@ void run();
 #ifdef ARDUINO
 #include <Arduino.h>
 
-// AVR callees modify passed va_list for caller
-// saves maybe 50 bytes
-#define SAFE_VA_LIST_ARG_PASS 0
+// need this if multiple separate compressed substrs contain sprintf identifiers
+#define SAFE_VA_LIST_ARG_PASS 1
 
 #if 1
 // http://michael-buschbeck.github.io/arduino/2013/10/20/string-merging-pstr/
@@ -460,6 +459,16 @@ struct item
     {
         return make(type_, subtype_).raw1_ == raw1_;
     }
+    static item from_u16(uint16_t x)
+    {
+        union { uint16_t x; item it; } u{ x };
+        return u.it;
+    }
+    uint16_t to_u16() const
+    {
+        union { item it; uint16_t x; } u{ *this };
+        return u.x;
+    }
 };
 static_assert(sizeof(item) == 2, "");
 
@@ -860,7 +869,7 @@ void draw_status();
 void status(char const* fmt, ...);
 void status_simple(char const* s);
 void status_i(char const* fmt, item it);
-void status_si(char const* s, char const* a, item i);
+void status_si(char const* s, char const* a, item it);
 void status_u(char const* fmt, uint8_t a);
 void status_usu(char const* fmt, uint8_t a, char const* b, uint8_t c);
 void status_you_are_no_longer(char const* s);

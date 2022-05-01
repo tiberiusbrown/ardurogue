@@ -132,7 +132,7 @@ static void draw_inventory(
         {
             if(item_is_equipped(it))
                 draw_char(x + 1, y, '#');
-            draw_textf(x + 7, y, PSTR("@i"), inv[it]);
+            draw_textf(x + 7, y, PSTR("@i"), (uintptr_t)inv[it].to_u16());
             if(j == seli)
                 inv_rect(0, 63, y - 1, y + 5); // TODO: width
         }

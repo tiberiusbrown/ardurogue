@@ -231,7 +231,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
 {
     char c;
     uint8_t u;
-    size_t u16;
+    uintptr_t u16;
     uint8_t dec[5];
     char const* s;
     char* b_orig = b;
@@ -259,9 +259,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             continue;
         }
         c = (char)pgm_read_byte(fmt++);
-        va_list ap_old;
-        va_copy(ap_old, ap);
-        u16 = va_arg(ap, size_t);
+        u16 = va_arg(ap, uintptr_t);
         switch(c)
         {
         case 'c': // char
@@ -331,13 +329,8 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             }
             break;
         case 'i': // item
-        {
-            item it = va_arg(ap_old, item);
-            va_end(ap);
-            va_copy(ap, ap_old);
-            b = item_name(b, it);
+            b = item_name(b, item::from_u16((uint16_t)u16));
             break;
-        }
         case 'd': // int8_t only (int16_t not supported)
         case 'u': // uint8_t or uint16_t
             u16 &= 0xffff; // no-op on avr
@@ -360,7 +353,6 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         default:
             break;
         }
-        va_end(ap_old);
     }
 end:
     return (uint8_t)(ptrdiff_t)(b - b_orig) - 1;

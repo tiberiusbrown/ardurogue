@@ -62,14 +62,13 @@ NOINLINE void status_simple(char const* s)
 
 NOINLINE void status_i(char const* fmt, item it)
 {
-    status(fmt, it);
+    status(fmt, it.to_u16());
 }
 
-NOINLINE void status_si(char const* s, char const* p, item i)
+NOINLINE void status_si(char const* s, char const* p, item it)
 {
-    status(s, p, i);
+    status(s, p, it.to_u16());
 }
-
 
 NOINLINE void status_u(char const* fmt, uint8_t a)
 {
