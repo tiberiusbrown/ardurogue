@@ -305,7 +305,7 @@ bool equip_item(uint8_t i)
         return false;
     bool weap = type <= item::SWORD;
     identify_item(i);
-    status(STR_YOU_P_THE_I,
+    status_si(STR_YOU_P_THE_I,
         weap ? PSTR("ready") : PSTR("put on"),
         inv[i]);
     if(it.is_type(item::AMULET, AMU_CLARITY))
