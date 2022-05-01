@@ -172,7 +172,7 @@ bool player_pickup_item(uint8_t i)
             {
                 if(inv[j].quant >= MAX_ITEM_QUANT)
                 {
-                    status_simple(PSTR("You can't hold any more of those."));
+                    status_simple(PSTR2(STRI_YOU_CANT_HOLD_ANY_MORE "of those."));
                     return false;
                 }
                 break;
@@ -186,7 +186,7 @@ bool player_pickup_item(uint8_t i)
     }
     if(j >= INV_ITEMS)
     {
-        status_simple(PSTR("You can't hold any more items."));
+        status_simple(PSTR2(STRI_YOU_CANT_HOLD_ANY_MORE "items."));
         return false;
     }
     if(!inv[j].is_nothing())
@@ -206,13 +206,13 @@ bool player_pickup_item(uint8_t i)
             it.reset();
         }
         inv[j].quant += tt.quant + 1;
-        status_i(PSTR("You now have @i."), inv[j]);
+        status_i(PSTR2(STRI_YOU_HAVE "@i."), inv[j]);
         return true;
     }
     else
         inv[j] = it;
     it.reset();
-    status_i(PSTR("You got the @i."), inv[j]);
+    status_i(PSTR2(STRI_YOU "got " STRI_THE "@i."), inv[j]);
     return true;
 }
 
@@ -251,7 +251,7 @@ void put_item_on_ground(uint8_t x, uint8_t y, item it)
             t.it = it;
             return;
         }
-    status_i(PSTR("The @i breaks."), it);
+    status_i(PSTR2(STRI_CAPTHE "@i breaks."), it);
 }
 
 void render()
@@ -283,8 +283,7 @@ void advance_hunger()
     }
     else if(healths[0] > 0)
     {
-        static char const MSG[] PROGMEM = "@U " STRI_STARVING "!";
-        status_u(MSG, 0);
+        status_simple(PSTR2(STRI_YOU_ARE STRI_STARVING "!"));
         hs.type = HS_STARVED;
         entity_take_damage(0, u8rand() % 2 + 1);
     }
@@ -376,7 +375,7 @@ void step()
             map_item& mit = items[i];
             if(mit.it.is_nothing() || mit.x != px || mit.y != py)
                 continue;
-            if(yesno_menui(PSTR("Pick up the @i?"), mit.it))
+            if(yesno_menui(PSTR2("Pick up " STRI_THE "@i?"), mit.it))
             {
                 player_pickup_item(i);
                 render();
@@ -384,7 +383,7 @@ void step()
         }
 
         if(px == xdn && py == ydn &&
-            yesno_menu(PSTR("Go down to the next dungeon?")))
+            yesno_menu(PSTR2("Go down to " STRI_THE "next dungeon?")))
         {
             ++map_index;
             generate_dungeon();
@@ -394,8 +393,8 @@ void step()
         }
         else if(px == xup && py == yup &&
             yesno_menu(map_index == 0 ?
-                PSTR("Return to the surface?") :
-                PSTR("Go back up the stairs?")))
+                PSTR2("Return" STRI_TO_THE_SURFACE "?") :
+                PSTR2("Go back up " STRI_THE "stairs?")))
         {
             if(map_index == 0)
             {
@@ -406,12 +405,12 @@ void step()
                 if(have_amulet)
                 {
                     hs.type = HS_ESCAPED;
-                    status_simple(PSTR("You have escaped with the amulet of Yendor!"));
+                    status_simple(PSTR2(STRI_YOU_HAVE "e" STRI_SCAPED_WITH STRI_THE_AMULET_OF_YENDOR "!"));
                 }
                 else
                 {
                     hs.type = HS_RETURNED;
-                    status_simple(PSTR("You have left without the amulet of Yendor."));
+                    status_simple(PSTR2(STRI_YOU_HAVE "left without" STRI_THE_AMULET_OF_YENDOR "."));
                 }
                 ents[0].type = entity::NONE;
                 return;
@@ -419,7 +418,6 @@ void step()
             else
             {
                 --map_index;
-                // TODO: test for returning to surface
                 generate_dungeon();
                 ents[0].x = xdn, ents[0].y = ydn;
                 update_light();
@@ -524,7 +522,7 @@ void run()
         if(saved) load();
         saved &= (ents[0].type == entity::PLAYER);
 
-        draw_text(7, 24, PSTR("ArduRogue"));
+        draw_text(7, 24, STR_ARDUROGUE);
         set_box(5, 42, 22, 30);
         draw_text(0, 34, PSTR("Press A to"));
         draw_text(35, 34, saved ? PSTR("load.") : PSTR("play."));
@@ -539,8 +537,8 @@ void run()
             generate_dungeon();
             load();         // need another load to overwrite current map entities
             destroy_save(); // NOW destroy save
-            status_simple(PSTR(
-                "Welcome back to ArduRogue. The save file has been deleted. Don't forget to save again when you're done!"));
+            status_simple(PSTR2(
+                "Welcome back to " STRI_ARDUROGUE ". The save file has been deleted. Don't forget to save again when you're done!"));
         }
         else
         {
@@ -552,7 +550,7 @@ void run()
             for(auto& i : pinfo.equipped) i = 255;
             pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
             new_entity(0, entity::PLAYER, xup, yup);
-            status_simple(PSTR("Welcome to ArduRogue."));
+            status_simple(PSTR2("Welcome to " STRI_ARDUROGUE "."));
         }
 
         update_light();

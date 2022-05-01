@@ -1,17 +1,38 @@
 #include "game.hpp"
 
-char const STR_YOU_P_THE_I[] PROGMEM = "You @p the @i.";
+char const STR_YOU_P_THE_I[] PROGMEM = STRI_YOU "@p " STRI_THE "@i.";
 char const STR_ARROW[] PROGMEM = "arrow";
+char const STR_THE[] PROGMEM = "the ";
+char const STR_CAPTHE[] PROGMEM = "The ";
+char const STR_AMULET[] PROGMEM = "amulet";
+char const STR_ARDUROGUE[] PROGMEM = "ArduRogue";
+
+static char const NRNG_SEE_INVIS[] PROGMEM = "see invisible";
+char const* const STR_INVISIBLE = NRNG_SEE_INVIS + 4; // merged with "see invisible"
 
 static char const STR_STRI_WHICH_ITEM_Q[] PROGMEM = " which item?";
 static char const STR_STRI_FOR_A_MOMENT_P[] PROGMEM = " for a moment.";
-static char const STR_STRI_THE_I_GLOWS[] PROGMEM = "The @i glows ";
+static char const STR_STRI_THE_I_GLOWS[] PROGMEM = STRI_CAPTHE "@i glows ";
 static char const STR_STRI_STARVING[] PROGMEM = "starving";
 static char const STR_STRI_TRENGTH[] PROGMEM = "trength";
-static char const STR_STRI_YOU_ARE[] PROGMEM = "You are ";
+static char const STR_STRI_YOU_ARE[] PROGMEM = STRI_YOU "are ";
 static char const STR_STRI_YOU_ARE_UNABLE_TO[] PROGMEM = STRI_YOU_ARE "unable to ";
 static constexpr char const* STR_STRI_P_THE_I = STR_YOU_P_THE_I + 4;
 static constexpr char const* STR_STRI_ARROW = STR_ARROW;
+static char const STR_STRI_YOU_FEEL[] PROGMEM = STRI_YOU "feel ";
+static char const STR_STRI_YOU_CANT_HOLD_ANY_MORE[] PROGMEM = STRI_YOU "can't hold any more ";
+static char const STR_STRI_YOU[] PROGMEM = "You ";
+static char const STR_STRI_THE_DOOR_IS[] PROGMEM = STRI_CAPTHE "door is ";
+static char const STR_STRI_THE_AMULET_OF_YENDOR[] PROGMEM = " " STRI_THE STRI_AMULET " of Yendor";
+static char const STR_STRI_YOU_HAVE[] PROGMEM = STRI_YOU "have ";
+static char const STR_STRI_TO_THE_SURFACE[] PROGMEM = " to " STRI_THE "surface";
+static char const STR_STRI_SCAPED_WITH[] PROGMEM = "scaped with";
+static constexpr char const* STR_STRI_THE = STR_THE;
+static constexpr char const* STR_STRI_AMULET = STR_AMULET;
+static constexpr char const* STR_STRI_CAPTHE = STR_CAPTHE;
+static constexpr char const* STR_STRI_INVISIBLE = NRNG_SEE_INVIS + 4;
+static char const STR_STRI_DROP_THE_I[] PROGMEM = "drop " STRI_THE "@i.";
+static constexpr char const* STR_STRI_ARDUROGUE = STR_ARDUROGUE;
 
 char const* const STRI_STRS[] PROGMEM =
 {
@@ -24,11 +45,25 @@ char const* const STRI_STRS[] PROGMEM =
     STR_STRI_YOU_ARE_UNABLE_TO,
     STR_STRI_P_THE_I,
     STR_STRI_ARROW,
+    STR_STRI_YOU_FEEL,
+    STR_STRI_YOU_CANT_HOLD_ANY_MORE,
+    STR_STRI_YOU,
+    STR_STRI_THE_DOOR_IS,
+    STR_STRI_THE_AMULET_OF_YENDOR,
+    STR_STRI_YOU_HAVE,
+    STR_STRI_TO_THE_SURFACE,
+    STR_STRI_SCAPED_WITH,
+    STR_STRI_THE,
+    STR_STRI_AMULET,
+    STR_STRI_CAPTHE,
+    STR_STRI_INVISIBLE,
+    STR_STRI_DROP_THE_I,
+    STR_STRI_ARDUROGUE,
 };
 
 char const STR_EMPTY[] PROGMEM = "";
-char const STR_YOU_FEEL_STRONGER[] PROGMEM = "You feel stronger.";
-char const STR_YOU_FEEL_MORE_AGILE[] PROGMEM = "You feel more agile.";
+char const STR_YOU_FEEL_STRONGER[] PROGMEM = STRI_YOU_FEEL "stronger.";
+char const STR_YOU_FEEL_MORE_AGILE[] PROGMEM = STRI_YOU_FEEL "more agile.";
 char const STR_NOTHING_HAPPENS[] PROGMEM = "Nothing happens.";
 char const STR_CONFUSED[] PROGMEM = "confused";
 char const STR_PARALYZED[] PROGMEM = "paralyzed";
@@ -172,7 +207,6 @@ char const* const UNID_SCR_NAMES[NUM_SCR] PROGMEM =
     UNID_SCR_8,
 };
 
-static char const NRNG_SEE_INVIS[] PROGMEM = "see invisible";
 static constexpr char const* NRNG_STRENGTH = NPOT_STRENGTH;
 static constexpr char const* NRNG_DEXTERITY = NPOT_DEXTERITY;
 static char const NRNG_PROTECTION[] PROGMEM = "protection";
@@ -180,8 +214,6 @@ static char const NRNG_FIRE_PROTECT[] PROGMEM = "fire immunity";
 static char const NRNG_ATTACK[] PROGMEM = "attack";
 static char const NRNG_SUSTENANCE[] PROGMEM = "sustenance";
 static constexpr char const* NRNG_INVIS = NPOT_INVIS;
-
-char const* const STR_INVISIBLE = NRNG_SEE_INVIS + 4; // merged with "see invisible"
 
 char const* const RNG_NAMES[NUM_RNG] PROGMEM =
 {
@@ -199,7 +231,7 @@ static char const NAMU_SPEED[] PROGMEM = "speed";
 static char const NAMU_CLARITY[] PROGMEM = "clarity";
 static char const NAMU_CONSERVATION[] PROGMEM = "conservation";
 static char const NAMU_REGENERATION[] PROGMEM = "regeneration";
-static char const NAMU_VAMPIRE[] PROGMEM = "the vampire";
+static char const NAMU_VAMPIRE[] PROGMEM = STRI_THE "vampire";
 static char const NAMU_IRONBLOOD[] PROGMEM = "ironblood";
 static char const NAMU_VITALITY[] PROGMEM = "vitality";
 static char const NAMU_WISDOM[] PROGMEM = "wisdom";

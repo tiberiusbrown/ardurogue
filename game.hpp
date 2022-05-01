@@ -50,17 +50,21 @@ void run();
 #ifdef ARDUINO
 #include <Arduino.h>
 
+// AVR callees modify passed va_list for caller
+// saves maybe 50 bytes
+#define SAFE_VA_LIST_ARG_PASS 0
+
 #if 1
 // http://michael-buschbeck.github.io/arduino/2013/10/20/string-merging-pstr/
 // limitation: cannot use string literal concatenation: PSTR("hi " "there")
 #undef PSTR
-#define PSTR(str) \
+#define PSTR(str_) \
     (__extension__({ \
         PGM_P ptr;  \
         asm volatile \
         ( \
             ".pushsection .progmem.pstrs, \"SM\", @progbits, 1" "\n\t" \
-            "PSTR%=: .string " #str                             "\n\t" \
+            "PSTR%=: .string " #str_                            "\n\t" \
             ".type PSTR%= STT_OBJECT"                           "\n\t" \
             ".popsection"                                       "\n\t" \
             "ldi %A0, lo8(PSTR%=)"                              "\n\t" \
@@ -71,8 +75,13 @@ void run();
     }))
 #endif
 
+#define PSTR2(str_) \
+    (__extension__({ static char const PROGSTR_[] PROGMEM = str_; PROGSTR_; }))
+
 #else
+#define SAFE_VA_LIST_ARG_PASS 1
 #define PSTR(str_) str_
+#define PSTR2(str_) str_
 #define PROGMEM
 inline uint8_t pgm_read_byte(void const* p) { return *(uint8_t*)p; }
 inline uint16_t pgm_read_word(void const* p) { return *(uint16_t*)p; }
@@ -625,7 +634,8 @@ inline bool ring_is_identified(uint8_t subtype)
 }
 inline bool amulet_is_identified(uint8_t subtype)
 {
-    return identified.test(NUM_POT + NUM_SCR + NUM_RNG + subtype);
+    return subtype == AMU_YENDOR ||
+        identified.test(NUM_POT + NUM_SCR + NUM_RNG + subtype);
 }
 inline bool wand_is_identified(uint8_t subtype)
 {
@@ -683,15 +693,29 @@ inline uint8_t light_radius2()
 inline bool player_is_dead() { return ents[0].type == entity::NONE; }
 
 // strings.cpp
-#define STRI_WHICH_ITEM_Q      "\x80" /* " which item?"       */
-#define STRI_FOR_A_MOMENT_P    "\x81" /* " for a moment."     */
-#define STRI_THE_I_GLOWS       "\x82" /* "The @i glows "      */
-#define STRI_STARVING          "\x83" /* "starving"           */
-#define STRI_TRENGTH           "\x84" /* "trength"            */
-#define STRI_YOU_ARE           "\x85" /* "You are "           */
-#define STRI_YOU_ARE_UNABLE_TO "\x86" /* "You are unable to " */
-#define STRI_P_THE_I           "\x87" /* "@p the @i."         */
-#define STRI_ARROW             "\x88" /* "arrow"              */
+#define STRI_WHICH_ITEM_Q           "\x80" /* " which item?"             */
+#define STRI_FOR_A_MOMENT_P         "\x81" /* " for a moment."           */
+#define STRI_THE_I_GLOWS            "\x82" /* "The @i glows "            */
+#define STRI_STARVING               "\x83" /* "starving"                 */
+#define STRI_TRENGTH                "\x84" /* "trength"                  */
+#define STRI_YOU_ARE                "\x85" /* "You are "                 */
+#define STRI_YOU_ARE_UNABLE_TO      "\x86" /* "You are unable to "       */
+#define STRI_P_THE_I                "\x87" /* "@p the @i."               */
+#define STRI_ARROW                  "\x88" /* "arrow"                    */
+#define STRI_YOU_FEEL               "\x89" /* "You feel "                */
+#define STRI_YOU_CANT_HOLD_ANY_MORE "\x8a" /* "You can't hold any more " */
+#define STRI_YOU                    "\x8b" /* "You "                     */
+#define STRI_THE_DOOR_IS            "\x8c" /* "The door is "             */
+#define STRI_THE_AMULET_OF_YENDOR   "\x8d" /* " the amulet of Yendor"    */
+#define STRI_YOU_HAVE               "\x8e" /* "You have "                */
+#define STRI_TO_THE_SURFACE         "\x8f" /* " to the surface"          */
+#define STRI_SCAPED_WITH            "\x90" /* "scaped with"              */
+#define STRI_THE                    "\x91" /* "the "                     */
+#define STRI_AMULET                 "\x92" /* "amulet"                   */
+#define STRI_CAPTHE                 "\x93" /* "The "                     */
+#define STRI_INVISIBLE              "\x94" /* "invisible"                */
+#define STRI_DROP_THE_I             "\x95" /* "drop the @i."             */
+#define STRI_ARDUROGUE              "\x96" /* "ArduRogue"                */
 extern char const* const STRI_STRS[] PROGMEM;
 extern char const STR_EMPTY[] PROGMEM;
 extern char const* const MONSTER_NAMES[] PROGMEM;
@@ -717,6 +741,10 @@ extern char const STR_HUNGRY[] PROGMEM;
 extern char const* const STR_STARVING;       // same as STRI_STARVING
 extern char const STR_YOU_P_THE_I[] PROGMEM; // "You @p the @i."
 extern char const STR_ARROW[] PROGMEM;       // "arrow"
+extern char const STR_THE[] PROGMEM;         // "the "
+extern char const STR_CAPTHE[] PROGMEM;      // "The "
+extern char const STR_AMULET[] PROGMEM;      // "amulet"
+extern char const STR_ARDUROGUE[] PROGMEM;   // "ArduRogue"
 
 // game.cpp
 void dig_tile(uint8_t x, uint8_t y);
@@ -819,6 +847,7 @@ void set_tile_explored(uint8_t x, uint8_t y);
 void update_light();
 
 // sprintf.cpp
+char* uncompress(char* dst, char const* src);
 uint8_t tsprintf(char* b, char const* fmt, ...);
 uint8_t tvsprintf(char* b, char const* fmt, va_list ap);
 uint8_t tstrlen(char const* s); // s not progmem

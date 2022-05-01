@@ -254,8 +254,7 @@ void entity_restore_strength(uint8_t i)
     if(ents[i].weakened)
     {
         ents[i].weakened = 0;
-        static char const MSG[] PROGMEM = "Your s" STRI_TRENGTH " returns.";
-        if(i == 0) status_simple(MSG);
+        if(i == 0) status_simple(PSTR2("Your s" STRI_TRENGTH " returns."));
     }
 }
 
@@ -266,7 +265,7 @@ void entity_heal(uint8_t i, uint8_t amount)
     {
         if(amulet_bonus(AMU_REGENERATION) < 0)
             amount = (amount + 1) / 2;
-        status(PSTR("You feel @pbetter."), s);
+        status(PSTR2(STRI_YOU "feel @pbetter."), s);
     }
     else if(player_can_see_entity(i))
         status(PSTR("@S looks @pbetter."), i, s);
@@ -312,7 +311,7 @@ void entity_take_fire_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam
         // TODO: monster immune to fire
     }
     if(dam == 0)
-        status_u(PSTR("The flames do not affect @O."), defi);
+        status_u(PSTR2(STRI_CAPTHE "flames do not affect @O."), defi);
     entity_take_damage_from_entity(atti, defi, dam);
 }
 
@@ -383,7 +382,7 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
 void teleport_entity(uint8_t i)
 {
     if(i == 0)
-        status_simple(PSTR("You find yourself in another location."));
+        status_simple(PSTR2(STRI_YOU "find yourself in another location."));
     else if(player_can_see_entity(i))
         status_u(PSTR("@S disappears!"), i);
     find_unoccupied_guaranteed(ents[i].x, ents[i].y);
@@ -527,9 +526,9 @@ bool entity_perform_action(uint8_t i, action a)
         if(d && !d->secret)
         {
             if(!d->open)
-                status_simple(PSTR("The door is already closed."));
+                status_simple(PSTR2(STRI_THE_DOOR_IS "already closed."));
             else if(te)
-                status_simple(PSTR("The door is blocked."));
+                status_simple(PSTR2(STRI_THE_DOOR_IS "blocked."));
             else
             {
                 d->open = 0;
@@ -537,7 +536,10 @@ bool entity_perform_action(uint8_t i, action a)
             }
         }
         else
-            status_simple(PSTR("You see no door there."));
+        {
+            static char const MSG[] = STRI_YOU "see no door there.";
+            status_simple(MSG);
+        }
         return false;
     }
     case action::MOVE:
@@ -572,7 +574,7 @@ bool entity_perform_action(uint8_t i, action a)
                 if(!d) continue;
                 if(d->secret)
                 {
-                    status_simple(PSTR("You found a hidden door!"));
+                    status_simple(PSTR2(STRI_YOU "find a hidden door!"));
                     d->secret = 0;
                 }
             }
@@ -583,8 +585,7 @@ bool entity_perform_action(uint8_t i, action a)
         item it = inv[a.data];
         if(it.is_type(item::AMULET, AMU_YENDOR))
         {
-            static char const MSG[] PROGMEM = STRI_YOU_ARE_UNABLE_TO "drop the @i.";
-            status_i(MSG, it);
+            status_i(PSTR2(STRI_YOU_ARE_UNABLE_TO STRI_DROP_THE_I), it);
             return false;
         }
         else if(item_is_equipped(a.data))
@@ -592,7 +593,7 @@ bool entity_perform_action(uint8_t i, action a)
             if(!unequip_item(a.data))
                 return false;
         }
-        status_i(PSTR("You drop the @i."), it);
+        status_i(PSTR2(STRI_YOU STRI_DROP_THE_I), it);
         player_remove_item(a.data);
         put_item_on_ground(e.x, e.y, it);
         inv[a.data].reset();
@@ -611,10 +612,10 @@ bool entity_perform_action(uint8_t i, action a)
         if(sr.i < MAP_ENTITIES)
         {
             aggro_monster(sr.i);
-            status(PSTR("The @i hits @O!"), it, sr.i);
+            status(PSTR2(STRI_CAPTHE "@i hits @O!"), it, sr.i);
             entity_apply_potion(it.subtype, sr.i);
         }
-        status_i(PSTR("The @i shatters."), it);
+        status_i(PSTR2(STRI_CAPTHE "@i shatters."), it);
         return true;
     }
     case action::SHOOT:
@@ -634,8 +635,8 @@ bool entity_perform_action(uint8_t i, action a)
         if(sr.i < MAP_ENTITIES)
         {
             uint8_t dam = calculate_arrow_damage(sr.i);
-            static char const MSG[] PROGMEM = "Your " STRI_ARROW " @ps @O.";
-            status(MSG, dam == 0 ? PSTR("misse") : PSTR("hit"), sr.i);
+            status(PSTR2("Your " STRI_ARROW " @ps @O."),
+                dam == 0 ? PSTR("misse") : PSTR("hit"), sr.i);
             entity_take_damage_from_entity(0, sr.i, dam);
         }
         if(u8rand() >= ARROW_BREAK_CHANCE)

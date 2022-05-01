@@ -135,12 +135,11 @@ static void use_scroll(uint8_t subtype)
     {
     case SCR_IDENTIFY:
     {
-        static char const MSG[] PROGMEM = "Identify" STRI_WHICH_ITEM_Q;
-        i = inventory_menu(MSG);
+        i = inventory_menu(PSTR2("Identify" STRI_WHICH_ITEM_Q));
         if(i < INV_ITEMS)
         {
             identify_item(i);
-            status_i(PSTR("You identified: @i."), inv[i]);
+            status_i(PSTR2(STRI_YOU "identified: @i."), inv[i]);
         }
         else
             status_simple(STR_NOTHING_HAPPENS);
@@ -148,8 +147,7 @@ static void use_scroll(uint8_t subtype)
     }
     case SCR_ENCHANT:
     {
-        static char const MSG[] PROGMEM = "Enchant" STRI_WHICH_ITEM_Q;
-        i = inventory_menu(MSG);
+        i = inventory_menu(PSTR2("Enchant" STRI_WHICH_ITEM_Q));
         if(i < INV_ITEMS)
         {
             auto& it = inv[i];
@@ -172,8 +170,7 @@ static void use_scroll(uint8_t subtype)
     }
     case SCR_REMOVE_CURSE:
     {
-        static char const MSG[] PROGMEM = "Uncurse" STRI_WHICH_ITEM_Q;
-        i = inventory_menu(MSG);
+        i = inventory_menu(PSTR2("Uncurse" STRI_WHICH_ITEM_Q));
         if(i < INV_ITEMS)
         {
             auto& it = inv[i];
@@ -196,7 +193,7 @@ static void use_scroll(uint8_t subtype)
     case SCR_MAPPING:
         for(auto& t : tfog)
             t = 0xff;
-        status_simple(PSTR("You become aware of your surroundings."));
+        status_simple(PSTR2(STRI_YOU "become aware of your surroundings."));
         break;
     case SCR_FEAR:
     case SCR_TORMENT:
@@ -262,8 +259,7 @@ bool unequip_item(uint8_t i)
         PSTR("stop using") : PSTR("take off");
     if(it.cursed)
     {
-        static char const MSG[] PROGMEM = STRI_YOU_ARE_UNABLE_TO STRI_P_THE_I;
-        status_si(MSG, verb, it);
+        status_si(PSTR2(STRI_YOU_ARE_UNABLE_TO STRI_P_THE_I), verb, it);
         return false;
     }
     for(auto& j : pinfo.equipped)
@@ -331,7 +327,7 @@ bool use_item(uint8_t i)
         if(n <= 1)
         {
             player_remove_item(i);
-            status_i(PSTR("The @i crumbles to dust."), it);
+            status_i(PSTR2(STRI_CAPTHE "@i crumbles to dust."), it);
         }
         else
             inv[i].quant = n - 1;
@@ -377,7 +373,7 @@ void entity_apply_potion(uint8_t subtype, uint8_t i)
         uint8_t dam = entity_max_health(i) / 8 + 1;
         dam += u8rand(dam * 2);
         if(dam > 10) dam = 10;
-        status_u(PSTR("@U harmed by the potion!"), i);
+        status_u(PSTR2("@U harmed by " STRI_THE "potion!"), i);
         entity_take_damage_from_entity(0, i, dam);
         break;
     }
@@ -403,7 +399,7 @@ void entity_apply_potion(uint8_t subtype, uint8_t i)
             if(ring_bonus(RNG_INVIS) < 0)
                 break;
             pinfo.invis_rem = u8rand() % 16 + 12;
-            status_simple(PSTR("You turn invisible."));
+            status_simple(PSTR2(STRI_YOU "turn " STRI_INVISIBLE "."));
         }
         ents[i].invis = 1;
         break;

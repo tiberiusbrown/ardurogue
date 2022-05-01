@@ -33,7 +33,7 @@ void draw_status()
 
 void status_cursed_amulet()
 {
-    status_simple(PSTR("Your cursed amulet burns at you."));
+    status_simple(PSTR2("Your cursed " STRI_AMULET "burns at you."));
 }
 
 void reset_status()
@@ -83,8 +83,7 @@ NOINLINE void status_usu(char const* fmt, uint8_t a, char const* b, uint8_t c)
 
 NOINLINE void status_you_are_no_longer(char const* s)
 {
-    static char const MSG[] PROGMEM = STRI_YOU_ARE "no longer @p.";
-    status(MSG, s);
+    status(PSTR2(STRI_YOU_ARE "no longer @p."), s);
 }
 
 

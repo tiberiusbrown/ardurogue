@@ -9,12 +9,9 @@ uint8_t tsprintf(char* b, char const* fmt, ...)
     return r;
 }
 
-// does not copy null char
 static char* tstrcpy_prog(char* dst, char const* src)
 {
-    char c;
-    while((c = pgm_read_byte(src++)) != '\0')
-        *dst++ = c;
+    dst += tsprintf(dst, src);
     return dst;
 }
 
@@ -143,7 +140,7 @@ static char* item_name(char* dst, item it)
     case item::AMULET:
         if(amulet_is_identified(st))
         {
-            dst = tstrcpy_prog(dst, PSTR("amulet of "));
+            dst = tstrcpy_prog(dst, PSTR2(STRI_AMULET " of "));
             dst = tstrcpy_prog(dst, pgmptr(&AMU_NAMES[st]));
             if(it.identified)
             {
@@ -172,7 +169,7 @@ static char* item_name(char* dst, item it)
         else
         {
             dst = tstrcpy_prog(dst, pgmptr(&UNID_RNG_AMU_NAMES[perm_amu[st]]));
-            dst = tstrcpy_prog(dst, PSTR(" amulet"));
+            dst = tstrcpy_prog(dst, PSTR2(" " STRI_AMULET));
             return dst;
         }
     case item::POTION:
@@ -212,6 +209,24 @@ static char* item_name(char* dst, item it)
 
 static char const HEX_CHARS[] PROGMEM = "0123456789ABCDEF";
 
+#if SAFE_VA_LIST_ARG_PASS
+char* uncompress(char* dst, char const* src)
+{
+    for(;;)
+    {
+        char c = (char)pgm_read_byte(src++);
+        if((uint8_t)c >= 0x80)
+        {
+            dst = uncompress(dst, pgmptr(&STRI_STRS[uint8_t(c & 0x7f)]));
+            continue;
+        }
+        *dst = c;
+        if(c == '\0') return dst;
+        ++dst;
+    }
+}
+#endif
+
 uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
 {
     char c;
@@ -220,14 +235,23 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
     uint8_t dec[5];
     char const* s;
     char* b_orig = b;
+#if SAFE_VA_LIST_ARG_PASS
+    char fmt_uncompressed[128];
+    uncompress(fmt_uncompressed, fmt);
+    fmt = fmt_uncompressed;
+#endif
     for(;;)
     {
+#if SAFE_VA_LIST_ARG_PASS
+        c = *fmt++;
+#else
         c = (char)pgm_read_byte(fmt++);
         if((uint8_t)c >= 0x80)
         {
             b += tvsprintf(b, pgmptr(&STRI_STRS[uint8_t(c & 0x7f)]), ap);
             continue;
         }
+#endif
         if(c != '@')
         {
             *b++ = c;
@@ -281,7 +305,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
             {
                 if(player_can_see_entity((uint8_t)u16))
                 {
-                    b = tstrcpy_prog(b, c >= 'S' ? PSTR("The ") : PSTR("the "));
+                    b = tstrcpy_prog(b, c >= 'S' ? STR_CAPTHE : STR_THE);
                     b = tstrcpy_prog(b, pgmptr(&MONSTER_NAMES[u]));
                 }
                 else
@@ -309,6 +333,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         case 'i': // item
         {
             item it = va_arg(ap_old, item);
+            va_end(ap);
             va_copy(ap, ap_old);
             b = item_name(b, it);
             break;
@@ -335,6 +360,7 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
         default:
             break;
         }
+        va_end(ap_old);
     }
 end:
     return (uint8_t)(ptrdiff_t)(b - b_orig) - 1;

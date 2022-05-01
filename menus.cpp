@@ -3,9 +3,9 @@
 #include "git.hpp"
 #include "ctstr.hpp"
 
-static char const HS_MSG_ESCAPED[] PROGMEM = "Escaped with the amulet";
-static char const HS_MSG_RETURNED[] PROGMEM = "Returned to the surface";
-static char const HS_MSG_ABANDONED[] PROGMEM = "Abandoned the game";
+static char const HS_MSG_ESCAPED[] PROGMEM = "E" STRI_SCAPED_WITH " " STRI_THE STRI_AMULET;
+static char const HS_MSG_RETURNED[] PROGMEM = "Returned" STRI_TO_THE_SURFACE;
+static char const HS_MSG_ABANDONED[] PROGMEM = "Abandoned " STRI_THE "game";
 static char const HS_MSG_ENTITY[] PROGMEM = "Death by @M";
 static char const HS_MSG_SUICIDE[] PROGMEM = "Committed suicide";
 //static char const HS_MSG_TRAP[] PROGMEM = "";
@@ -332,8 +332,7 @@ static bool act_wait(action& a)
 
 static bool act_use(action& a)
 {
-    static char const MSG[] PROGMEM = "Use" STRI_WHICH_ITEM_Q;
-    uint8_t i = inventory_menu(MSG);
+    uint8_t i = inventory_menu(PSTR2("Use" STRI_WHICH_ITEM_Q));
     if(i < INV_ITEMS)
     {
         a.type = action::USE;
@@ -348,8 +347,7 @@ static bool act_shoot(action& a)
     uint8_t i = pinfo.equipped[SLOT_WEAPON];
     if(!(i < INV_ITEMS && inv[i].is_type(item::BOW)))
     {
-        static char const MSG[] PROGMEM = STRI_YOU_ARE "not holding a bow.";
-        status_simple(MSG);
+        status_simple(PSTR2(STRI_YOU_ARE "not holding a bow."));
         return false;
     }
     bool have_arrow = false;
@@ -357,8 +355,7 @@ static bool act_shoot(action& a)
         have_arrow |= inv[j].is_type(item::ARROW);
     if(!have_arrow)
     {
-        static char const MSG[] PROGMEM = "You have no " STRI_ARROW "s.";
-        status_simple(MSG);
+        status_simple(PSTR2(STRI_YOU_HAVE "no " STRI_ARROW "s."));
         return false;
     }
     if(!direction_menu(a.data))
@@ -369,8 +366,7 @@ static bool act_shoot(action& a)
 
 static bool act_drop(action& a)
 {
-    static char const MSG[] PROGMEM = "Drop" STRI_WHICH_ITEM_Q;
-    uint8_t i = inventory_menu(MSG);
+    uint8_t i = inventory_menu(PSTR2("Drop" STRI_WHICH_ITEM_Q));
     if(i < INV_ITEMS)
     {
         a.type = action::DROP;
@@ -525,7 +521,7 @@ static void men_abandon()
 {
     if(yesno_menu(PSTR("Are you sure you want to end this game?")))
     {
-        status_simple(PSTR("You have abandoned this game."));
+        status_simple(PSTR2(STRI_YOU_HAVE "abandoned this game."));
         hs.type = HS_ABANDONED;
         ents[0].type = entity::NONE;
     }
