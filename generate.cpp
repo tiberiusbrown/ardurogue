@@ -373,7 +373,7 @@ bool room::inside(uint8_t tx, uint8_t ty) const
     return !solid(rx, ry);
 }
 
-bool room::inside_bb(uint8_t tx, uint8_t ty) const
+NOINLINE bool room::inside_bb(uint8_t tx, uint8_t ty) const
 {
     uint8_t rx = uint8_t(tx - x);
     uint8_t ry = uint8_t(ty - y);

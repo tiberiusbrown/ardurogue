@@ -154,7 +154,6 @@ void draw_text(uint8_t x, uint8_t y, const char* p)
 #if defined(__GNUC__) && defined(__AVR_ARCH__)
     asm("" : "=w"(undefined_args));
 #else
-    // who cares about non avr
     undefined_args = {};
 #endif
     tvsprintf(buf, p, undefined_args);

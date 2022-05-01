@@ -60,7 +60,7 @@ void run();
 #undef PSTR
 #define PSTR(str_) \
     (__extension__({ \
-        PGM_P ptr;  \
+        char const* ptr;  \
         asm volatile \
         ( \
             ".pushsection .progmem.pstrs, \"SM\", @progbits, 1" "\n\t" \

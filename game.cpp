@@ -4,7 +4,7 @@
 
 static constexpr uint8_t MAX_ITEM_QUANT = 98;
 
-void pgm_memcpy(void* dst, void const* src, uint8_t n)
+NOINLINE void pgm_memcpy(void* dst, void const* src, uint8_t n)
 {
     uint8_t* d = (uint8_t*)dst;
     uint8_t const* s = (uint8_t const*)src;
@@ -125,7 +125,7 @@ uint8_t weapon_item_attack(item it)
     return level + (uint8_t(it.type - item::BOW) * 8) - 5;
 }
 
-void add_to_score(uint8_t amount)
+NOINLINE void add_to_score(uint8_t amount)
 {
     hs.score += amount;
     if(hs.score >= 0xff00)

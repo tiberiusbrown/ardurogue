@@ -420,7 +420,7 @@ void entity_apply_potion(uint8_t subtype, uint8_t i)
     }
 }
 
-bool item_is_equipped(uint8_t i)
+NOINLINE bool item_is_equipped(uint8_t i)
 {
     for(auto j : pinfo.equipped)
         if(i == j) return true;

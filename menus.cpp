@@ -204,7 +204,7 @@ static uint8_t const DEFAULT_ITEM_CATS[item::NUM_ITEM_TYPES] PROGMEM =
     255, 6, 3, 4, 6, 2, 0, 0, 5, 5, 1, 1, 1,
 };
 
-uint8_t inventory_menu(char const* prompt)
+NOINLINE uint8_t inventory_menu(char const* prompt)
 {
     return inventory_menu_ex(prompt, DEFAULT_ITEM_CATS);
 }

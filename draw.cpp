@@ -158,7 +158,7 @@ static void set_img(
     }
 }
 
-void set_img_prog(uint8_t const* p, uint8_t w, uint8_t x, uint8_t y)
+NOINLINE void set_img_prog(uint8_t const* p, uint8_t w, uint8_t x, uint8_t y)
 {
     uint8_t tp[8];
     for(uint8_t i = 0; i < w; ++i)
@@ -218,14 +218,14 @@ static void draw_sprite_precise(
     draw_sprite_precise_nonprog(tp, x, y);
 }
 
-static void draw_sprite_nonprog(
+static NOINLINE void draw_sprite_nonprog(
     uint16_t tp,
     uint8_t x, uint8_t y)
 {
     draw_sprite_precise_nonprog(tp, x * 5, y * 5);
 }
 
-static void draw_sprite(
+static NOINLINE void draw_sprite(
     uint16_t const* p, // PROGMEM
     uint8_t x, uint8_t y)
 {

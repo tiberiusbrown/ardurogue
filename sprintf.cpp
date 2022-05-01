@@ -11,7 +11,13 @@ uint8_t tsprintf(char* b, char const* fmt, ...)
 
 static char* tstrcpy_prog(char* dst, char const* src)
 {
-    dst += tsprintf(dst, src);
+    va_list undefined_args;
+#if defined(__GNUC__) && defined(__AVR_ARCH__)
+    asm("" : "=w"(undefined_args));
+#else
+    undefined_args = {};
+#endif
+    dst += tvsprintf(dst, src, undefined_args);
     return dst;
 }
 
@@ -46,7 +52,7 @@ static char const* const ITEM_NAME_ARMORS[] PROGMEM =
     ITEM_NAME_BOOTS,
 };
 
-static uint8_t tsprintf_d(char* b, char const* fmt, uint8_t d)
+static NOINLINE uint8_t tsprintf_d(char* b, char const* fmt, uint8_t d)
 {
     return tsprintf(b, fmt, d);
 }

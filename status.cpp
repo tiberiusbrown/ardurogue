@@ -8,7 +8,7 @@ static inline bool is_white(char c)
     return c <= ' ';
 }
 
-uint8_t advance_white(char* b, uint8_t i)
+uint8_t NOINLINE advance_white(char* b, uint8_t i)
 {
     while(!is_white(b[i])) ++i;
     b[i] = '\0';
@@ -31,12 +31,12 @@ void draw_status()
     }
 }
 
-void status_cursed_amulet()
+void NOINLINE status_cursed_amulet()
 {
     status_simple(PSTR2("Your cursed " STRI_AMULET "burns at you."));
 }
 
-void reset_status()
+void NOINLINE reset_status()
 {
     statusn = 0;
     statusx = 1;
