@@ -150,9 +150,6 @@ static uint8_t draw_text_ex(uint8_t x, uint8_t y, char const* t)
 void draw_text(uint8_t x, uint8_t y, const char* p)
 {
     char buf[64];
-#if SAFE_VA_LIST_ARG_PASS
-    uncompress(buf, p);
-#else
     va_list undefined_args;
 #if defined(__GNUC__) && defined(__AVR_ARCH__)
     asm("" : "=w"(undefined_args));
@@ -161,7 +158,6 @@ void draw_text(uint8_t x, uint8_t y, const char* p)
     undefined_args = {};
 #endif
     tvsprintf(buf, p, undefined_args);
-#endif
     draw_text_ex(x, y, buf);
 }
 

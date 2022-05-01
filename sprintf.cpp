@@ -209,25 +209,7 @@ static char* item_name(char* dst, item it)
 
 static char const HEX_CHARS[] PROGMEM = "0123456789ABCDEF";
 
-#if SAFE_VA_LIST_ARG_PASS
-char* uncompress(char* dst, char const* src)
-{
-    for(;;)
-    {
-        char c = (char)pgm_read_byte(src++);
-        if((uint8_t)c >= 0x80)
-        {
-            dst = uncompress(dst, pgmptr(&STRI_STRS[uint8_t(c & 0x7f)]));
-            continue;
-        }
-        *dst = c;
-        if(c == '\0') return dst;
-        ++dst;
-    }
-}
-#endif
-
-uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
+uint8_t tvsprintf(char* b, char const* fmt, tvsprintf_va_list ap)
 {
     char c;
     uint8_t u;
@@ -235,23 +217,14 @@ uint8_t tvsprintf(char* b, char const* fmt, va_list ap)
     uint8_t dec[5];
     char const* s;
     char* b_orig = b;
-#if SAFE_VA_LIST_ARG_PASS
-    char fmt_uncompressed[128];
-    uncompress(fmt_uncompressed, fmt);
-    fmt = fmt_uncompressed;
-#endif
     for(;;)
     {
-#if SAFE_VA_LIST_ARG_PASS
-        c = *fmt++;
-#else
         c = (char)pgm_read_byte(fmt++);
         if((uint8_t)c >= 0x80)
         {
             b += tvsprintf(b, pgmptr(&STRI_STRS[uint8_t(c & 0x7f)]), ap);
             continue;
         }
-#endif
         if(c != '@')
         {
             *b++ = c;

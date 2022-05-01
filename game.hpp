@@ -50,8 +50,9 @@ void run();
 #ifdef ARDUINO
 #include <Arduino.h>
 
+// disabling this breaks the C standard wrt varargs to save some bytes
 // need this if multiple separate compressed substrs contain sprintf identifiers
-#define SAFE_VA_LIST_ARG_PASS 1
+#define SAFE_VA_LIST_ARG_PASS 0
 
 #if 1
 // http://michael-buschbeck.github.io/arduino/2013/10/20/string-merging-pstr/
@@ -858,7 +859,12 @@ void update_light();
 // sprintf.cpp
 char* uncompress(char* dst, char const* src);
 uint8_t tsprintf(char* b, char const* fmt, ...);
-uint8_t tvsprintf(char* b, char const* fmt, va_list ap);
+#if SAFE_VA_LIST_ARG_PASS
+using tvsprintf_va_list = va_list&;
+#else
+using tvsprintf_va_list = va_list;
+#endif
+uint8_t tvsprintf(char* b, char const* fmt, tvsprintf_va_list ap);
 uint8_t tstrlen(char const* s); // s not progmem
 
 // status.cpp: fmt is PROGMEM
