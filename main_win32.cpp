@@ -39,6 +39,8 @@ static char persistent_path[MAX_PATH] = {};
 static uint8_t persistent_data[1024];
 static bool path_defined = false;
 
+static uint64_t freq;
+
 uint8_t read_persistent(uint16_t addr)
 {
     return persistent_data[addr % 1024];
@@ -89,43 +91,126 @@ static void screenshot()
 #endif
 }
 
-void wait()
+static constexpr UINT_PTR TIMER_ID = 0x1001;
+
+static void wait_ms(int ms)
 {
-    constexpr UINT_PTR timer_id = 0x1001;
     MSG msg{};
-    SetTimer(hwnd, timer_id, 50, (TIMERPROC)NULL);
+    SetTimer(hwnd, TIMER_ID, (UINT)ms, (TIMERPROC)NULL);
     while(GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
-        if(msg.hwnd == hwnd && msg.message == WM_TIMER && msg.wParam == timer_id)
+        if(msg.hwnd == hwnd && msg.message == WM_TIMER && msg.wParam == TIMER_ID)
             return;
     }
+
 }
+
+void wait()
+{
+    wait_ms(50);
+}
+
+static uint8_t translate_button(WPARAM wParam)
+{
+    switch(wParam)
+    {
+    case VK_UP     : return BTN_UP;
+    case VK_DOWN   : return BTN_DOWN;
+    case VK_LEFT   : return BTN_LEFT;
+    case VK_RIGHT  : return BTN_RIGHT;
+    case 'A'       : return BTN_A;
+    case 'B'       : return BTN_B;
+    default        : return 0;
+    }
+}
+
+static uint8_t const BTNS[8] =
+{
+    BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_A, BTN_B, 0, 0
+};
+static int button_index(uint8_t btn)
+{
+    switch(btn)
+    {
+    case BTN_UP:    return 0;
+    case BTN_DOWN:  return 1;
+    case BTN_LEFT:  return 2;
+    case BTN_RIGHT: return 3;
+    case BTN_A:     return 4;
+    case BTN_B:     return 5;
+    default:        return 6;
+    }
+}
+
+static uint8_t btn_states = 0;
+
+// time when allowed to repeat
+static uint64_t btn_reptimes[8] = {};
+
+static double REP_INIT_TIME = 0.5;
+static double REP_REPEAT_TIME = 0.25;
+
+static uint64_t perf_counter()
+{
+    LARGE_INTEGER t;
+    QueryPerformanceCounter(&t);
+    return (uint64_t)t.QuadPart;
+}
+
+static constexpr uint8_t BTN_ARROWS = BTN_UP | BTN_DOWN | BTN_LEFT | BTN_RIGHT;
 
 uint8_t wait_btn()
 {
     MSG msg{};
+    SetTimer(hwnd, TIMER_ID, 10, (TIMERPROC)NULL);
     while(GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
         if(msg.hwnd == hwnd && msg.message == WM_KEYDOWN)
         {
-            // note: is repeat if
-            //       (HIWORD(msg.lParam) & KF_REPEAT) != 0
-            switch(msg.wParam)
+            if(msg.wParam == VK_F2)
+                screenshot();
+            else if(msg.wParam == VK_ESCAPE)
+                ExitProcess(0);
+            else
             {
-            case VK_UP     : return BTN_UP;
-            case VK_DOWN   : return BTN_DOWN;
-            case VK_LEFT   : return BTN_LEFT;
-            case VK_RIGHT  : return BTN_RIGHT;
-            case 'A'       : return BTN_A;
-            case 'B'       : return BTN_B;
-            case VK_F2     : screenshot(); break;
-            case VK_ESCAPE : ExitProcess(0);
-            default        : break;
+                uint8_t btn = translate_button(msg.wParam);
+                int btni = button_index(btn);
+                bool first_pressed = !(btn_states & btn);
+                btn_states |= btn;
+                uint64_t t = perf_counter();
+                if(first_pressed)
+                {
+                    btn_reptimes[btni] = t + uint64_t(REP_INIT_TIME * freq);
+                    return btn;
+                }
             }
+        }
+        if(msg.hwnd == hwnd && msg.message == WM_KEYUP)
+        {
+            uint8_t btn = translate_button(msg.wParam);
+            btn_states &= ~btn;
+        }
+
+        // check for repeats
+        uint64_t t = perf_counter();
+        uint64_t minv = UINT64_MAX;
+        int mini = 0;
+        for(int i = 0; i < 8; ++i)
+        {
+            if((btn_states & BTNS[i] & BTN_ARROWS) && btn_reptimes[i] < minv)
+            {
+                minv = btn_reptimes[i];
+                mini = i;
+            }
+        }
+        if((btn_states & BTNS[mini] & BTN_ARROWS) && btn_reptimes[mini] <= t)
+        {
+            btn_reptimes[mini] += uint64_t(REP_REPEAT_TIME * freq);
+            return BTNS[mini];
         }
     }
     ExitProcess(0);
@@ -312,6 +397,12 @@ int WINAPI WinMain(
     RECT wr;
     HBITMAP hbitmap;
     static char const* const CLASS_NAME = "ArduRogue";
+
+    {
+        LARGE_INTEGER t;
+        QueryPerformanceFrequency(&t);
+        freq = (uint64_t)t.QuadPart;
+    }
 
     if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, persistent_path)))
     {
