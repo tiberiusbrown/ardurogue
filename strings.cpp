@@ -33,6 +33,7 @@ static constexpr char const* STR_STRI_CAPTHE = STR_CAPTHE;
 static constexpr char const* STR_STRI_INVISIBLE = NRNG_SEE_INVIS + 4;
 static char const STR_STRI_DROP_THE_I[] PROGMEM = "drop " STRI_THE "@i.";
 static constexpr char const* STR_STRI_ARDUROGUE = STR_ARDUROGUE;
+static char const STR_STRI_WELCOME[] PROGMEM = "Welcome ";
 
 char const* const STRI_STRS[] PROGMEM =
 {
@@ -59,6 +60,7 @@ char const* const STRI_STRS[] PROGMEM =
     STR_STRI_INVISIBLE,
     STR_STRI_DROP_THE_I,
     STR_STRI_ARDUROGUE,
+    STR_STRI_WELCOME,
 };
 
 char const STR_EMPTY[] PROGMEM = "";
@@ -73,8 +75,8 @@ char const STR_HUNGRY[] PROGMEM = "hungry";
 char const* const STR_STARVING = STR_STRI_STARVING;
 
 static char const MON_BAT        [] PROGMEM = "bat";
-static char const MON_SNAKE      [] PROGMEM = "snake";
 static char const MON_RATTLESNAKE[] PROGMEM = "rattlesnake";
+static constexpr char const* MON_SNAKE = MON_RATTLESNAKE + 6;
 static char const MON_ZOMBIE     [] PROGMEM = "zombie";
 static char const MON_GOBLIN     [] PROGMEM = "goblin";
 static char const MON_PHANTOM    [] PROGMEM = "phantom";
@@ -111,9 +113,12 @@ char const* const MONSTER_NAMES[] PROGMEM =
     MON_DARKNESS,
 };
 
+static char const NSCR_MASS_CONFUSE[] PROGMEM = "mass confusion";
+static char const NSCR_MASS_POISON[] PROGMEM = "mass poison";
+
 static char const NPOT_HEALING[] PROGMEM = "healing";
-static char const NPOT_CONFUSION[] PROGMEM = "confusion";
-static char const NPOT_POISON[] PROGMEM = "poison";
+static constexpr char const* NPOT_CONFUSION = NSCR_MASS_CONFUSE + 5;
+static constexpr char const* NPOT_POISON = NSCR_MASS_POISON + 5;
 static char const NPOT_HARMING[] PROGMEM = "harming";
 static char const NPOT_STRENGTH[] PROGMEM = "s" STRI_TRENGTH;
 static char const NPOT_DEXTERITY[] PROGMEM = "dexterity";
@@ -168,8 +173,6 @@ static char const NSCR_TELEPORT[] PROGMEM = "teleportation";
 static char const NSCR_MAPPING[] PROGMEM = "magic mapping";
 static char const NSCR_FEAR[] PROGMEM = "fear";
 static char const NSCR_TORMENT[] PROGMEM = "torment";
-static char const NSCR_MASS_CONFUSE[] PROGMEM = "mass confusion";
-static char const NSCR_MASS_POISON[] PROGMEM = "mass poison";
 
 char const* const SCR_NAMES[NUM_SCR] PROGMEM =
 {

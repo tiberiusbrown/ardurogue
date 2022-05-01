@@ -142,7 +142,7 @@ void player_gain_xp(uint8_t xp)
     if(txp - xp < pstats.xp)
     {
         ++plevel;
-        status_u(PSTR("You advance to level @u!"), plevel + 1);
+        status_u(PSTR2(STRI_YOU "advance to level @u!"), plevel + 1);
         pstats.max_health += 4;
         if(plevel % 4 == 2)
         {
@@ -538,7 +538,7 @@ void run()
             load();         // need another load to overwrite current map entities
             destroy_save(); // NOW destroy save
             status_simple(PSTR2(
-                "Welcome back to " STRI_ARDUROGUE ". The save file has been deleted. Don't forget to save again when you're done!"));
+                STRI_WELCOME "back to " STRI_ARDUROGUE ". The save file has been deleted. Don't forget to save again when you're done!"));
         }
         else
         {
@@ -550,7 +550,7 @@ void run()
             for(auto& i : pinfo.equipped) i = 255;
             pgm_memcpy(&pstats, &MONSTER_INFO[entity::PLAYER], sizeof(pstats));
             new_entity(0, entity::PLAYER, xup, yup);
-            status_simple(PSTR2("Welcome to " STRI_ARDUROGUE "."));
+            status_simple(PSTR2(STRI_WELCOME "to " STRI_ARDUROGUE "."));
         }
 
         update_light();

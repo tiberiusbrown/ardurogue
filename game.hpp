@@ -726,6 +726,7 @@ inline bool player_is_dead() { return ents[0].type == entity::NONE; }
 #define STRI_INVISIBLE              "\x94" /* "invisible"                */
 #define STRI_DROP_THE_I             "\x95" /* "drop the @i."             */
 #define STRI_ARDUROGUE              "\x96" /* "ArduRogue"                */
+#define STRI_WELCOME                "\x97" /* "Welcome "                 */
 extern char const* const STRI_STRS[] PROGMEM;
 extern char const STR_EMPTY[] PROGMEM;
 extern char const* const MONSTER_NAMES[] PROGMEM;
