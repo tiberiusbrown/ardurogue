@@ -121,7 +121,12 @@ static void use_wand(uint8_t subtype)
 {
     draw_dungeon_at_player();
     paint_left();
-    identify_wand(subtype);
+    {
+        bool was_identified = wand_is_identified(subtype);
+        identify_wand(subtype);
+        if(!was_identified)
+            status_i(PSTR("It is a @i."), item::make(item::WAND, subtype));
+    }
     uint8_t d = 255;
     direction_menu(d); // canceling will mean target self
     wand_effect(0, d, subtype);
@@ -130,7 +135,12 @@ static void use_wand(uint8_t subtype)
 static void use_scroll(uint8_t subtype)
 {
     uint8_t i;
-    identify_scroll(subtype);
+    {
+        bool was_identified = scroll_is_identified(subtype);
+        identify_scroll(subtype);
+        if(!was_identified)
+            status_i(PSTR("It was a @i."), item::make(item::SCROLL, subtype));
+    }
     switch(subtype)
     {
     case SCR_IDENTIFY:
@@ -199,6 +209,8 @@ static void use_scroll(uint8_t subtype)
     case SCR_TORMENT:
     case SCR_MASS_CONFUSE:
     case SCR_MASS_POISON:
+    {
+        bool found = false;
         for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
         {
             auto& e = ents[i];
@@ -207,20 +219,30 @@ static void use_scroll(uint8_t subtype)
             aggro_monster(i);
             if(subtype == SCR_FEAR)
             {
-                e.scared = 1;
                 if(i != 0)
+                {
+                    e.scared = 1;
                     status_u(PSTR("@S flees!"), i);
+                }
             }
-            else if(subtype == SCR_TORMENT)
+            else
             {
-                healths[i] /= 2;
-                status_u(PSTR("@U stricken!"), i);
+                found = true;
+                if(subtype == SCR_TORMENT)
+                {
+                    healths[i] /= 2;
+                    status_u(PSTR("@U stricken!"), i);
+                }
+                else if(subtype == SCR_MASS_CONFUSE)
+                    confuse_entity(i);
+                else if(subtype == SCR_MASS_POISON)
+                    poison_entity(i);
             }
-            else if(subtype == SCR_MASS_CONFUSE)
-                confuse_entity(i);
-            else if(subtype == SCR_MASS_POISON)
-                poison_entity(i);
         }
+        if(!found)
+            status_simple(STR_NOTHING_HAPPENS);
+        break;
+    }
     default:
         break;
     }
@@ -352,7 +374,12 @@ bool use_item(uint8_t i)
 
 void entity_apply_potion(uint8_t subtype, uint8_t i)
 {
-    identify_potion(subtype);
+    {
+        bool was_identified = potion_is_identified(subtype);
+        identify_potion(subtype);
+        if(!was_identified)
+            status_i(PSTR("It was a @i."), item::make(item::POTION, subtype));
+    }
     switch(subtype)
     {
     case POT_HEALING:

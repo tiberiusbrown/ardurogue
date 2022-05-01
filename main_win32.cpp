@@ -41,6 +41,16 @@ static bool path_defined = false;
 
 static uint64_t freq;
 
+static uint8_t btn_states = 0;
+
+// time when allowed to repeat
+static uint64_t btn_reptimes[8] = {};
+
+static double const REP_INIT_TIME = 0.5;
+static double const REP_REPEAT_TIME = 0.25;
+
+static constexpr UINT_PTR TIMER_ID = 0x1001;
+
 uint8_t read_persistent(uint16_t addr)
 {
     return persistent_data[addr % 1024];
@@ -91,11 +101,10 @@ static void screenshot()
 #endif
 }
 
-static constexpr UINT_PTR TIMER_ID = 0x1001;
-
 static void wait_ms(int ms)
 {
     MSG msg{};
+    btn_states = 0;
     SetTimer(hwnd, TIMER_ID, (UINT)ms, (TIMERPROC)NULL);
     while(GetMessage(&msg, NULL, 0, 0))
     {
@@ -143,14 +152,6 @@ static int button_index(uint8_t btn)
     default:        return 6;
     }
 }
-
-static uint8_t btn_states = 0;
-
-// time when allowed to repeat
-static uint64_t btn_reptimes[8] = {};
-
-static double REP_INIT_TIME = 0.5;
-static double REP_REPEAT_TIME = 0.25;
 
 static uint64_t perf_counter()
 {
