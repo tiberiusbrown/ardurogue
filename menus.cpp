@@ -243,7 +243,7 @@ bool yesno_menui(char const* fmt, item it)
     uint8_t y = STATUS_START_Y;
     {
         char t[128];
-        tsprintf(t, fmt, it);
+        tsprintf(t, fmt, it.to_u16());
         uint8_t len = tstrlen(t);
         uint8_t x = 1;
         uint8_t n = 0;
