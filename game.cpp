@@ -523,6 +523,7 @@ void run()
 
         bool saved = save_valid();
         if(saved) load();
+        else wall_style = 2;
         saved &= (ents[0].type == entity::PLAYER);
 
         draw_text(7, 24, STR_ARDUROGUE);
@@ -545,7 +546,6 @@ void run()
         }
         else
         {
-            wall_style = 2;
             new_game();
             init_all_perms();
             generate_dungeon();
