@@ -285,6 +285,7 @@ void entity_take_damage(uint8_t i, uint8_t dam)
 #endif
     auto& te = ents[i];
     //bool cansee = player_can_see_entity(i);
+    aggro_monster(i);
     if(dam >= healths[i])
     {
         status(PSTR("@W!"), i, PSTR("die"));
@@ -310,7 +311,9 @@ void entity_take_fire_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam
     }
     else
     {
-        // TODO: monster immune to fire
+        // dragons are immune to fire
+        if(ents[defi].type == entity::DRAGON)
+            dam = 0;
     }
     if(dam == 0)
         status_u(PSTR2(STRI_CAPTHE "flames do not affect @O."), defi);
@@ -368,8 +371,6 @@ void entity_take_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t dam)
         if(atti == 0)
             hs.type = HS_SUICIDE;
     }
-    if(atti == 0)
-        aggro_monster(defi);
     entity_take_damage(defi, dam);
     if(te.type == entity::NONE) // entity was killed
     {

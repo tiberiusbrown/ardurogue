@@ -66,10 +66,10 @@ void wand_effect(uint8_t i, uint8_t d, uint8_t subtype)
             0, 0, -1, -1, 0, -1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 1, -1, 0,
         };
         draw_dungeon_at_player();
-        for(uint8_t i = 0; i < 18; i += 2)
+        for(uint8_t j = 0; j < 18; j += 2)
         {
-            uint8_t tx = sr.x + pgm_read_byte(&FIRE[i]);
-            uint8_t ty = sr.y + pgm_read_byte(&FIRE[i + 1]);
+            uint8_t tx = sr.x + pgm_read_byte(&FIRE[j]);
+            uint8_t ty = sr.y + pgm_read_byte(&FIRE[j + 1]);
             draw_sprite_nonprog_rel_and_wait(0x0eae, tx, ty);
             if(entity* e = get_entity(tx, ty))
                 entity_take_fire_damage_from_entity(i, index_of_entity(*e), u8rand(8) + 8);
@@ -225,10 +225,12 @@ static void use_scroll(uint8_t subtype)
             t = 0xff;
         status_simple(PSTR2(STRI_YOU "become aware of your surroundings."));
         break;
+    case SCR_MASS_POISON:
+        status_simple(PSTR("There is a poisonous blast."));
+        /* fallthrough */
     case SCR_FEAR:
     case SCR_TORMENT:
     case SCR_MASS_CONFUSE:
-    case SCR_MASS_POISON:
     {
         bool found = false;
         for(uint8_t i = 0; i < MAP_ENTITIES; ++i)
@@ -241,6 +243,7 @@ static void use_scroll(uint8_t subtype)
             {
                 if(i != 0)
                 {
+                    found = true;
                     e.scared = 1;
                     status_u(PSTR("@S flees!"), i);
                 }
