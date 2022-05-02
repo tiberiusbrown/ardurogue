@@ -46,8 +46,8 @@ static uint8_t btn_states = 0;
 // time when allowed to repeat
 static uint64_t btn_reptimes[8] = {};
 
-static double const REP_INIT_TIME = 0.5;
-static double const REP_REPEAT_TIME = 0.25;
+static double const REP_INIT_TIME = 0.32;
+static double const REP_REPEAT_TIME = 0.16;
 
 static constexpr UINT_PTR TIMER_ID = 0x1001;
 

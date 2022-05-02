@@ -9,23 +9,68 @@
 struct rgba_t { uint8_t r, g, b, a; };
 static rgba_t buffer[128 * 64];
 
-static uint8_t last_pressed = 0;
 static uint8_t persistent_data[1024];
 
-static EM_BOOL keydown_callback(int type, EmscriptenKeyboardEvent const* e, void* user)
+static uint8_t first_pressed = 0;
+static uint8_t btn_states = 0;
+
+// time when allowed to repeat
+static double btn_reptimes[8] = {};
+
+static double const REP_INIT_TIME = 320;
+static double const REP_REPEAT_TIME = 160;
+
+static uint8_t translate_button(int code)
 {
+    switch(code)
+    {
+    case 38 : return BTN_UP;
+    case 40 : return BTN_DOWN;
+    case 37 : return BTN_LEFT;
+    case 39 : return BTN_RIGHT;
+    case 'A': return BTN_A;
+    case 'B': return BTN_B;
+    default : return 0;
+    }
+}
+
+static uint8_t const BTNS[8] =
+{
+    BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_A, BTN_B, 0, 0
+};
+static int button_index(uint8_t btn)
+{
+    switch(btn)
+    {
+    case BTN_UP:    return 0;
+    case BTN_DOWN:  return 1;
+    case BTN_LEFT:  return 2;
+    case BTN_RIGHT: return 3;
+    case BTN_A:     return 4;
+    case BTN_B:     return 5;
+    default:        return 6;
+    }
+}
+
+static constexpr uint8_t BTN_ARROWS = BTN_UP | BTN_DOWN | BTN_LEFT | BTN_RIGHT;
+
+static EM_BOOL key_callback(int type, EmscriptenKeyboardEvent const* e, void* user)
+{
+    uint8_t btn = translate_button(e->keyCode);
     if(type == EMSCRIPTEN_EVENT_KEYDOWN)
     {
-        switch(e->keyCode)
+        if(!(btn_states & btn))
         {
-        case 'K': case 38: last_pressed = BTN_UP; break;
-        case 'J': case 40: last_pressed = BTN_DOWN; break;
-        case 'H': case 37: last_pressed = BTN_LEFT; break;
-        case 'L': case 39: last_pressed = BTN_RIGHT; break;
-        case 'A': last_pressed = BTN_A; break;
-        case 'B': last_pressed = BTN_B; break;
-        default: break;
+            int btni = button_index(btn);
+            double t = emscripten_get_now();
+            btn_states |= btn;
+            first_pressed = btn;
+            btn_reptimes[btni] = t + REP_INIT_TIME;
         }
+    }
+    else if(type == EMSCRIPTEN_EVENT_KEYUP)
+    {
+        btn_states &= ~btn;
     }
     return EM_TRUE;
 }
@@ -39,12 +84,30 @@ uint8_t wait_btn()
 {
     for(;;)
     {
-        if(last_pressed != 0)
+        if(first_pressed != 0)
         {
-            uint8_t r = last_pressed;
-            last_pressed = 0;
-            return r;
+            uint8_t tbtn = first_pressed;
+            first_pressed = 0;
+            return tbtn;
         }
+        
+        double t = emscripten_get_now();
+        double minv = t + 1e10;
+        int mini = 0;
+        for(int i = 0; i < 8; ++i)
+        {
+            if((btn_states & BTNS[i] & BTN_ARROWS) && btn_reptimes[i] < minv)
+            {
+                minv = btn_reptimes[i];
+                mini = i;
+            }
+        }
+        if((btn_states & BTNS[mini] & BTN_ARROWS) && btn_reptimes[mini] <= t)
+        {
+            btn_reptimes[mini] += REP_REPEAT_TIME;
+            return BTNS[mini];
+        }
+        
         emscripten_sleep(1);
     }
 }
@@ -159,7 +222,9 @@ int main()
     emscripten_set_resize_callback(
         EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, EM_TRUE, resize_callback);
     emscripten_set_keydown_callback(
-        EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, EM_TRUE, keydown_callback);
+        EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, EM_TRUE, key_callback);
+    emscripten_set_keyup_callback(
+        EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, EM_TRUE, key_callback);
         
     EM_ASM(
         FS.mkdir('/offline');
