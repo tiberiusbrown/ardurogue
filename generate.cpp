@@ -123,9 +123,9 @@ static constexpr big_room_info const BIG_ROOM_TYPES[] PROGMEM =
     cbm(0x10000000), cbm(0x00000011),
     cbm(0x10000000), cbm(0x00000011),
     cbm(0x00000111), cbm(0x11000001),
-    cbm(0x00000111), cbm(0x11000001),
-    cbm(0x00000110), cbm(0x11000001),
-    cbm(0x00000110), cbm(0x11000001),
+    cbm(0x00000100), cbm(0x01000001),
+    cbm(0x00000100), cbm(0x01000001),
+    cbm(0x00000100), cbm(0x01000001),
     cbm(0x00000110), cbm(0x11000001),
     cbm(0x10000000), cbm(0x00000011),
     cbm(0x10000000), cbm(0x00000011),
@@ -853,16 +853,10 @@ void generate_dungeon()
         uint8_t x = rooms[0].x + 7;
         uint8_t y = rooms[0].y + 7;
         {
-            auto& it = items[MAP_ITEMS - 1];
-            it.it = item::make(item::AMULET, AMU_YENDOR, true);
-            it.x = x;
-            it.y = y;
-        }
-        {
             auto& e = ents[1];
             e.type = entity::DARKNESS;
             e.x = x;
-            e.y = y + 1;
+            e.y = y;
         }
         {
             uint8_t i = num_doors;

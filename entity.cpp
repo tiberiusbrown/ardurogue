@@ -290,6 +290,14 @@ void entity_take_damage(uint8_t i, uint8_t dam)
     {
         status(PSTR("@W!"), i, PSTR("die"));
         healths[i] = 0;
+        // Lord of Darkness drops the amulet of Yendor on death
+        if(te.type == entity::DARKNESS)
+        {
+            items[MAP_ITEMS - 1] = {
+                item::make(item::AMULET, AMU_YENDOR),
+                ents[i].x, ents[i].y
+            };
+        }
         te.type = entity::NONE;
 #if ENABLE_GOT_ENTS
         maps[map_index].got_ents.set(i);   

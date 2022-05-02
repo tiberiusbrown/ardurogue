@@ -114,6 +114,8 @@ void monster_ai(uint8_t i, action& a)
         auto c = dircoord(a.data);
         uint8_t nx = ex + c.x;
         uint8_t ny = ey + c.y;
+        if(get_door(nx, ny))
+            return; // don't open doors when moving randomly
         entity* e = get_entity(nx, ny);
         if(e && (!mean || e->type != entity::PLAYER))
             return;
