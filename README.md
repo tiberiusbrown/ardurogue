@@ -20,7 +20,7 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
 - Items can be cursed, identified, enchanted
 - Throw a potion at an enemy to apply its effect to it
 - Hidden doors
-- Affects: confusion, invisibility, weaken, slow, etc.
+- Afflictions: confusion, invisibility, weaken, slow, etc.
 
 ## Wishlist (in order of priority)
 
