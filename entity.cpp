@@ -179,12 +179,10 @@ void advance_entity(uint8_t i)
     }
 
     // regeneration
-    if(info.regens || (i == 0 && wearing_uncursed_amulet(AMU_REGENERATION)))
-    {
-        uint8_t t = tmax<uint8_t>(entity_max_health(0), 48);
-        if(u8rand() < t)
-            entity_heal(0, 1);
-    }
+    if(info.regens && u8rand(8) == 0)
+        entity_heal(i, 3);
+    if(i == 0 && wearing_uncursed_amulet(AMU_REGENERATION) && u8rand(20) == 0)
+        entity_heal(0, 1);
 
     // advance temporary effects
     {
