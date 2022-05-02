@@ -264,15 +264,16 @@ void entity_restore_strength(uint8_t i)
 void entity_heal(uint8_t i, uint8_t amount)
 {
     char const* s = (amount < 3 ? PSTR("slightly ") : STR_EMPTY);
-    if(i == 0)
-    {
-        if(amulet_bonus(AMU_REGENERATION) < 0)
-            amount = (amount + 1) / 2;
-        status(PSTR2(STRI_YOU "feel @pbetter."), s);
-    }
-    else if(player_can_see_entity(i))
-        status(PSTR("@S looks @pbetter."), i, s);
+    if(i == 0 && amulet_bonus(AMU_REGENERATION) < 0)
+        amount = (amount + 1) / 2;
     uint8_t mhp = entity_max_health(i);
+    if(healths[i] < mhp)
+    {
+        if(i == 0)
+            status(PSTR2(STRI_YOU "feel @pbetter."), s);
+        else if(player_can_see_entity(i))
+            status(PSTR("@S looks @pbetter."), i, s);
+    }
     if(mhp - healths[i] <= amount)
         healths[i] = mhp;
     else
