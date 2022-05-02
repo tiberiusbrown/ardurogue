@@ -727,6 +727,7 @@ inline bool player_is_dead() { return ents[0].type == entity::NONE; }
 #define STRI_DROP_THE_I             "\x95" /* "drop the @i."             */
 #define STRI_ARDUROGUE              "\x96" /* "ArduRogue"                */
 #define STRI_WELCOME                "\x97" /* "Welcome "                 */
+#define STRI_YOU_DISCOVER_IT        "\x98" /* "You discover it "         */
 extern char const* const STRI_STRS[] PROGMEM;
 extern char const STR_EMPTY[] PROGMEM;
 extern char const* const MONSTER_NAMES[] PROGMEM;
@@ -756,6 +757,7 @@ extern char const STR_THE[] PROGMEM;         // "the "
 extern char const STR_CAPTHE[] PROGMEM;      // "The "
 extern char const STR_AMULET[] PROGMEM;      // "amulet"
 extern char const STR_ARDUROGUE[] PROGMEM;   // "ArduRogue"
+extern char const STR_YOU_DISCOVER_IT_WAS_A_I[] PROGMEM; // "You discover it was a @i."
 
 // game.cpp
 void dig_tile(uint8_t x, uint8_t y);

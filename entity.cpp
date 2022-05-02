@@ -190,9 +190,15 @@ void advance_entity(uint8_t i)
     }
 
     // advance temporary effects
-    if(u8rand() %  8 == 0) end_paralysis(i);
-    if(u8rand() %  8 == 0) end_confusion(i);
-    if(u8rand() % 32 == 0) end_slow(i);
+    {
+        uint8_t n = 12;
+        // paralysis, confusion, slow last longer on monsters
+        if(i != 0) n *= 2;
+        if(u8rand(n) == 0) end_paralysis(i);
+        if(u8rand(n) == 0) end_confusion(i);
+        n *= 4;
+        if(u8rand(n) == 0) end_slow(i);
+    }
     if(u8rand() % 32 == 0) e.scared = 0;
     if(e.invis && !info.invis) // temporary invis
     {
@@ -609,6 +615,7 @@ bool entity_perform_action(uint8_t i, action a)
         it.quant = 0;
         scan_result sr;
         scan_dir(0, dir, 8, sr);
+        draw_ray_anim(ents[0].x, ents[0].y, dir, sr.n);
         if(sr.i < MAP_ENTITIES)
         {
             aggro_monster(sr.i);

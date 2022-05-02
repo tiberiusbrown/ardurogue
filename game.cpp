@@ -337,7 +337,10 @@ void scan_dir_pos(uint8_t x, uint8_t y, uint8_t d, uint8_t n, scan_result& r)
     while(k < n)
     {
         if(tile_is_solid(x + c.x, y + c.y))
+        {
+            r.i = 254;
             break;
+        }
         x += c.x, y += c.y;
         ++k;
         if(entity* e = get_entity(x, y))

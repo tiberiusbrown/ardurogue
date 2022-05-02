@@ -34,6 +34,7 @@ static constexpr char const* STR_STRI_INVISIBLE = NRNG_SEE_INVIS + 4;
 static char const STR_STRI_DROP_THE_I[] PROGMEM = "drop " STRI_THE "@i.";
 static constexpr char const* STR_STRI_ARDUROGUE = STR_ARDUROGUE;
 static char const STR_STRI_WELCOME[] PROGMEM = "Welcome ";
+static char const STR_STRI_YOU_DISCOVER_IT[] PROGMEM = STRI_YOU "discover it ";
 
 char const* const STRI_STRS[] PROGMEM =
 {
@@ -61,6 +62,7 @@ char const* const STRI_STRS[] PROGMEM =
     STR_STRI_DROP_THE_I,
     STR_STRI_ARDUROGUE,
     STR_STRI_WELCOME,
+    STR_STRI_YOU_DISCOVER_IT,
 };
 
 char const STR_EMPTY[] PROGMEM = "";
@@ -73,6 +75,8 @@ char const STR_SLOWED[] PROGMEM = "slowed";
 char const STR_WEAKENED[] PROGMEM = "weakened";
 char const STR_HUNGRY[] PROGMEM = "hungry";
 char const* const STR_STARVING = STR_STRI_STARVING;
+
+char const STR_YOU_DISCOVER_IT_WAS_A_I[] PROGMEM = STRI_YOU_DISCOVER_IT "was a @i.";
 
 static char const MON_BAT        [] PROGMEM = "bat";
 static char const MON_RATTLESNAKE[] PROGMEM = "rattlesnake";

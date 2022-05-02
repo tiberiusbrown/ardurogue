@@ -78,14 +78,32 @@ void wand_effect(uint8_t i, uint8_t d, uint8_t subtype)
         return;
     }
     else if(!te) return;
+    uint8_t ti = index_of_entity(*te);
     switch(subtype)
     {
     case WND_FORCE:
     {
+        status_u(PSTR("@U blasted back!"), ti);
         scan_result tsr;
         scan_dir_pos(te->x, te->y, d, 8, tsr);
-        te->x = tsr.px;
-        te->y = tsr.py;
+        if(tsr.i < MAP_ENTITIES)
+        {
+            te->x = tsr.px;
+            te->y = tsr.py;
+            status_u(PSTR("@S crashes into"), ti);
+            status_u(PSTR("@O."), tsr.i);
+            paralyze_entity(tsr.i);
+        }
+        else
+        {
+            if(tsr.i == 254)
+            {
+                status_u(PSTR("@S hits a wall."), ti);
+                paralyze_entity(ti);
+            }
+            te->x = tsr.x;
+            te->y = tsr.y;
+        }
         // TODO: if(entity* pe = get_entity(tsr.x, tsr.y))
         //           damage both te and pe
         break;
@@ -106,8 +124,10 @@ void wand_effect(uint8_t i, uint8_t d, uint8_t subtype)
         uint8_t t = te->type;
         if(t > entity::BAT && t < entity::DARKNESS)
         {
+            status_u(PSTR("@T form morphs into"), ti);
             te->type = u8rand() < 64 ? t + 1 : t - 1;
-            healths[index_of_entity(*te)] = entity_max_health(sr.i);
+            status_u(PSTR("@O."), ti);
+            healths[ti] = entity_max_health(sr.i);
         }
         break;
     }
@@ -125,7 +145,7 @@ static void use_wand(uint8_t subtype)
         bool was_identified = wand_is_identified(subtype);
         identify_wand(subtype);
         if(!was_identified)
-            status_i(PSTR("It is a @i."), item::make(item::WAND, subtype));
+            status_i(PSTR2(STRI_YOU_DISCOVER_IT "is a @i."), item::make(item::WAND, subtype));
     }
     uint8_t d = 255;
     direction_menu(d); // canceling will mean target self
@@ -139,7 +159,7 @@ static void use_scroll(uint8_t subtype)
         bool was_identified = scroll_is_identified(subtype);
         identify_scroll(subtype);
         if(!was_identified)
-            status_i(PSTR("It was a @i."), item::make(item::SCROLL, subtype));
+            status_i(STR_YOU_DISCOVER_IT_WAS_A_I, item::make(item::SCROLL, subtype));
     }
     switch(subtype)
     {
@@ -378,14 +398,14 @@ void entity_apply_potion(uint8_t subtype, uint8_t i)
         bool was_identified = potion_is_identified(subtype);
         identify_potion(subtype);
         if(!was_identified)
-            status_i(PSTR("It was a @i."), item::make(item::POTION, subtype));
+            status_i(STR_YOU_DISCOVER_IT_WAS_A_I, item::make(item::POTION, subtype));
     }
     switch(subtype)
     {
     case POT_HEALING:
     {
         uint8_t mhp = entity_max_health(i);
-        entity_heal(i, u8rand(mhp / 2) + mhp / 4);
+        entity_heal(i, u8rand(mhp / 2 + 1) + mhp / 4);
         entity_restore_strength(i);
         break;
     }
