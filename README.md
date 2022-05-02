@@ -2,6 +2,8 @@
 
 ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/).
 
+![](img/recording.gif)
+
 [Try out the web version here.](https://tiberiusbrown.github.io/ardurogue.html)
 
 [Read the guide here.](guide.md)

@@ -16,6 +16,7 @@
 #define STBIR_DEFAULT_FILTER_UPSAMPLE STBIR_FILTER_BOX
 #include "stb_image_write.h"
 #include "stb_image_resize.h"
+#include "gif.h"
 #endif
 
 static HWND hwnd;
@@ -51,6 +52,10 @@ static double const REP_REPEAT_TIME = 0.16;
 
 static constexpr UINT_PTR TIMER_ID = 0x1001;
 
+static GifWriter gif;
+static bool gif_recording = false;
+static uint64_t gif_frame_time = 0;
+
 uint8_t read_persistent(uint16_t addr)
 {
     return persistent_data[addr % 1024];
@@ -80,6 +85,13 @@ void seed()
     if(rand_seed == 0) rand_seed = 0xbabe;
 }
 
+static uint64_t perf_counter()
+{
+    LARGE_INTEGER t;
+    QueryPerformanceCounter(&t);
+    return (uint64_t)t.QuadPart;
+}
+
 static void screenshot()
 {
 #ifndef NDEBUG
@@ -99,6 +111,41 @@ static void screenshot()
     stbi_write_png(fname, FBW * SZOOM, FBH * SZOOM, 4, resized, 0);
     free(resized);
 #endif
+}
+
+static void send_gif_frame()
+{
+    if(gif_recording)
+    {
+        uint64_t t = perf_counter();
+        double dt = double(t - gif_frame_time) / freq;
+        gif_frame_time = t;
+        GifWriteFrame(&gif, pixels, FBW, FBH, int(dt * 100 + 1.5));
+    }
+}
+
+static void screen_recording_toggle()
+{
+    if(gif_recording)
+    {
+        GifEnd(&gif);
+        gif_recording = false;
+    }
+    else
+    {
+        char fname[256];
+        time_t rawtime;
+        struct tm* ti;
+        time(&rawtime);
+        ti = localtime(&rawtime);
+        snprintf(fname, sizeof(fname), "recording_%04d%02d%02d%02d%02d%02d.gif",
+            ti->tm_year + 1900, ti->tm_mon + 1, ti->tm_mday,
+            ti->tm_hour + 1, ti->tm_min, ti->tm_sec);
+        GifBegin(&gif, fname, FBW, FBH, 0);
+        gif_frame_time = perf_counter();
+        gif_recording = true;
+        send_gif_frame();
+    }
 }
 
 static void wait_ms(int ms)
@@ -153,13 +200,6 @@ static int button_index(uint8_t btn)
     }
 }
 
-static uint64_t perf_counter()
-{
-    LARGE_INTEGER t;
-    QueryPerformanceCounter(&t);
-    return (uint64_t)t.QuadPart;
-}
-
 static constexpr uint8_t BTN_ARROWS = BTN_UP | BTN_DOWN | BTN_LEFT | BTN_RIGHT;
 
 uint8_t wait_btn()
@@ -174,6 +214,8 @@ uint8_t wait_btn()
         {
             if(msg.wParam == VK_F2)
                 screenshot();
+            else if(msg.wParam == VK_F3)
+                screen_recording_toggle();
             else if(msg.wParam == VK_ESCAPE)
                 ExitProcess(0);
             else
@@ -224,6 +266,8 @@ static void refresh()
 
 void paint_offset(uint8_t offset, bool clear)
 {
+    if(perf_counter() - gif_frame_time > 0.05 * freq)
+        send_gif_frame();
     for(int i = 0; i < 512; ++i)
     {
         int x = i % 64;
