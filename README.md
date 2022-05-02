@@ -17,6 +17,7 @@ ArduRogue is a traditional roguelike for the [Arduboy](https://www.arduboy.com/)
   - 9 scroll types
   - 8 ring types (up to 2 rings can be worn)
   - 8 amulet types (not including the amulet of Yendor)
+  - 7 wand types
 - Items can be cursed, identified, enchanted
 - Throw a potion at an enemy to apply its effect to it
 - Hidden doors
