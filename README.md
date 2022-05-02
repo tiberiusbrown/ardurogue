@@ -7,12 +7,12 @@ Read the guide [here](guide.md).
 ## Features
 
 - Random dungeon generation
-- Save/Load games, save (if it exists) destroyed on death (permadeath)
+- Save/Load games: save (if it exists) destroyed on load (permadeath is enforced)
 - High score tracking
 - 16 types of enemies, each with their own quirks and abilities
-- Variety of items
-  - 8 potion effects
-  - 9 scroll effects
+- Variety of items:
+  - 10 potion types
+  - 9 scroll types
   - 8 ring types (up to 2 rings can be worn)
   - 8 amulet types (not including the amulet of Yendor)
 - Items can be cursed, identified, enchanted
@@ -33,7 +33,7 @@ If enough prog bytes could be freed up...
 
 Contents of `platform.local.txt`:
 ```
-compiler.c.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-tree-scev-cprop -fno-move-loop-invariants -fweb -frename-registers -std=c++11
+compiler.c.extra_flags=-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-move-loop-invariants -fno-tree-scev-cprop -fweb -frename-registers -std=c++11 -Wall -Wextra -Wshadow -Wconversion -Wundef -Wunused-parameter -g3
 compiler.cpp.extra_flags={compiler.c.extra_flags} 
-compiler.c.elf.extra_flags=-Wl,--relax
+compiler.c.elf.extra_flags=-Wl,--relax -g3
 ```
