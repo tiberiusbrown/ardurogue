@@ -336,7 +336,7 @@ void entity_take_melee_damage_from_entity(uint8_t atti, uint8_t defi, uint8_t da
                 pinfo.vamp_drain = mhp - 1;
             adjust_health_to_max_health(0);
         }
-        entity_heal(atti, 3);
+        entity_heal(atti, atti == 0 ? 1 : 3);
     }
     entity_take_damage_from_entity(atti, defi, dam);
     if(ents[defi].type != entity::NONE) // target was not killed
