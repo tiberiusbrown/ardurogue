@@ -183,10 +183,7 @@ void advance_entity(uint8_t i)
     {
         uint8_t t = tmax<uint8_t>(entity_max_health(0), 48);
         if(u8rand() < t)
-        {
             entity_heal(0, 1);
-            if(i == 0) advance_hunger();
-        }
     }
 
     // advance temporary effects
