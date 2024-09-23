@@ -209,6 +209,9 @@ static void use_scroll(uint8_t subtype)
             else
             {
                 it.cursed = 0;
+                if((it.type == item::AMULET || it.type == item::RING) &&
+                    it.level <= ENCHANT_LEVEL_ZERO)
+                    it.level = ENCHANT_LEVEL_ZERO + 1;
                 static char const MSG2[] PROGMEM = STRI_THE_I_GLOWS "white" STRI_FOR_A_MOMENT_P;
                 status_i(MSG2, it);
             }
