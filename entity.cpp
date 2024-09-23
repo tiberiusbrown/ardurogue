@@ -51,10 +51,16 @@ uint8_t entity_max_health(uint8_t i)
     {
         r = pstats.max_health;
         r -= pinfo.vamp_drain;
-        int8_t t = amulet_bonus(AMU_VITALITY) * AMU_VITALITY_BONUS;
+        int8_t t = amulet_bonus(AMU_VITALITY);
+        if(t < -20) t = -20;
+        if(t > +20) t = +20;
+        t *= AMU_VITALITY_BONUS;
         if(-t >= r)
             return 1;
-        r += t;
+        if(r + t > PLAYER_HEALTH_LIMIT)
+            r = PLAYER_HEALTH_LIMIT;
+        else
+            r += t;
     }
     else
         r = pgm_read_byte(&MONSTER_INFO[ents[i].type].max_health);
