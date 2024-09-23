@@ -18,6 +18,8 @@
 #define PLAYER_INVULNERABLE 0
 #endif
 
+constexpr uint8_t PLAYER_HEALTH_LIMIT = 250;
+
 static constexpr uint16_t SAVE_VERSION = 1;
 
 // platform functionality

@@ -608,8 +608,6 @@ coord find_unoccupied_guaranteed()
 
 static void generate_item(uint8_t i, item it)
 {
-    if(maps[map_index].got_items.test(i))
-        return;
     auto& mit = items[i];
     find_unoccupied_guaranteed(mit.x, mit.y);
     if(maps[map_index].got_items.test(i))

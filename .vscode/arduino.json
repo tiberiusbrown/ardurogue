@@ -1,0 +1,19 @@
+{
+    "board": "arduboy-homemade:avr:arduboy",
+    "output": "build/",
+    "buildPreferences": [
+        [
+            "compiler.c.extra_flags",
+            "-mcall-prologues -mstrict-X -fno-inline-small-functions -fno-move-loop-invariants -fno-tree-scev-cprop -fweb -frename-registers -std=c++11 -Wall -Wextra -Wshadow -Wconversion -Wundef -Wunused-parameter -g3"
+        ],
+        [
+            "compiler.cpp.extra_flags",
+            "{compiler.c.extra_flags}"
+        ],
+        [
+            "compiler.c.elf.extra_flags",
+            "-Wl,--relax -g3"
+        ]
+    ],
+    "sketch": "ardurogue.ino"
+}

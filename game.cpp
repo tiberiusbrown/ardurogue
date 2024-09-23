@@ -143,7 +143,10 @@ void player_gain_xp(uint8_t xp)
     {
         ++plevel;
         status_u(PSTR2(STRI_YOU "advance to level @u!"), plevel + 1);
-        pstats.max_health += 4;
+        if(pstats.max_health >= PLAYER_HEALTH_LIMIT - 4)
+            pstats.max_health = PLAYER_HEALTH_LIMIT;
+        else
+            pstats.max_health += 4;
         if(plevel % 4 == 2)
         {
             status_simple(STR_YOU_FEEL_STRONGER);
@@ -165,6 +168,7 @@ bool player_pickup_item(uint8_t i)
 {
     uint8_t j = 255;
     auto& it = items[i].it;
+    maps[map_index].got_items.set(i);
     if(it.stackable())
     {
         for(j = 0; j < INV_ITEMS; ++j)
